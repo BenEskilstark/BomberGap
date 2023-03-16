@@ -1,0 +1,53 @@
+#!/bin/bash
+# Copy the entire directory this file is in as the base for your game.
+# get rid of all the node_modules
+# Then run to get all these node files
+# Comment out things you don't need
+
+# npm init
+
+# my packages
+sudo npm install bens_utils
+sudo npm install bens_ui_components
+
+# browserify
+sudo npm install -g browserify
+sudo npm install esmify --save-dev
+
+# babel
+sudo npm install --save-dev @babel/core
+sudo npm install --save-dev @babel/cli
+sudo npm install babel-preset-es2021
+sudo npm install  --save-dev @babel/plugin-transform-react-jsx
+sudo npm install --save-dev @babel/plugin-proposal-optional-chaining
+
+# react
+sudo npm install --save react react-dom
+# sudo npm install react-tween-state
+
+# d3
+# sudo npm install d3
+# npm install topojson-client
+
+# express, sockets, cors
+sudo npm install socket.io
+sudo npm install cors
+sudo npm install express --save
+
+# react native server
+# npm install -g expo-cli
+
+# postgres
+# npm install pg
+
+# clientside REST
+npm install axios
+
+# electron
+# npm i -D electron@latest
+
+# electron forge
+# npm i -g @electron-forge/cli
+
+# electron squirrel
+# npm i @electron-forge/maker-squirrel

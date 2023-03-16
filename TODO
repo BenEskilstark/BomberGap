@@ -1,0 +1,28 @@
+
+  - change session start to handle plane designs
+  - change reducer to handle plane designs
+  - new world map
+  - toggle to display plane stats next to them
+
+  - bugs:
+    - menu of carrier can disappear?
+    - fix finished games not clearing sometimes
+
+
+  - fighting:
+    - remove target if you can't see it
+    - should detect collision range based on speed radius
+      ( faster planes would have higher priority)
+
+
+  - additional features:
+    - try out rollback netcode
+
+
+  - maybe features
+    - planes have to refit before they can launch again
+
+
+  - update multiplayer template:
+    - something is broken about postVisit (not detecting unique)
+    - wrap server stuff in try/catch

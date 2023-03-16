@@ -1,0 +1,15 @@
+#!/bin/zsh
+
+sed s/bbbNAMEbbb/$1/g package.json > tst.json
+rm package.json
+mv tst.json package.json
+
+sed s/bbbNAMEbbb/$1/g index.html > tst.html
+rm index.html
+mv tst.html index.html
+
+sudo ./npm_install
+sudo npm install
+
+npm run build
+

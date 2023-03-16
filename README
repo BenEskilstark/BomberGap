@@ -1,0 +1,15 @@
+
+To run locally:
+  - make sure the socket.io script in index.html looks like:
+    <script src="/socket.io/socket.io.js"></script>
+    (no leading /midway/...)
+  - make sure the first line of js/config.js is:
+    const isLocalHost = true;
+  - if you had to make changes then see below before running...
+  - Start the server:
+    > npm start
+
+To run after making changes:
+  > npm install
+  > npm run build
+  > npm start
