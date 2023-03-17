@@ -1,5 +1,6 @@
 const React = require('react');
 const {gameReducer} = require('./gameReducer');
+const {sessionReducer} = require('./sessionReducer');
 const {modalReducer} = require('./modalReducer');
 const GameOverModal = require('../UI/GameOverModal.react');
 const {mouseReducer, hotKeyReducer} = require('bens_ui_components');
@@ -11,63 +12,16 @@ const rootReducer = (state, action) => {
   if (state === undefined) return initState();
 
   switch (action.type) {
-    case 'CREATE_SESSION': {
-      const {clientID, session} = action;
-      if (clientID != state.clientID) {
-        return {
-          ...state,
-          sessions: {...state.sessions, [session.id]: {...session}},
-        };
-      }
-      return {
-        ...state,
-        sessions: {...state.sessions, [session.id]: session},
-      };
-    }
-    case 'JOIN_SESSION': {
-      const {sessionID, clientID} = action;
-      const session = state.sessions[sessionID];
-      session.clients.push(clientID);
-      if (clientID != state.clientID) {
-        return {
-          ...state,
-          sessions: {...state.sessions, [sessionID]: {...session}},
-        };
-      }
-      return {
-        ...state,
-        sessions: {...state.sessions, [sessionID]: {...session}},
-      };
-    }
-    case 'UPDATE_SESSION': {
-      const {session} = action;
-      return {
-        ...state,
-        sessions: {...state.sessions, [session.id]: {...session}},
-      };
-    }
-    case 'END_SESSION': {
-      const {sessionID} = action;
-      if (getSession(state)?.id == sessionID) {
-        state.screen = 'LOBBY';
-        state.game = null;
-        state.modal = null;
-      }
-      delete state.sessions[sessionID];
-      return {...state};
-    }
-
-    case 'EDIT_SESSION_PARAMS': {
-      delete action.type;
-      for (const property in action) {
-        state.config[property] = action[property];
-      }
-      return {...state};
-    }
+    case 'CREATE_SESSION':
+    case 'JOIN_SESSION':
+    case 'UPDATE_SESSION':
+    case 'END_SESSION':
+    case 'EDIT_SESSION_PARAMS':
+      return sessionReducer(state, action);
     case 'START': {
       const {entities} = action;
       const game = {
-        ...initGameState(state.config, state.clientID),
+        ...initGameState(state.config, state.clientID, state.clientConfig.planeDesigns),
         clientID: state.clientID,
         entities,
         // prevTickTime = new Date().getTime();
@@ -119,6 +73,27 @@ const rootReducer = (state, action) => {
     case 'SET_MODAL':
     case 'DISMISS_MODAL':
       return modalReducer(state, action);
+    case 'BUY_PLANE': {
+      const {plane} = action;
+      if (plane.cost > state.clientConfig.money) return state;
+      state.clientConfig.money -= plane.cost;
+      if (!state.clientConfig.planes[plane.name]) {
+        state.clientConfig.planes[plane.name] = 0;
+      }
+      state.clientConfig.planes[plane.name]++;
+      return {...state};
+    }
+    case 'ADD_PLANE_DESIGN': {
+      const {clientID, plane} = action;
+      if (!state.clientConfig.planeDesigns[clientID]) {
+        state.clientConfig.planeDesigns[clientID] = [];
+      }
+      state.clientConfig.planeDesigns[clientID].push(plane);
+      if (clientID == state.clientID) {
+        state.clientConfig.planes[plane.name] = 0;
+      }
+      return {...state};
+    }
     case 'SET':
     case 'SELECT_ENTITIES':
     case 'SET_ENTITIES': {
@@ -142,10 +117,15 @@ const initState = () => {
     modal: null,
     sessions: {},
     config: deepCopy(config),
+    clientConfig: {
+      money: config.startingMoney,
+      planes: {}, // {[name]: number}
+      planeDesigns: {}, // {[clientID]: Array<Plane>}
+    },
   };
 }
 
-const initGameState = (config, clientID) => {
+const initGameState = (config, clientID, planeDesigns) => {
   const game = {
     worldSize: {...config.worldSize},
     canvasSize: {width: window.innerWidth, height: window.innerHeight},
@@ -154,8 +134,10 @@ const initGameState = (config, clientID) => {
     selectedIDs: [],
     marquee: null,
     clientID,
-    clickMode: 'MOVE',
-    launchType: 'FIGHTER',
+    clickMode: 'LAUNCH',
+    launchType: null,
+
+    planeDesigns,
 
     hotKeys: {
       onKeyDown: {},

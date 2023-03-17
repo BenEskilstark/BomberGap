@@ -8,6 +8,8 @@ const {
   Slider, Checkbox,
   CheckerBackground,
 } = require('bens_ui_components');
+const PlaneDesigner = require('./PlaneDesigner.react');
+const PlaneDesignDisplay = require('./PlaneDesignDisplay.react');
 const {dispatchToServer} = require('../clientToServer');
 const {isHost, getSession} = require('../selectors/sessions');
 const {useEffect, useState, useMemo} = React;
@@ -19,7 +21,7 @@ const Lobby = (props) => {
   for (const sessionID in state.sessions) {
     sessionCards.push(<SessionCard
       key={"sessionCard_" + sessionID}
-      state={state}
+      state={state} dispatch={dispatch}
       session={state.sessions[sessionID]}
       joinedSessionID={getSession(state)?.id}
     />);
@@ -69,8 +71,9 @@ const CreateGameCard = (props) => {
 }
 
 const SessionCard = (props) => {
-  const {session, joinedSessionID, state} = props;
+  const {session, joinedSessionID, state, dispatch} = props;
   const {id, name, clients} = session;
+
   return (
     <InfoCard
       style={{
@@ -80,9 +83,7 @@ const SessionCard = (props) => {
     >
       <div style={{textAlign: 'center'}}><b>{name}</b></div>
       Players: {clients.length}
-      {joinedSessionID == id ? (
-        <Settings {...props} />
-      ) : null}
+      {joinedSessionID == id ? (<Settings state={state} dispatch={dispatch} />) : null}
       {joinedSessionID == id ? (
         <Button
           style={{
@@ -122,40 +123,23 @@ const SessionCard = (props) => {
 };
 
 const Settings = (props) => {
-  const {session, joinedSessionID, state} = props;
-  let deployment = (
-    <div>
-      Starting Fighters:
-      <Slider value={state.config.startingFighters} min={1} max={100}
-        noOriginalValue={true}
-        onChange={(startingFighters) => {
-          dispatch({type: 'EDIT_SESSION_PARAMS', startingFighters});
-          dispatchToServer({type: 'EDIT_SESSION_PARAMS', startingFighters});
+  const {state, dispatch} = props;
+
+  const planeDesigns = [];
+  for (const name in state.clientConfig.planes) {
+    const planeDesign = state.clientConfig.planeDesigns[state.clientID]
+      .filter(p => p.name == name)[0];
+    planeDesigns.push(
+      <PlaneDesignDisplay
+        key={"plane_design_" + planeDesign.name}
+        planeDesign={planeDesign}
+        quantity={state.clientConfig.planes[name]}
+        dispatch={(action) => {
+          dispatch(action);
+          dispatchToServer(action);
         }}
+        money={state.clientConfig.money}
       />
-      <div></div>
-      Starting Bombers:
-      <Slider value={state.config.startingBombers} min={1} max={100}
-        noOriginalValue={true}
-        onChange={(startingBombers) => {
-          dispatch({type: 'EDIT_SESSION_PARAMS', startingBombers});
-          dispatchToServer({type: 'EDIT_SESSION_PARAMS', startingBombers});
-        }}
-      />
-    </div>
-  );
-  if (state.config.isRandomDeployment) {
-    deployment = (
-      <div>
-        Total Starting Planes:
-        <Slider value={state.config.totalNumPlanes} min={10} max={200}
-          noOriginalValue={true}
-          onChange={(totalNumPlanes) => {
-            dispatch({type: 'EDIT_SESSION_PARAMS', totalNumPlanes});
-            dispatchToServer({type: 'EDIT_SESSION_PARAMS', totalNumPlanes});
-          }}
-        />
-      </div>
     );
   }
 
@@ -189,25 +173,28 @@ const Settings = (props) => {
         }}
       />
       <div></div>
-      Carriers per player:
-      <Slider value={state.config.numCarriers} min={1} max={5}
+      Airports per player:
+      <Slider value={state.config.numAirports} min={1} max={5}
         noOriginalValue={true}
-        onChange={(numCarriers) => {
-          dispatch({type: 'EDIT_SESSION_PARAMS', numCarriers});
-          dispatchToServer({type: 'EDIT_SESSION_PARAMS', numCarriers});
+        onChange={(numAirports) => {
+          dispatch({type: 'EDIT_SESSION_PARAMS', numAirports});
+          dispatchToServer({type: 'EDIT_SESSION_PARAMS', numAirports});
         }}
       />
       <div></div>
-      <Checkbox
-        checked={state.config.isRandomDeployment}
-        label="Randomize Fighter/Bomber Deployment"
-        onChange={(isRandomDeployment) => {
-          dispatch({type: 'EDIT_SESSION_PARAMS', isRandomDeployment});
-          dispatchToServer({type: 'EDIT_SESSION_PARAMS', isRandomDeployment});
+      <Divider />
+      Money Available: {state.clientConfig.money}
+
+      {planeDesigns}
+
+      <PlaneDesigner
+        config={state.config}
+        clientID={state.clientID}
+        dispatch={(action) => {
+          dispatch(action);
+          dispatchToServer(action);
         }}
       />
-
-      {deployment}
     </div>
   );
 };

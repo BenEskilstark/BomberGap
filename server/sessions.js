@@ -74,11 +74,25 @@ const sessionReducer = (state, action, clientID, socket, newSession) => {
       session.clients.push(clientID);
       clientToSession[clientID] = session.id;
 
+      // update dynamic config items
+      session.dynamicConfig.money[clientID] = session.config.startingMoney;
+      session.dynamicConfig.planes[clientID] = {};
+      session.dynamicConfig.planeDesigns[clientID] = [];
+
       // tell the rest of the clients this one joined the session
       emitToAllClients(socketClients, {...action, clientID}, clientID, true);
 
       // tell the client that just joined what the settings are:
       socket.emit('receiveAction', {type: 'EDIT_SESSION_PARAMS', ...session.config});
+      for (const alreadyJoinedClientID of session.clients) {
+        if (session.dynamicConfig.planeDesigns[alreadyJoinedClientID]) {
+          for (const plane of session.dynamicConfig.planeDesigns[alreadyJoinedClientID]) {
+            socket.emit('receiveAction',
+              {type: 'ADD_PLANE_DESIGN', plane, clientID: alreadyJoinedClientID},
+            );
+          }
+        }
+      }
       break;
     }
     case 'LEAVE_SESSION': {

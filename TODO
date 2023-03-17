@@ -1,6 +1,17 @@
 
-  - change session start to handle plane designs
-  - change reducer to handle plane designs
+  - refactor
+    - planeDesigns should be keyed by name
+    - client/dynamic config should be keyed by clientID instead of per-property
+      - both reducers, lobby,
+  - Lobby:
+    - don't allow planes with the same name
+    - don't allow more than maxDesigns
+  - game start
+    - change session start to handle plane designs
+    - change reducer to handle plane designs
+  - in game
+    - change launch plane based on names
+    - change selection UI to be generalized across planes
   - new world map
   - toggle to display plane stats next to them
 

@@ -122,11 +122,11 @@ function Game(props) {
         {selections.BOMBER > 0 ? (<div>Bombers: {selections.BOMBER}</div>) : null}
       </div>
     );
-    if (selections.CARRIER > 0) {
+    if (selections.AIRPORT> 0) {
      const carrier = game.entities[game.selectedIDs[0]];
      selectionContent = (
         <div>
-          Carrier
+          Airport
           <div
             style={{
 

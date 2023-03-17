@@ -4,7 +4,9 @@ const {randomIn, normalIn} = require('bens_utils').stochastic;
 const initGameState = (
   clientIDs, config,
   dynamicConfig, // additional parameters set by users before game start
-                 // currently: planeDesigns, planes
+                 // currently: planeDesigns,
+                 // planes {[clientID]: {[name]: number}}
+                 // money {[clientID]: number}
 ) => {
   const game = {
     time: 0,
@@ -28,7 +30,7 @@ const initGameState = (
               : randomIn(game.worldSize.width - 40, game.worldSize.width - 160),
             y: normalIn(40, game.worldSize.height - 40),
           },
-          {...dynamicConfig.planes},
+          {...dynamicConfig.planes[clientID]},
         );
       game.entities[airport.id] = airport;
     }

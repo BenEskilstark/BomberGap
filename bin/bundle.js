@@ -189,9 +189,9 @@ function Game(props) {
       selections[entity.type] += 1;
     }
     let selectionContent = /*#__PURE__*/React.createElement("div", null, selections.FIGHTER > 0 ? /*#__PURE__*/React.createElement("div", null, "Fighters: ", selections.FIGHTER) : null, selections.BOMBER > 0 ? /*#__PURE__*/React.createElement("div", null, "Bombers: ", selections.BOMBER) : null);
-    if (selections.CARRIER > 0) {
+    if (selections.AIRPORT > 0) {
       const carrier = game.entities[game.selectedIDs[0]];
-      selectionContent = /*#__PURE__*/React.createElement("div", null, "Carrier", /*#__PURE__*/React.createElement("div", {
+      selectionContent = /*#__PURE__*/React.createElement("div", null, "Airport", /*#__PURE__*/React.createElement("div", {
         style: {}
       }, /*#__PURE__*/React.createElement("div", null, "Fighters: ", carrier.planes.FIGHTER), /*#__PURE__*/React.createElement("div", null, "Bombers: ", carrier.planes.BOMBER)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, "Control Mode:"), /*#__PURE__*/React.createElement(RadioPicker, {
         options: ['MOVE', 'LAUNCH'],
@@ -251,7 +251,7 @@ function Game(props) {
 }
 module.exports = Game;
 
-},{"../clientToServer":5,"../postVisit":8,"../render":12,"bens_ui_components":79,"react":96}],2:[function(require,module,exports){
+},{"../clientToServer":7,"../postVisit":10,"../render":15,"bens_ui_components":82,"react":99}],2:[function(require,module,exports){
 const React = require('react');
 const {
   Modal
@@ -335,7 +335,7 @@ const PlayerStats = props => {
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, isYou ? 'You' : 'Opponent')), /*#__PURE__*/React.createElement("div", null, "Fighter sorties flown: ", stats[clientID].fighter_sorties), /*#__PURE__*/React.createElement("div", null, "Bomber sorties flown: ", stats[clientID].bomber_sorties), /*#__PURE__*/React.createElement("div", null, "Enemy fighters shot down: ", stats[otherID].fighters_shot_down), /*#__PURE__*/React.createElement("div", null, "Enemy bombers shot down: ", stats[otherID].bombers_shot_down), /*#__PURE__*/React.createElement("div", null, "Fighter aces: ", stats[clientID].fighter_aces), /*#__PURE__*/React.createElement("div", null, "Fighters lost to no fuel: ", stats[clientID].fighters_no_fuel), /*#__PURE__*/React.createElement("div", null, "Bombers lost to no fuel: ", stats[clientID].bombers_no_fuel), /*#__PURE__*/React.createElement("div", null, "Enemy ships sunk: ", stats[otherID].ships_sunk));
 };
 module.exports = GameOverModal;
-},{"../clientToServer":5,"bens_ui_components":79,"react":96}],3:[function(require,module,exports){
+},{"../clientToServer":7,"bens_ui_components":82,"react":99}],3:[function(require,module,exports){
 const React = require('react');
 const {
   Button,
@@ -352,6 +352,8 @@ const {
   Checkbox,
   CheckerBackground
 } = require('bens_ui_components');
+const PlaneDesigner = require('./PlaneDesigner.react');
+const PlaneDesignDisplay = require('./PlaneDesignDisplay.react');
 const {
   dispatchToServer
 } = require('../clientToServer');
@@ -376,6 +378,7 @@ const Lobby = props => {
     sessionCards.push( /*#__PURE__*/React.createElement(SessionCard, {
       key: "sessionCard_" + sessionID,
       state: state,
+      dispatch: dispatch,
       session: state.sessions[sessionID],
       joinedSessionID: (_getSession = getSession(state)) === null || _getSession === void 0 ? void 0 : _getSession.id
     }));
@@ -417,7 +420,8 @@ const SessionCard = props => {
   const {
     session,
     joinedSessionID,
-    state
+    state,
+    dispatch
   } = props;
   const {
     id,
@@ -433,7 +437,10 @@ const SessionCard = props => {
     style: {
       textAlign: 'center'
     }
-  }, /*#__PURE__*/React.createElement("b", null, name)), "Players: ", clients.length, joinedSessionID == id ? /*#__PURE__*/React.createElement(Settings, props) : null, joinedSessionID == id ? /*#__PURE__*/React.createElement(Button, {
+  }, /*#__PURE__*/React.createElement("b", null, name)), "Players: ", clients.length, joinedSessionID == id ? /*#__PURE__*/React.createElement(Settings, {
+    state: state,
+    dispatch: dispatch
+  }) : null, joinedSessionID == id ? /*#__PURE__*/React.createElement(Button, {
     style: {
       width: '100%',
       height: 30
@@ -469,57 +476,21 @@ const SessionCard = props => {
 };
 const Settings = props => {
   const {
-    session,
-    joinedSessionID,
-    state
+    state,
+    dispatch
   } = props;
-  let deployment = /*#__PURE__*/React.createElement("div", null, "Starting Fighters:", /*#__PURE__*/React.createElement(Slider, {
-    value: state.config.startingFighters,
-    min: 1,
-    max: 100,
-    noOriginalValue: true,
-    onChange: startingFighters => {
-      dispatch({
-        type: 'EDIT_SESSION_PARAMS',
-        startingFighters
-      });
-      dispatchToServer({
-        type: 'EDIT_SESSION_PARAMS',
-        startingFighters
-      });
-    }
-  }), /*#__PURE__*/React.createElement("div", null), "Starting Bombers:", /*#__PURE__*/React.createElement(Slider, {
-    value: state.config.startingBombers,
-    min: 1,
-    max: 100,
-    noOriginalValue: true,
-    onChange: startingBombers => {
-      dispatch({
-        type: 'EDIT_SESSION_PARAMS',
-        startingBombers
-      });
-      dispatchToServer({
-        type: 'EDIT_SESSION_PARAMS',
-        startingBombers
-      });
-    }
-  }));
-  if (state.config.isRandomDeployment) {
-    deployment = /*#__PURE__*/React.createElement("div", null, "Total Starting Planes:", /*#__PURE__*/React.createElement(Slider, {
-      value: state.config.totalNumPlanes,
-      min: 10,
-      max: 200,
-      noOriginalValue: true,
-      onChange: totalNumPlanes => {
-        dispatch({
-          type: 'EDIT_SESSION_PARAMS',
-          totalNumPlanes
-        });
-        dispatchToServer({
-          type: 'EDIT_SESSION_PARAMS',
-          totalNumPlanes
-        });
-      }
+  const planeDesigns = [];
+  for (const name in state.clientConfig.planes) {
+    const planeDesign = state.clientConfig.planeDesigns[state.clientID].filter(p => p.name == name)[0];
+    planeDesigns.push( /*#__PURE__*/React.createElement(PlaneDesignDisplay, {
+      key: "plane_design_" + planeDesign.name,
+      planeDesign: planeDesign,
+      quantity: state.clientConfig.planes[name],
+      dispatch: action => {
+        dispatch(action);
+        dispatchToServer(action);
+      },
+      money: state.clientConfig.money
     }));
   }
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, "Settings:")), "Game ms per tick:", /*#__PURE__*/React.createElement(Slider, {
@@ -579,38 +550,32 @@ const Settings = props => {
         }
       });
     }
-  }), /*#__PURE__*/React.createElement("div", null), "Carriers per player:", /*#__PURE__*/React.createElement(Slider, {
-    value: state.config.numCarriers,
+  }), /*#__PURE__*/React.createElement("div", null), "Airports per player:", /*#__PURE__*/React.createElement(Slider, {
+    value: state.config.numAirports,
     min: 1,
     max: 5,
     noOriginalValue: true,
-    onChange: numCarriers => {
+    onChange: numAirports => {
       dispatch({
         type: 'EDIT_SESSION_PARAMS',
-        numCarriers
+        numAirports
       });
       dispatchToServer({
         type: 'EDIT_SESSION_PARAMS',
-        numCarriers
+        numAirports
       });
     }
-  }), /*#__PURE__*/React.createElement("div", null), /*#__PURE__*/React.createElement(Checkbox, {
-    checked: state.config.isRandomDeployment,
-    label: "Randomize Fighter/Bomber Deployment",
-    onChange: isRandomDeployment => {
-      dispatch({
-        type: 'EDIT_SESSION_PARAMS',
-        isRandomDeployment
-      });
-      dispatchToServer({
-        type: 'EDIT_SESSION_PARAMS',
-        isRandomDeployment
-      });
+  }), /*#__PURE__*/React.createElement("div", null), /*#__PURE__*/React.createElement(Divider, null), "Money Available: ", state.clientConfig.money, planeDesigns, /*#__PURE__*/React.createElement(PlaneDesigner, {
+    config: state.config,
+    clientID: state.clientID,
+    dispatch: action => {
+      dispatch(action);
+      dispatchToServer(action);
     }
-  }), deployment);
+  }));
 };
 module.exports = Lobby;
-},{"../clientToServer":5,"../selectors/sessions":13,"bens_ui_components":79,"react":96}],4:[function(require,module,exports){
+},{"../clientToServer":7,"../selectors/sessions":16,"./PlaneDesignDisplay.react":5,"./PlaneDesigner.react":6,"bens_ui_components":82,"react":99}],4:[function(require,module,exports){
 "use strict";
 
 var _postVisit = _interopRequireDefault(require("../postVisit"));
@@ -664,7 +629,188 @@ function Main(props) {
 }
 module.exports = Main;
 
-},{"../clientToServer":5,"../postVisit":8,"../reducers/rootReducer":11,"./Game.react":1,"./Lobby.react":3,"bens_ui_components":79,"react":96}],5:[function(require,module,exports){
+},{"../clientToServer":7,"../postVisit":10,"../reducers/rootReducer":13,"./Game.react":1,"./Lobby.react":3,"bens_ui_components":82,"react":99}],5:[function(require,module,exports){
+const React = require('react');
+const {
+  Button
+} = require('bens_ui_components');
+const {
+  useEffect,
+  useState,
+  useMemo
+} = React;
+const PlaneDesignDisplay = props => {
+  const {
+    planeDesign,
+    quantity,
+    dispatch,
+    money
+  } = props;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: '100%'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: 'center'
+    }
+  }, /*#__PURE__*/React.createElement("b", null, planeDesign.name, " ", planeDesign.type)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'row'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: '50%',
+      padding: 5
+    }
+  }, /*#__PURE__*/React.createElement("div", null, "Cost: ", planeDesign.cost), /*#__PURE__*/React.createElement("div", null, "Speed: ", planeDesign.speed), /*#__PURE__*/React.createElement("div", null, "Fuel: ", planeDesign.fuel), /*#__PURE__*/React.createElement("div", null, "Vision: ", planeDesign.vision)), /*#__PURE__*/React.createElement("div", null, "Purchased: ", quantity, /*#__PURE__*/React.createElement(Button, {
+    label: "Purchase",
+    disabled: money < planeDesign.cost,
+    onClick: () => {
+      dispatch({
+        type: 'BUY_PLANE',
+        plane: planeDesign
+      });
+    }
+  }))));
+};
+module.exports = PlaneDesignDisplay;
+},{"bens_ui_components":82,"react":99}],6:[function(require,module,exports){
+const React = require('react');
+const {
+  Slider,
+  TextField,
+  RadioPicker,
+  Button
+} = require('bens_ui_components');
+const {
+  oneOf,
+  randomIn
+} = require('bens_utils').stochastic;
+const {
+  useEffect,
+  useState,
+  useMemo
+} = React;
+const PlaneDesigner = props => {
+  const {
+    dispatch,
+    config,
+    clientID
+  } = props;
+  const [plane, setPlane] = useState({
+    name: oneOf(["MIG-15", "MIG-17", "MIG-21", "MIG-22", "SU-27", "F-4", "F14", "F-15", "F-16", "F-18", "F-22", "B-1", "B-2", "B-17", "B-29", "Tu-99", "Tu-101", "Tu-27", "SR-71"]),
+    fuel: 100,
+    vision: 10,
+    speed: 1,
+    type: 'RECON',
+    cost: 120,
+    productionTime: 10000 // ms
+  });
+
+  const sliders = [];
+  for (const name of ['speed', 'fuel', 'vision']) {
+    sliders.push( /*#__PURE__*/React.createElement(ParamSlider, {
+      key: "paramslider_" + name,
+      name: name,
+      param: config[name],
+      plane: plane,
+      setPlane: setPlane
+    }));
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: '100%',
+      textAlign: 'center'
+    }
+  }, /*#__PURE__*/React.createElement("b", null, "Design Plane: \xA0"), /*#__PURE__*/React.createElement(TextField, {
+    style: {
+      width: '25%'
+    },
+    value: plane.name,
+    onChange: name => {
+      setPlane({
+        ...plane,
+        name
+      });
+    }
+  }), /*#__PURE__*/React.createElement(RadioPicker, {
+    options: ['RECON', 'FIGHTER', 'BOMBER'],
+    selected: plane.type,
+    onChange: type => {
+      let cost = 0;
+      if (type == 'FIGHTER' && plane.type == 'RECON') {
+        cost = config.airAttackCost;
+      }
+      if (type == 'BOMBER' && plane.type == 'RECON') {
+        cost = config.groundAttackCost;
+      }
+      if (type == 'RECON' && plane.type == 'FIGHTER') {
+        cost = -1 * config.airAttackCost;
+      }
+      if (type == 'RECON' && plane.type == 'BOMBER') {
+        cost = -1 * config.groundAttackCost;
+      }
+      setPlane({
+        ...plane,
+        type,
+        cost: plane.cost + cost
+      });
+    }
+  }), sliders, "Cost: ", plane.cost, /*#__PURE__*/React.createElement(Button, {
+    style: {
+      width: '100%'
+    },
+    label: "Finalize Design",
+    onClick: () => {
+      dispatch({
+        type: 'ADD_PLANE_DESIGN',
+        clientID,
+        plane
+      });
+      setPlane({
+        name: oneOf(["MIG-15", "MIG-17", "MIG-21", "MIG-22", "SU-27", "F-4", "F14", "F-15", "F-16", "F-18", "F-22", "B-1", "B-2", "B-17", "B-29", "Tu-99", "Tu-101", "Tu-27", "SR-71"]),
+        fuel: 100,
+        vision: 10,
+        speed: 1,
+        type: 'RECON',
+        cost: 120,
+        productionTime: 10000 // ms
+      });
+    }
+  }));
+};
+
+const ParamSlider = props => {
+  const {
+    name,
+    param,
+    setPlane,
+    plane
+  } = props;
+  return /*#__PURE__*/React.createElement(Slider, {
+    label: name,
+    min: param.min,
+    max: param.max,
+    value: plane[name],
+    step: param.inc,
+    onChange: value => {
+      const diff = value - plane[name];
+      const cost = Math.round(plane.cost + diff * param.cost);
+      setPlane({
+        ...plane,
+        [name]: value,
+        cost
+      });
+    },
+    noNumberField: false,
+    noOriginalValue: true,
+    isFloat: name == 'speed'
+  });
+};
+module.exports = PlaneDesigner;
+},{"bens_ui_components":82,"bens_utils":89,"react":99}],7:[function(require,module,exports){
 const {
   config
 } = require('./config');
@@ -678,7 +824,7 @@ const setupSocket = dispatch => {
     path: config.path
   });
   socket.on('receiveAction', action => {
-    console.log("received", action);
+    // console.log("received", action);
     dispatch(action);
   });
   return socket;
@@ -695,7 +841,7 @@ module.exports = {
   dispatchToServer,
   setupSocket
 };
-},{"./config":6}],6:[function(require,module,exports){
+},{"./config":8}],8:[function(require,module,exports){
 const isLocalHost = true;
 const config = {
   isLocalHost,
@@ -703,21 +849,46 @@ const config = {
   path: isLocalHost ? null : "/midway/socket.io",
   msPerTick: 200,
   worldSize: {
-    width: 900,
-    height: 450
+    width: 1100,
+    height: 650
   },
-  // for random:
-  isRandomDeployment: false,
-  totalNumPlanes: 30,
-  // for non-random:
-  startingFighters: 10,
-  startingBombers: 20,
-  numCarriers: 1
+  numAirports: 3,
+  startingMoney: 5000,
+  maxPlaneDesigns: 4,
+  // airplane parameters:
+  fuel: {
+    min: 0,
+    max: 2000,
+    cost: 0.1,
+    inc: 50
+  },
+  // 10 range per dollar
+  vision: {
+    min: 0,
+    max: 200,
+    cost: 1,
+    inc: 1
+  },
+  // 1 vision per dollar
+  speed: {
+    min: 1,
+    max: 5,
+    cost: 100,
+    inc: 1
+  },
+  // 100 cost per speed (inc is actually 0.1)
+  airAttackCost: 30,
+  groundAttackCost: 30
+  // fighter cost:
+  //  60 fuel + 30 vision + 120 speed + 30 attack = 240
+  // bomber cost:
+  //  80 fuel + 45 vision + 100 speed  + 30 attack = 255
 };
+
 module.exports = {
   config
 };
-},{}],7:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 
 var _Main = _interopRequireDefault(require("./UI/Main.react"));
@@ -730,7 +901,7 @@ function renderUI(root) {
 const root = _client.default.createRoot(document.getElementById('container'));
 renderUI(root);
 
-},{"./UI/Main.react":4,"react":96,"react-dom/client":92}],8:[function(require,module,exports){
+},{"./UI/Main.react":4,"react":99,"react-dom/client":95}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -765,7 +936,7 @@ const getHostname = () => {
 var _default = postVisit;
 exports.default = _default;
 
-},{"./config":6,"axios":14}],9:[function(require,module,exports){
+},{"./config":8,"axios":17}],11:[function(require,module,exports){
 // @flow
 
 const {
@@ -865,7 +1036,7 @@ const gameReducer = (game, action) => {
 module.exports = {
   gameReducer
 };
-},{"bens_utils":86}],10:[function(require,module,exports){
+},{"bens_utils":89}],12:[function(require,module,exports){
 const modalReducer = (state, action) => {
   switch (action.type) {
     case 'DISMISS_MODAL':
@@ -889,11 +1060,14 @@ const modalReducer = (state, action) => {
 module.exports = {
   modalReducer
 };
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 const React = require('react');
 const {
   gameReducer
 } = require('./gameReducer');
+const {
+  sessionReducer
+} = require('./sessionReducer');
 const {
   modalReducer
 } = require('./modalReducer');
@@ -913,6 +1087,178 @@ const {
 } = require('bens_utils').helpers;
 const rootReducer = (state, action) => {
   if (state === undefined) return initState();
+  switch (action.type) {
+    case 'CREATE_SESSION':
+    case 'JOIN_SESSION':
+    case 'UPDATE_SESSION':
+    case 'END_SESSION':
+    case 'EDIT_SESSION_PARAMS':
+      return sessionReducer(state, action);
+    case 'START':
+      {
+        const {
+          entities
+        } = action;
+        const game = {
+          ...initGameState(state.config, state.clientID, state.clientConfig.planeDesigns),
+          clientID: state.clientID,
+          entities
+          // prevTickTime = new Date().getTime();
+          // tickInterval: setInterval(
+          //   // HACK: dispatch is only available via window
+          //   () => dispatch({type: 'TICK'}),
+          //   config.msPerTick,
+          // ),
+        };
+
+        return {
+          ...state,
+          screen: "GAME",
+          game
+        };
+      }
+    case 'GAME_OVER':
+      {
+        const {
+          winner
+        } = action;
+        return {
+          ...state,
+          modal: /*#__PURE__*/React.createElement(GameOverModal, action)
+        };
+      }
+    case 'SET_SCREEN':
+      {
+        const {
+          screen
+        } = action;
+        const nextState = {
+          ...state,
+          screen
+        };
+        if (screen == 'LOBBY') {
+          nextState.game = null;
+        }
+        return nextState;
+      }
+    case 'SET_MOUSE_DOWN':
+    case 'SET_MOUSE_POS':
+      return {
+        ...state,
+        mouse: mouseReducer(state.mouse, action)
+      };
+    case 'SET_HOTKEY':
+    case 'SET_KEY_PRESS':
+      {
+        if (!state.game) return state;
+        return {
+          ...state,
+          game: {
+            ...state.game,
+            hotKeys: hotKeyReducer(state.game.hotKeys, action)
+          }
+        };
+      }
+    case 'SET_MODAL':
+    case 'DISMISS_MODAL':
+      return modalReducer(state, action);
+    case 'BUY_PLANE':
+      {
+        const {
+          plane
+        } = action;
+        if (plane.cost > state.clientConfig.money) return state;
+        state.clientConfig.money -= plane.cost;
+        if (!state.clientConfig.planes[plane.name]) {
+          state.clientConfig.planes[plane.name] = 0;
+        }
+        state.clientConfig.planes[plane.name]++;
+        return {
+          ...state
+        };
+      }
+    case 'ADD_PLANE_DESIGN':
+      {
+        const {
+          clientID,
+          plane
+        } = action;
+        if (!state.clientConfig.planeDesigns[clientID]) {
+          state.clientConfig.planeDesigns[clientID] = [];
+        }
+        state.clientConfig.planeDesigns[clientID].push(plane);
+        if (clientID == state.clientID) {
+          state.clientConfig.planes[plane.name] = 0;
+        }
+        return {
+          ...state
+        };
+      }
+    case 'SET':
+    case 'SELECT_ENTITIES':
+    case 'SET_ENTITIES':
+      {
+        if (!state.game) return state;
+        return {
+          ...state,
+          game: gameReducer(state.game, action)
+        };
+      }
+  }
+  return state;
+};
+
+//////////////////////////////////////
+// Initializations
+const initState = () => {
+  return {
+    screen: 'LOBBY',
+    game: null,
+    modal: null,
+    sessions: {},
+    config: deepCopy(config),
+    clientConfig: {
+      money: config.startingMoney,
+      planes: {},
+      // {[name]: number}
+      planeDesigns: {} // {[clientID]: Array<Plane>}
+    }
+  };
+};
+
+const initGameState = (config, clientID, planeDesigns) => {
+  const game = {
+    worldSize: {
+      ...config.worldSize
+    },
+    canvasSize: {
+      width: window.innerWidth,
+      height: window.innerHeight
+    },
+    entities: {},
+    fogLocations: [],
+    selectedIDs: [],
+    marquee: null,
+    clientID,
+    clickMode: 'LAUNCH',
+    launchType: null,
+    planeDesigns,
+    hotKeys: {
+      onKeyDown: {},
+      onKeyPress: {},
+      onKeyUp: {},
+      keysDown: {}
+    }
+  };
+  return game;
+};
+module.exports = {
+  rootReducer,
+  initState
+};
+},{"../UI/GameOverModal.react":2,"../config":8,"../selectors/sessions":16,"./gameReducer":11,"./modalReducer":12,"./sessionReducer":14,"bens_ui_components":82,"bens_utils":89,"react":99}],14:[function(require,module,exports){
+const sessionReducer = (state, action) => {
+  if (state === undefined) return {};
   switch (action.type) {
     case 'CREATE_SESSION':
       {
@@ -1009,129 +1355,13 @@ const rootReducer = (state, action) => {
           ...state
         };
       }
-    case 'START':
-      {
-        const {
-          entities
-        } = action;
-        const game = {
-          ...initGameState(state.config, state.clientID),
-          clientID: state.clientID,
-          entities
-          // prevTickTime = new Date().getTime();
-          // tickInterval: setInterval(
-          //   // HACK: dispatch is only available via window
-          //   () => dispatch({type: 'TICK'}),
-          //   config.msPerTick,
-          // ),
-        };
-
-        return {
-          ...state,
-          screen: "GAME",
-          game
-        };
-      }
-    case 'GAME_OVER':
-      {
-        const {
-          winner
-        } = action;
-        return {
-          ...state,
-          modal: /*#__PURE__*/React.createElement(GameOverModal, action)
-        };
-      }
-    case 'SET_SCREEN':
-      {
-        const {
-          screen
-        } = action;
-        const nextState = {
-          ...state,
-          screen
-        };
-        if (screen == 'LOBBY') {
-          nextState.game = null;
-        }
-        return nextState;
-      }
-    case 'SET_MOUSE_DOWN':
-    case 'SET_MOUSE_POS':
-      return {
-        ...state,
-        mouse: mouseReducer(state.mouse, action)
-      };
-    case 'SET_HOTKEY':
-    case 'SET_KEY_PRESS':
-      {
-        if (!state.game) return state;
-        return {
-          ...state,
-          game: {
-            ...state.game,
-            hotKeys: hotKeyReducer(state.game.hotKeys, action)
-          }
-        };
-      }
-    case 'SET_MODAL':
-    case 'DISMISS_MODAL':
-      return modalReducer(state, action);
-    case 'SET':
-    case 'SELECT_ENTITIES':
-    case 'SET_ENTITIES':
-      {
-        if (!state.game) return state;
-        return {
-          ...state,
-          game: gameReducer(state.game, action)
-        };
-      }
   }
   return state;
 };
-
-//////////////////////////////////////
-// Initializations
-const initState = () => {
-  return {
-    screen: 'LOBBY',
-    game: null,
-    modal: null,
-    sessions: {},
-    config: deepCopy(config)
-  };
-};
-const initGameState = (config, clientID) => {
-  const game = {
-    worldSize: {
-      ...config.worldSize
-    },
-    canvasSize: {
-      width: window.innerWidth,
-      height: window.innerHeight
-    },
-    entities: {},
-    fogLocations: [],
-    selectedIDs: [],
-    marquee: null,
-    clientID,
-    clickMode: 'MOVE',
-    launchType: 'FIGHTER',
-    hotKeys: {
-      onKeyDown: {},
-      onKeyPress: {},
-      onKeyUp: {},
-      keysDown: {}
-    }
-  };
-  return game;
-};
 module.exports = {
-  rootReducer,
-  initState
+  sessionReducer
 };
-},{"../UI/GameOverModal.react":2,"../config":6,"../selectors/sessions":13,"./gameReducer":9,"./modalReducer":10,"bens_ui_components":79,"bens_utils":86,"react":96}],12:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 const {
   isHost
 } = require('./selectors/sessions');
@@ -1257,7 +1487,7 @@ const render = state => {
 module.exports = {
   render
 };
-},{"./selectors/sessions":13,"bens_utils":86}],13:[function(require,module,exports){
+},{"./selectors/sessions":16,"bens_utils":89}],16:[function(require,module,exports){
 const getSession = state => {
   for (const id in state.sessions) {
     const session = state.sessions[id];
@@ -1274,7 +1504,7 @@ module.exports = {
   getSession,
   isHost
 };
-},{}],14:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1326,7 +1556,7 @@ exports.CanceledError = CanceledError;
 exports.AxiosError = AxiosError;
 exports.Axios = Axios;
 
-},{"./lib/axios.js":17}],15:[function(require,module,exports){
+},{"./lib/axios.js":20}],18:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1385,7 +1615,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../core/AxiosError.js":22,"../utils.js":55,"./http.js":43,"./xhr.js":16}],16:[function(require,module,exports){
+},{"../core/AxiosError.js":25,"../utils.js":58,"./http.js":46,"./xhr.js":19}],19:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1612,7 +1842,7 @@ var _default = isXHRAdapterSupported && function (config) {
 };
 exports.default = _default;
 
-},{"../cancel/CanceledError.js":19,"../core/AxiosError.js":22,"../core/AxiosHeaders.js":23,"../core/buildFullPath.js":25,"../defaults/transitional.js":31,"../helpers/parseProtocol.js":45,"../helpers/speedometer.js":46,"../platform/index.js":54,"./../core/settle.js":28,"./../helpers/buildURL.js":36,"./../helpers/cookies.js":38,"./../helpers/isURLSameOrigin.js":42,"./../utils.js":55}],17:[function(require,module,exports){
+},{"../cancel/CanceledError.js":22,"../core/AxiosError.js":25,"../core/AxiosHeaders.js":26,"../core/buildFullPath.js":28,"../defaults/transitional.js":34,"../helpers/parseProtocol.js":48,"../helpers/speedometer.js":49,"../platform/index.js":57,"./../core/settle.js":31,"./../helpers/buildURL.js":39,"./../helpers/cookies.js":41,"./../helpers/isURLSameOrigin.js":45,"./../utils.js":58}],20:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1703,7 +1933,7 @@ axios.default = axios;
 var _default = axios;
 exports.default = _default;
 
-},{"./cancel/CancelToken.js":18,"./cancel/CanceledError.js":19,"./cancel/isCancel.js":20,"./core/Axios.js":21,"./core/AxiosError.js":22,"./core/AxiosHeaders.js":23,"./core/mergeConfig.js":27,"./defaults/index.js":30,"./env/data.js":32,"./helpers/HttpStatusCode.js":34,"./helpers/bind.js":35,"./helpers/formDataToJSON.js":39,"./helpers/isAxiosError.js":41,"./helpers/spread.js":47,"./helpers/toFormData.js":48,"./utils.js":55}],18:[function(require,module,exports){
+},{"./cancel/CancelToken.js":21,"./cancel/CanceledError.js":22,"./cancel/isCancel.js":23,"./core/Axios.js":24,"./core/AxiosError.js":25,"./core/AxiosHeaders.js":26,"./core/mergeConfig.js":30,"./defaults/index.js":33,"./env/data.js":35,"./helpers/HttpStatusCode.js":37,"./helpers/bind.js":38,"./helpers/formDataToJSON.js":42,"./helpers/isAxiosError.js":44,"./helpers/spread.js":50,"./helpers/toFormData.js":51,"./utils.js":58}],21:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1820,7 +2050,7 @@ class CancelToken {
 var _default = CancelToken;
 exports.default = _default;
 
-},{"./CanceledError.js":19}],19:[function(require,module,exports){
+},{"./CanceledError.js":22}],22:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1850,7 +2080,7 @@ _utils.default.inherits(CanceledError, _AxiosError.default, {
 var _default = CanceledError;
 exports.default = _default;
 
-},{"../core/AxiosError.js":22,"../utils.js":55}],20:[function(require,module,exports){
+},{"../core/AxiosError.js":25,"../utils.js":58}],23:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1861,7 +2091,7 @@ function isCancel(value) {
   return !!(value && value.__CANCEL__);
 }
 
-},{}],21:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2035,7 +2265,7 @@ _utils.default.forEach(['post', 'put', 'patch'], function forEachMethodWithData(
 var _default = Axios;
 exports.default = _default;
 
-},{"../helpers/buildURL.js":36,"../helpers/validator.js":50,"./../utils.js":55,"./AxiosHeaders.js":23,"./InterceptorManager.js":24,"./buildFullPath.js":25,"./dispatchRequest.js":26,"./mergeConfig.js":27}],22:[function(require,module,exports){
+},{"../helpers/buildURL.js":39,"../helpers/validator.js":53,"./../utils.js":58,"./AxiosHeaders.js":26,"./InterceptorManager.js":27,"./buildFullPath.js":28,"./dispatchRequest.js":29,"./mergeConfig.js":30}],25:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2121,7 +2351,7 @@ AxiosError.from = (error, code, config, request, response, customProps) => {
 var _default = AxiosError;
 exports.default = _default;
 
-},{"../utils.js":55}],23:[function(require,module,exports){
+},{"../utils.js":58}],26:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2339,7 +2569,7 @@ _utils.default.freezeMethods(AxiosHeaders);
 var _default = AxiosHeaders;
 exports.default = _default;
 
-},{"../helpers/parseHeaders.js":44,"../utils.js":55}],24:[function(require,module,exports){
+},{"../helpers/parseHeaders.js":47,"../utils.js":58}],27:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2416,7 +2646,7 @@ class InterceptorManager {
 var _default = InterceptorManager;
 exports.default = _default;
 
-},{"./../utils.js":55}],25:[function(require,module,exports){
+},{"./../utils.js":58}],28:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2443,7 +2673,7 @@ function buildFullPath(baseURL, requestedURL) {
   return requestedURL;
 }
 
-},{"../helpers/combineURLs.js":37,"../helpers/isAbsoluteURL.js":40}],26:[function(require,module,exports){
+},{"../helpers/combineURLs.js":40,"../helpers/isAbsoluteURL.js":43}],29:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2511,7 +2741,7 @@ function dispatchRequest(config) {
   });
 }
 
-},{"../adapters/adapters.js":15,"../cancel/CanceledError.js":19,"../cancel/isCancel.js":20,"../core/AxiosHeaders.js":23,"../defaults/index.js":30,"./transformData.js":29}],27:[function(require,module,exports){
+},{"../adapters/adapters.js":18,"../cancel/CanceledError.js":22,"../cancel/isCancel.js":23,"../core/AxiosHeaders.js":26,"../defaults/index.js":33,"./transformData.js":32}],30:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2620,7 +2850,7 @@ function mergeConfig(config1, config2) {
   return config;
 }
 
-},{"../utils.js":55,"./AxiosHeaders.js":23}],28:[function(require,module,exports){
+},{"../utils.js":58,"./AxiosHeaders.js":26}],31:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2647,7 +2877,7 @@ function settle(resolve, reject, response) {
   }
 }
 
-},{"./AxiosError.js":22}],29:[function(require,module,exports){
+},{"./AxiosError.js":25}],32:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2678,7 +2908,7 @@ function transformData(fns, response) {
   return data;
 }
 
-},{"../core/AxiosHeaders.js":23,"../defaults/index.js":30,"./../utils.js":55}],30:[function(require,module,exports){
+},{"../core/AxiosHeaders.js":26,"../defaults/index.js":33,"./../utils.js":58}],33:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2816,7 +3046,7 @@ _utils.default.forEach(['post', 'put', 'patch'], function forEachMethodWithData(
 var _default = defaults;
 exports.default = _default;
 
-},{"../core/AxiosError.js":22,"../helpers/formDataToJSON.js":39,"../helpers/toFormData.js":48,"../helpers/toURLEncodedForm.js":49,"../platform/index.js":54,"../utils.js":55,"./transitional.js":31}],31:[function(require,module,exports){
+},{"../core/AxiosError.js":25,"../helpers/formDataToJSON.js":42,"../helpers/toFormData.js":51,"../helpers/toURLEncodedForm.js":52,"../platform/index.js":57,"../utils.js":58,"./transitional.js":34}],34:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2830,7 +3060,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{}],32:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2840,7 +3070,7 @@ exports.VERSION = void 0;
 const VERSION = "1.3.2";
 exports.VERSION = VERSION;
 
-},{}],33:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2899,7 +3129,7 @@ prototype.toString = function toString(encoder) {
 var _default = AxiosURLSearchParams;
 exports.default = _default;
 
-},{"./toFormData.js":48}],34:[function(require,module,exports){
+},{"./toFormData.js":51}],37:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2977,7 +3207,7 @@ Object.entries(HttpStatusCode).forEach(([key, value]) => {
 var _default = HttpStatusCode;
 exports.default = _default;
 
-},{}],35:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2990,7 +3220,7 @@ function bind(fn, thisArg) {
   };
 }
 
-},{}],36:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3044,7 +3274,7 @@ function buildURL(url, params, options) {
   return url;
 }
 
-},{"../helpers/AxiosURLSearchParams.js":33,"../utils.js":55}],37:[function(require,module,exports){
+},{"../helpers/AxiosURLSearchParams.js":36,"../utils.js":58}],40:[function(require,module,exports){
 'use strict';
 
 /**
@@ -3063,7 +3293,7 @@ function combineURLs(baseURL, relativeURL) {
   return relativeURL ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '') : baseURL;
 }
 
-},{}],38:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3115,7 +3345,7 @@ function nonStandardBrowserEnv() {
 }();
 exports.default = _default;
 
-},{"../platform/index.js":54,"./../utils.js":55}],39:[function(require,module,exports){
+},{"../platform/index.js":57,"./../utils.js":58}],42:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3203,7 +3433,7 @@ function formDataToJSON(formData) {
 var _default = formDataToJSON;
 exports.default = _default;
 
-},{"../utils.js":55}],40:[function(require,module,exports){
+},{"../utils.js":58}],43:[function(require,module,exports){
 'use strict';
 
 /**
@@ -3224,7 +3454,7 @@ function isAbsoluteURL(url) {
   return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(url);
 }
 
-},{}],41:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3244,7 +3474,7 @@ function isAxiosError(payload) {
   return _utils.default.isObject(payload) && payload.isAxiosError === true;
 }
 
-},{"./../utils.js":55}],42:[function(require,module,exports){
+},{"./../utils.js":58}],45:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3310,7 +3540,7 @@ function nonStandardBrowserEnv() {
 }();
 exports.default = _default;
 
-},{"../platform/index.js":54,"./../utils.js":55}],43:[function(require,module,exports){
+},{"../platform/index.js":57,"./../utils.js":58}],46:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3321,7 +3551,7 @@ exports.default = void 0;
 var _default = null;
 exports.default = _default;
 
-},{}],44:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3374,7 +3604,7 @@ var _default = rawHeaders => {
 };
 exports.default = _default;
 
-},{"./../utils.js":55}],45:[function(require,module,exports){
+},{"./../utils.js":58}],48:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3386,7 +3616,7 @@ function parseProtocol(url) {
   return match && match[1] || '';
 }
 
-},{}],46:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 'use strict';
 
 /**
@@ -3435,7 +3665,7 @@ function speedometer(samplesCount, min) {
 var _default = speedometer;
 exports.default = _default;
 
-},{}],47:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 'use strict';
 
 /**
@@ -3469,7 +3699,7 @@ function spread(callback) {
   };
 }
 
-},{}],48:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 (function (Buffer){(function (){
 'use strict';
 
@@ -3666,7 +3896,7 @@ var _default = toFormData;
 exports.default = _default;
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"../core/AxiosError.js":22,"../platform/node/classes/FormData.js":43,"../utils.js":55,"buffer":87}],49:[function(require,module,exports){
+},{"../core/AxiosError.js":25,"../platform/node/classes/FormData.js":46,"../utils.js":58,"buffer":90}],52:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3689,7 +3919,7 @@ function toURLEncodedForm(data, options) {
   }, options));
 }
 
-},{"../platform/index.js":54,"../utils.js":55,"./toFormData.js":48}],50:[function(require,module,exports){
+},{"../platform/index.js":57,"../utils.js":58,"./toFormData.js":51}],53:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3775,7 +4005,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../core/AxiosError.js":22,"../env/data.js":32}],51:[function(require,module,exports){
+},{"../core/AxiosError.js":25,"../env/data.js":35}],54:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3785,7 +4015,7 @@ exports.default = void 0;
 var _default = FormData;
 exports.default = _default;
 
-},{}],52:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3797,7 +4027,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var _default = typeof URLSearchParams !== 'undefined' ? URLSearchParams : _AxiosURLSearchParams.default;
 exports.default = _default;
 
-},{"../../../helpers/AxiosURLSearchParams.js":33}],53:[function(require,module,exports){
+},{"../../../helpers/AxiosURLSearchParams.js":36}],56:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3859,7 +4089,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./classes/FormData.js":51,"./classes/URLSearchParams.js":52}],54:[function(require,module,exports){
+},{"./classes/FormData.js":54,"./classes/URLSearchParams.js":55}],57:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3874,7 +4104,7 @@ Object.defineProperty(exports, "default", {
 var _index = _interopRequireDefault(require("./node/index.js"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./node/index.js":53}],55:[function(require,module,exports){
+},{"./node/index.js":56}],58:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -4555,7 +4785,7 @@ var _default = {
 exports.default = _default;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./helpers/bind.js":35}],56:[function(require,module,exports){
+},{"./helpers/bind.js":38}],59:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -4707,7 +4937,7 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],57:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 const React = require('react');
 const Button = require('./Button.react');
 const {
@@ -4780,7 +5010,7 @@ const AudioWidget = props => {
   }));
 };
 module.exports = AudioWidget;
-},{"./Button.react":59,"react":96}],58:[function(require,module,exports){
+},{"./Button.react":62,"react":99}],61:[function(require,module,exports){
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 const React = require('react');
 const CheckerBackground = require('./CheckerBackground.react.js');
@@ -4899,7 +5129,7 @@ const Piece = props => {
   }, props.sprite);
 };
 module.exports = Board;
-},{"./CheckerBackground.react.js":62,"./DragArea.react.js":64,"react":96}],59:[function(require,module,exports){
+},{"./CheckerBackground.react.js":65,"./DragArea.react.js":67,"react":99}],62:[function(require,module,exports){
 const React = require('react');
 const {
   useState,
@@ -4973,7 +5203,7 @@ function Button(props) {
   }, props.label);
 }
 module.exports = Button;
-},{"react":96}],60:[function(require,module,exports){
+},{"react":99}],63:[function(require,module,exports){
 const React = require('react');
 const {
   useResponsiveDimensions
@@ -5036,7 +5266,7 @@ function Canvas(props) {
   }));
 }
 module.exports = Canvas;
-},{"./hooks":77,"react":96}],61:[function(require,module,exports){
+},{"./hooks":80,"react":99}],64:[function(require,module,exports){
 const React = require('react');
 
 /**
@@ -5069,7 +5299,7 @@ function Checkbox(props) {
   }
 }
 module.exports = Checkbox;
-},{"react":96}],62:[function(require,module,exports){
+},{"react":99}],65:[function(require,module,exports){
 const React = require('react');
 
 /**
@@ -5117,7 +5347,7 @@ const CheckerBackground = props => {
   }, squares);
 };
 module.exports = CheckerBackground;
-},{"react":96}],63:[function(require,module,exports){
+},{"react":99}],66:[function(require,module,exports){
 const React = require('react');
 function Divider(props) {
   const {
@@ -5133,7 +5363,7 @@ function Divider(props) {
   });
 }
 module.exports = Divider;
-},{"react":96}],64:[function(require,module,exports){
+},{"react":99}],67:[function(require,module,exports){
 const React = require('react');
 const {
   useMouseHandler,
@@ -5386,7 +5616,7 @@ const clampToArea = (dragAreaID, pixel, style) => {
   };
 };
 module.exports = DragArea;
-},{"./hooks":77,"bens_utils":86,"react":96}],65:[function(require,module,exports){
+},{"./hooks":80,"bens_utils":89,"react":99}],68:[function(require,module,exports){
 const React = require('react');
 
 /**
@@ -5419,7 +5649,7 @@ const Dropdown = function (props) {
   }, optionTags);
 };
 module.exports = Dropdown;
-},{"react":96}],66:[function(require,module,exports){
+},{"react":99}],69:[function(require,module,exports){
 const React = require('react');
 const {
   useEffect,
@@ -5465,7 +5695,7 @@ const usePrevious = value => {
   return ref.current;
 };
 module.exports = Indicator;
-},{"react":96}],67:[function(require,module,exports){
+},{"react":99}],70:[function(require,module,exports){
 const React = require('react');
 const InfoCard = props => {
   const overrideStyle = props.style || {};
@@ -5489,7 +5719,7 @@ const InfoCard = props => {
   }, props.children);
 };
 module.exports = InfoCard;
-},{"react":96}],68:[function(require,module,exports){
+},{"react":99}],71:[function(require,module,exports){
 const React = require('react');
 const Button = require('./Button.react');
 const Divider = require('./Divider.react');
@@ -5568,7 +5798,7 @@ function Modal(props) {
   }, buttonHTML)));
 }
 module.exports = Modal;
-},{"./Button.react":59,"./Divider.react":63,"react":96}],69:[function(require,module,exports){
+},{"./Button.react":62,"./Divider.react":66,"react":99}],72:[function(require,module,exports){
 const React = require('react');
 const {
   useState,
@@ -5650,7 +5880,7 @@ const submitValue = (onChange, nextVal, onlyInt) => {
   }
 };
 module.exports = NumberField;
-},{"react":96}],70:[function(require,module,exports){
+},{"react":99}],73:[function(require,module,exports){
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 /**
  * See ~/Code/teaching/clusters for an example of how to use the plot
@@ -5938,7 +6168,7 @@ const PlotWatcher = props => {
   }));
 };
 module.exports = PlotWatcher;
-},{"./Button.react":59,"./Canvas.react":60,"react":96}],71:[function(require,module,exports){
+},{"./Button.react":62,"./Canvas.react":63,"react":99}],74:[function(require,module,exports){
 const React = require('react');
 const Button = require('./Button.react');
 const Modal = require('./Modal.react');
@@ -6021,7 +6251,7 @@ const quitGameModal = dispatch => {
   });
 };
 module.exports = QuitButton;
-},{"./Button.react":59,"./Modal.react":68,"bens_utils":86,"react":96}],72:[function(require,module,exports){
+},{"./Button.react":62,"./Modal.react":71,"bens_utils":89,"react":99}],75:[function(require,module,exports){
 const React = require('react');
 
 // props:
@@ -6048,7 +6278,7 @@ class RadioPicker extends React.Component {
   }
 }
 module.exports = RadioPicker;
-},{"react":96}],73:[function(require,module,exports){
+},{"react":99}],76:[function(require,module,exports){
 const React = require('react');
 const NumberField = require('./NumberField.react');
 const {
@@ -6118,7 +6348,7 @@ function Slider(props) {
   }), props.noOriginalValue ? null : "(" + originalValue + ")"));
 }
 module.exports = Slider;
-},{"./NumberField.react":69,"react":96}],74:[function(require,module,exports){
+},{"./NumberField.react":72,"react":99}],77:[function(require,module,exports){
 const React = require('react');
 
 /**
@@ -6162,7 +6392,7 @@ const SpriteSheet = props => {
   }));
 };
 module.exports = SpriteSheet;
-},{"react":96}],75:[function(require,module,exports){
+},{"react":99}],78:[function(require,module,exports){
 const React = require('react');
 const Button = require('./Button.react');
 const Dropdown = require('./Dropdown.react');
@@ -6349,7 +6579,7 @@ function Table(props) {
   }, props.hideNumRows ? null : /*#__PURE__*/React.createElement("span", null, "Total Rows: ", rows.length, " Rows Displayed: ", filteredRows.length), /*#__PURE__*/React.createElement("table", null, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, headers)), /*#__PURE__*/React.createElement("tbody", null, rowHTML)));
 }
 module.exports = Table;
-},{"./Button.react":59,"./Dropdown.react":65,"react":96}],76:[function(require,module,exports){
+},{"./Button.react":62,"./Dropdown.react":68,"react":99}],79:[function(require,module,exports){
 const React = require('react');
 
 /**
@@ -6391,7 +6621,7 @@ const TextField = props => {
   });
 };
 module.exports = TextField;
-},{"react":96}],77:[function(require,module,exports){
+},{"react":99}],80:[function(require,module,exports){
 const React = require('react');
 const {
   throttle
@@ -6881,7 +7111,7 @@ module.exports = {
   useCompare,
   usePrevious
 };
-},{"bens_utils":86,"react":96}],78:[function(require,module,exports){
+},{"bens_utils":89,"react":99}],81:[function(require,module,exports){
 // type Point = {
 //   x: number,
 //   y: number,
@@ -6966,7 +7196,7 @@ const plotReducer = (state, action) => {
 module.exports = {
   plotReducer
 };
-},{}],79:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 
 // const React = require('react');
 // const ReactDOM = require('react-dom');
@@ -7000,7 +7230,7 @@ module.exports = {
 
 
 
-},{"./bin/AudioWidget.react.js":57,"./bin/Board.react.js":58,"./bin/Button.react.js":59,"./bin/Canvas.react.js":60,"./bin/Checkbox.react.js":61,"./bin/CheckerBackground.react.js":62,"./bin/Divider.react.js":63,"./bin/DragArea.react.js":64,"./bin/Dropdown.react.js":65,"./bin/Indicator.react.js":66,"./bin/InfoCard.react.js":67,"./bin/Modal.react.js":68,"./bin/NumberField.react.js":69,"./bin/Plot.react.js":70,"./bin/QuitButton.react.js":71,"./bin/RadioPicker.react.js":72,"./bin/Slider.react.js":73,"./bin/SpriteSheet.react.js":74,"./bin/Table.react.js":75,"./bin/TextField.react.js":76,"./bin/hooks.js":77,"./bin/plotReducer.js":78}],80:[function(require,module,exports){
+},{"./bin/AudioWidget.react.js":60,"./bin/Board.react.js":61,"./bin/Button.react.js":62,"./bin/Canvas.react.js":63,"./bin/Checkbox.react.js":64,"./bin/CheckerBackground.react.js":65,"./bin/Divider.react.js":66,"./bin/DragArea.react.js":67,"./bin/Dropdown.react.js":68,"./bin/Indicator.react.js":69,"./bin/InfoCard.react.js":70,"./bin/Modal.react.js":71,"./bin/NumberField.react.js":72,"./bin/Plot.react.js":73,"./bin/QuitButton.react.js":74,"./bin/RadioPicker.react.js":75,"./bin/Slider.react.js":76,"./bin/SpriteSheet.react.js":77,"./bin/Table.react.js":78,"./bin/TextField.react.js":79,"./bin/hooks.js":80,"./bin/plotReducer.js":81}],83:[function(require,module,exports){
 'use strict';
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -7164,7 +7394,7 @@ module.exports = {
   getEntityPositions: getEntityPositions,
   entityInsideGrid: entityInsideGrid
 };
-},{"./helpers":81,"./math":82,"./vectors":85}],81:[function(require,module,exports){
+},{"./helpers":84,"./math":85,"./vectors":88}],84:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -7311,7 +7541,7 @@ module.exports = {
   deepCopy: deepCopy,
   throttle: throttle
 };
-},{"./vectors":85}],82:[function(require,module,exports){
+},{"./vectors":88}],85:[function(require,module,exports){
 "use strict";
 
 var clamp = function clamp(val, min, max) {
@@ -7356,7 +7586,7 @@ module.exports = {
   clamp: clamp,
   subtractWithDeficit: subtractWithDeficit
 };
-},{}],83:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 'use strict';
 
 function isIpad() {
@@ -7387,7 +7617,7 @@ module.exports = {
   isMobile: isMobile,
   isPhone: isPhone
 };
-},{}],84:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 "use strict";
 
 var floor = Math.floor,
@@ -7442,7 +7672,7 @@ module.exports = {
   oneOf: oneOf,
   weightedOneOf: weightedOneOf
 };
-},{}],85:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 "use strict";
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
@@ -7641,7 +7871,7 @@ module.exports = {
   rotate: rotate,
   abs: abs
 };
-},{}],86:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 
 module.exports = {
   vectors: require('./bin/vectors'),
@@ -7652,7 +7882,7 @@ module.exports = {
   math: require('./bin/math'),
 }
 
-},{"./bin/gridHelpers":80,"./bin/helpers":81,"./bin/math":82,"./bin/platform":83,"./bin/stochastic":84,"./bin/vectors":85}],87:[function(require,module,exports){
+},{"./bin/gridHelpers":83,"./bin/helpers":84,"./bin/math":85,"./bin/platform":86,"./bin/stochastic":87,"./bin/vectors":88}],90:[function(require,module,exports){
 (function (Buffer){(function (){
 /*!
  * The buffer module from node.js, for the browser.
@@ -9433,7 +9663,7 @@ function numberIsNaN (obj) {
 }
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"base64-js":56,"buffer":87,"ieee754":88}],88:[function(require,module,exports){
+},{"base64-js":59,"buffer":90,"ieee754":91}],91:[function(require,module,exports){
 /*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
@@ -9520,7 +9750,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],89:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -9706,7 +9936,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],90:[function(require,module,exports){
+},{}],93:[function(require,module,exports){
 (function (process){(function (){
 /**
  * @license React
@@ -14661,7 +14891,7 @@ if(/^(https?|file):$/.test(protocol)){// eslint-disable-next-line react-internal
 console.info('%cDownload the React DevTools '+'for a better development experience: '+'https://reactjs.org/link/react-devtools'+(protocol==='file:'?'\nYou might need to use a local HTTP server (instead of file://): '+'https://reactjs.org/link/react-devtools-faq':''),'font-weight:bold');}}}}exports.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED=Internals;exports.createPortal=createPortal$1;exports.createRoot=createRoot$1;exports.findDOMNode=findDOMNode;exports.flushSync=flushSync$1;exports.hydrate=hydrate;exports.hydrateRoot=hydrateRoot$1;exports.render=render;exports.unmountComponentAtNode=unmountComponentAtNode;exports.unstable_batchedUpdates=batchedUpdates$1;exports.unstable_renderSubtreeIntoContainer=renderSubtreeIntoContainer;exports.version=ReactVersion;/* global __REACT_DEVTOOLS_GLOBAL_HOOK__ */if(typeof __REACT_DEVTOOLS_GLOBAL_HOOK__!=='undefined'&&typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop==='function'){__REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop(new Error());}})();}
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":89,"react":96,"scheduler":99}],91:[function(require,module,exports){
+},{"_process":92,"react":99,"scheduler":102}],94:[function(require,module,exports){
 /**
  * @license React
  * react-dom.production.min.js
@@ -14986,7 +15216,7 @@ exports.hydrateRoot=function(a,b,c){if(!ol(a))throw Error(p(405));var d=null!=c&
 e);return new nl(b)};exports.render=function(a,b,c){if(!pl(b))throw Error(p(200));return sl(null,a,b,!1,c)};exports.unmountComponentAtNode=function(a){if(!pl(a))throw Error(p(40));return a._reactRootContainer?(Sk(function(){sl(null,null,a,!1,function(){a._reactRootContainer=null;a[uf]=null})}),!0):!1};exports.unstable_batchedUpdates=Rk;
 exports.unstable_renderSubtreeIntoContainer=function(a,b,c,d){if(!pl(c))throw Error(p(200));if(null==a||void 0===a._reactInternals)throw Error(p(38));return sl(a,b,c,!1,d)};exports.version="18.2.0-next-9e3b772b8-20220608";
 
-},{"react":96,"scheduler":99}],92:[function(require,module,exports){
+},{"react":99,"scheduler":102}],95:[function(require,module,exports){
 (function (process){(function (){
 'use strict';
 
@@ -15015,7 +15245,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":89,"react-dom":93}],93:[function(require,module,exports){
+},{"_process":92,"react-dom":96}],96:[function(require,module,exports){
 (function (process){(function (){
 'use strict';
 
@@ -15057,7 +15287,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this)}).call(this,require('_process'))
-},{"./cjs/react-dom.development.js":90,"./cjs/react-dom.production.min.js":91,"_process":89}],94:[function(require,module,exports){
+},{"./cjs/react-dom.development.js":93,"./cjs/react-dom.production.min.js":94,"_process":92}],97:[function(require,module,exports){
 (function (process){(function (){
 /**
  * @license React
@@ -17462,7 +17692,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":89}],95:[function(require,module,exports){
+},{"_process":92}],98:[function(require,module,exports){
 /**
  * @license React
  * react.production.min.js
@@ -17490,7 +17720,7 @@ exports.useCallback=function(a,b){return U.current.useCallback(a,b)};exports.use
 exports.useInsertionEffect=function(a,b){return U.current.useInsertionEffect(a,b)};exports.useLayoutEffect=function(a,b){return U.current.useLayoutEffect(a,b)};exports.useMemo=function(a,b){return U.current.useMemo(a,b)};exports.useReducer=function(a,b,e){return U.current.useReducer(a,b,e)};exports.useRef=function(a){return U.current.useRef(a)};exports.useState=function(a){return U.current.useState(a)};exports.useSyncExternalStore=function(a,b,e){return U.current.useSyncExternalStore(a,b,e)};
 exports.useTransition=function(){return U.current.useTransition()};exports.version="18.2.0";
 
-},{}],96:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 (function (process){(function (){
 'use strict';
 
@@ -17501,7 +17731,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this)}).call(this,require('_process'))
-},{"./cjs/react.development.js":94,"./cjs/react.production.min.js":95,"_process":89}],97:[function(require,module,exports){
+},{"./cjs/react.development.js":97,"./cjs/react.production.min.js":98,"_process":92}],100:[function(require,module,exports){
 (function (process,setImmediate){(function (){
 /**
  * @license React
@@ -18139,7 +18369,7 @@ if (
 }
 
 }).call(this)}).call(this,require('_process'),require("timers").setImmediate)
-},{"_process":89,"timers":100}],98:[function(require,module,exports){
+},{"_process":92,"timers":103}],101:[function(require,module,exports){
 (function (setImmediate){(function (){
 /**
  * @license React
@@ -18162,7 +18392,7 @@ exports.unstable_scheduleCallback=function(a,b,c){var d=exports.unstable_now();"
 exports.unstable_shouldYield=M;exports.unstable_wrapCallback=function(a){var b=y;return function(){var c=y;y=b;try{return a.apply(this,arguments)}finally{y=c}}};
 
 }).call(this)}).call(this,require("timers").setImmediate)
-},{"timers":100}],99:[function(require,module,exports){
+},{"timers":103}],102:[function(require,module,exports){
 (function (process){(function (){
 'use strict';
 
@@ -18173,7 +18403,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this)}).call(this,require('_process'))
-},{"./cjs/scheduler.development.js":97,"./cjs/scheduler.production.min.js":98,"_process":89}],100:[function(require,module,exports){
+},{"./cjs/scheduler.development.js":100,"./cjs/scheduler.production.min.js":101,"_process":92}],103:[function(require,module,exports){
 (function (setImmediate,clearImmediate){(function (){
 var nextTick = require('process/browser.js').nextTick;
 var apply = Function.prototype.apply;
@@ -18252,4 +18482,4 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
   delete immediateIds[id];
 };
 }).call(this)}).call(this,require("timers").setImmediate,require("timers").clearImmediate)
-},{"process/browser.js":89,"timers":100}]},{},[7]);
+},{"process/browser.js":92,"timers":103}]},{},[9]);

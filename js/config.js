@@ -17,7 +17,7 @@ const config = {
   // airplane parameters:
   fuel: {min: 0, max: 2000, cost: 0.1, inc: 50}, // 10 range per dollar
   vision: {min: 0, max: 200, cost: 1, inc: 1}, // 1 vision per dollar
-  speed: {min: 1, max: 5, cost: 100, inc: 0.1}, // 100 cost per speed
+  speed: {min: 1, max: 5, cost: 100, inc: 1}, // 100 cost per speed (inc is actually 0.1)
   airAttackCost: 30,
   groundAttackCost: 30,
   // fighter cost:

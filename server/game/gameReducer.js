@@ -22,6 +22,26 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
 
   const game = session.game;
   switch (action.type) {
+    case 'ADD_PLANE_DESIGN': {
+      const {clientID, plane} = action;
+      if (!session.dynamicConfig.planeDesigns[clientID]) {
+        session.dynamicConfig.planeDesigns[clientID] = [];
+        if (!session.dynamicConfig.planes[clientID]) {
+          session.dynamicConfig.planes[clientID] = {};
+        }
+        session.dynamicConfig.planes[clientID][plane.name] = 0;
+      }
+      session.dynamicConfig.planeDesigns[clientID].push(plane);
+      emitToSession(session, socketClients, action, clientID);
+      break;
+    }
+    case 'BUY_PLANE': {
+      const {plane} = action;
+      if (plane.cost > session.dynamicConfig.money[clientID]) return session;
+      session.dynamicConfig.money[clientID] -= plane.cost;
+      session.dynamicConfig.planes[clientID][plane.name]++;
+      break;
+    }
     case 'EDIT_SESSION_PARAMS': {
       delete action.type;
       for (const property in action) {

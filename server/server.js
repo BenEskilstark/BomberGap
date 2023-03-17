@@ -25,6 +25,11 @@ const newSession = (clientID) => {
     name: "Game #" + id,
     clients: [clientID],
     config: deepCopy(config),
+    dynamicConfig: {
+      money: {[clientID]: config.startingMoney},
+      planes: {[clientID]: {}},
+      planeDesigns: {[clientID]: []},
+    },
     game: null,
   };
 }

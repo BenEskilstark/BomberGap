@@ -36,15 +36,19 @@ const PlaneDesigner = (props) => {
   return (
     <div
       style={{
-        width: 300,
-        border: '1px solid black',
+        width: '100%',
+        textAlign: 'center',
       }}
     >
+      <b>Design Plane: &nbsp;</b>
       <TextField
+        style={{
+          width: '25%',
+        }}
         value={plane.name}
         onChange={(name) => {
           setPlane({...plane, name});
-        }
+        }}
       />
       <RadioPicker
         options={['RECON', 'FIGHTER', 'BOMBER']}
@@ -67,13 +71,29 @@ const PlaneDesigner = (props) => {
         }}
       />
       {sliders}
+      Cost: {plane.cost}
       <Button
         style={{
           width: '100%',
         }}
         label="Finalize Design"
         onClick={() => {
-          dispatch({type: 'ADD_PLANE_DESIGN', clientID, plane})
+          dispatch({type: 'ADD_PLANE_DESIGN', clientID, plane});
+          setPlane({
+            name: oneOf([
+              "MIG-15", "MIG-17", "MIG-21", "MIG-22", "SU-27",
+              "F-4", "F14", "F-15", "F-16", "F-18", "F-22",
+              "B-1", "B-2", "B-17", "B-29",
+              "Tu-99", "Tu-101", "Tu-27",
+              "SR-71"
+            ]),
+            fuel: 100,
+            vision: 10,
+            speed: 1,
+            type: 'RECON',
+            cost: 120,
+            productionTime: 10000, // ms
+          });
         }}
       />
     </div>
@@ -91,12 +111,12 @@ const ParamSlider = (props) => {
       step={param.inc}
       onChange={(value) => {
         const diff = value - plane[name];
-        const cost = plane.cost + diff * param.cost;
+        const cost = Math.round(plane.cost + diff * param.cost);
         setPlane({...plane, [name]: value, cost});
       }}
       noNumberField={false}
       noOriginalValue={true}
-      isFloat={param.inc < 1}
+      isFloat={name == 'speed'}
     />
   );
 };
