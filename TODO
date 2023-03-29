@@ -1,7 +1,6 @@
 
   - Lobby:
     - don't allow planes with the same name
-    - don't allow more than maxDesigns
   - game start
     - change session start to handle plane designs
     - change reducer to handle plane designs

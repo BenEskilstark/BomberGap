@@ -493,6 +493,10 @@ const Settings = props => {
       money: state.clientConfig.money
     }));
   }
+  let numPlaneDesigns = 0;
+  if (state.clientConfig.planeDesigns[state.clientID]) {
+    numPlaneDesigns = Object.keys(state.clientConfig.planeDesigns[state.clientID]).length;
+  }
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, "Settings:")), "Game ms per tick:", /*#__PURE__*/React.createElement(Slider, {
     value: state.config.msPerTick,
     min: 1,
@@ -565,14 +569,14 @@ const Settings = props => {
         numAirports
       });
     }
-  }), /*#__PURE__*/React.createElement("div", null), /*#__PURE__*/React.createElement(Divider, null), "Money Available: ", state.clientConfig.money, planeDesigns, /*#__PURE__*/React.createElement(PlaneDesigner, {
+  }), /*#__PURE__*/React.createElement("div", null), /*#__PURE__*/React.createElement(Divider, null), "Money Available: ", state.clientConfig.money, /*#__PURE__*/React.createElement("div", null), "Designs Remaining: ", state.config.maxPlaneDesigns - numPlaneDesigns, planeDesigns, numPlaneDesigns < state.config.maxPlaneDesigns ? /*#__PURE__*/React.createElement(PlaneDesigner, {
     config: state.config,
     clientID: state.clientID,
     dispatch: action => {
       dispatch(action);
       dispatchToServer(action);
     }
-  }));
+  }) : 'Max Planes Designed');
 };
 module.exports = Lobby;
 },{"../clientToServer":7,"../selectors/sessions":16,"./PlaneDesignDisplay.react":5,"./PlaneDesigner.react":6,"bens_ui_components":83,"react":100}],4:[function(require,module,exports){

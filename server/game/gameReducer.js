@@ -85,22 +85,28 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
       return state;
     }
     case 'LAUNCH_PLANE': {
-      const {planeType, carrierID, targetPos} = action;
+      const {name, carrierID, targetPos} = action;
       const carrier = game.entities[carrierID];
 
       // check that this plane is launchable
-      if (carrier.planes[planeType] <= 0) break;
-      carrier.planes[planeType]--;
+      if (carrier.planes[name] <= 0) break;
+      carrier.planes[name]--;
+
+      const plane = makePlane(
+        clientID, {...carrier.position},
+        game.planeDesigns[clientID][name].type, i
+        targetPos,
+      );
+      game.entities[plane.id] = plane;
 
       // update sorties stat
-      if (planeType == 'FIGHTER') {
+      if (plane.type === 'FIGHTER') {
         game.stats[clientID].fighter_sorties++;
-      } else if (planeType == 'BOMBER') {
+      } else if (plane.type === 'BOMBER') {
         game.stats[clientID].bomber_sorties++;
+      } else if (plane.type === 'RECON') {
+        game.stats[clientID].recon_sorties++;
       }
-
-      const plane = makePlane(clientID, {...carrier.position}, planeType, targetPos);
-      game.entities[plane.id] = plane;
 
       const clientAction = {
         ...action,

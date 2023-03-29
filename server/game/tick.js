@@ -66,7 +66,8 @@ const tick = (game, session, socketClients) => {
 
           continue;
         }
-        if (targetEntity.type == 'CARRIER') {
+        let didKill = false;
+        if (targetEntity.type == 'AIRPORT') {
           delete game.entities[targetEntity.id];
           game.stats[targetEntity.clientID].ships_sunk++;
           if (getNumCarriers(game, targetEntity.clientID) == 0) {
@@ -76,13 +77,17 @@ const tick = (game, session, socketClients) => {
         } else if (targetEntity.type == 'FIGHTER') {
           delete game.entities[targetEntity.id];
           game.stats[targetEntity.clientID].fighters_shot_down++;
-          entity.kills++;
-          if (entity.kills == 5) {
-            game.stats[entity.clientID].fighter_aces++;
-          }
+          didKill = true;
         } else if (targetEntity.type == 'BOMBER') {
           delete game.entities[targetEntity.id];
           game.stats[targetEntity.clientID].bombers_shot_down++;
+          didKill = true;
+        } else if (targetEntity.type == 'RECON') { // update stats based on RECON
+          delete game.entities[targetEntity.id];
+          game.stats[targetEntity.clientID].recons_shot_down++;
+          didKill = true;
+        }
+        if (didKill) { // compute aces
           entity.kills++;
           if (entity.kills == 5) {
             game.stats[entity.clientID].fighter_aces++;
@@ -108,11 +113,7 @@ const tick = (game, session, socketClients) => {
     // compute running out of fuel
     if (entity.fuel <= 0) {
       delete game.entities[entity.id];
-      if (entity.type == 'FIGHTER') {
-        game.stats[entity.clientID].fighters_no_fuel++;
-      } else if (entity.type == 'BOMBER') {
-        game.stats[entity.clientID].bombers_no_fuel++;
-      }
+      game.stats[entity.clientID].planes_no_fuel++;
     }
   }
 
@@ -133,6 +134,9 @@ const tick = (game, session, socketClients) => {
             entity.targetEnemy = otherID;
           }
           if (entity.type == 'BOMBER' && entity.targetEnemy == null && other.isShip) {
+            entity.targetEnemy = otherID;
+          }
+          if (entity.type == 'RECON' && entity.targetEnemy == null && other.isPlane) { // update targetting based on RECON
             entity.targetEnemy = otherID;
           }
         }

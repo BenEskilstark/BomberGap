@@ -1,4 +1,3 @@
-
 const React = require('react');
 const {
   Button, InfoCard, Divider,
@@ -142,6 +141,10 @@ const Settings = (props) => {
     );
   }
 
+  let numPlaneDesigns = 0;
+  if (state.clientConfig.planeDesigns[state.clientID]) {
+    numPlaneDesigns = Object.keys(state.clientConfig.planeDesigns[state.clientID]).length;
+  }
   return (
     <div>
       <div><b>Settings:</b></div>
@@ -183,17 +186,22 @@ const Settings = (props) => {
       <div></div>
       <Divider />
       Money Available: {state.clientConfig.money}
-
+      <div></div>
+      Designs Remaining: {state.config.maxPlaneDesigns - numPlaneDesigns}
       {planeDesigns}
 
-      <PlaneDesigner
-        config={state.config}
-        clientID={state.clientID}
-        dispatch={(action) => {
-          dispatch(action);
-          dispatchToServer(action);
-        }}
-      />
+      {
+        numPlaneDesigns < state.config.maxPlaneDesigns ?
+          <PlaneDesigner
+            config={state.config}
+            clientID={state.clientID}
+            dispatch={(action) => {
+              dispatch(action);
+              dispatchToServer(action);
+            }}
+          /> :
+          'Max Planes Designed'
+      }
     </div>
   );
 };
