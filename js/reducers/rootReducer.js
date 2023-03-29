@@ -86,9 +86,9 @@ const rootReducer = (state, action) => {
     case 'ADD_PLANE_DESIGN': {
       const {clientID, plane} = action;
       if (!state.clientConfig.planeDesigns[clientID]) {
-        state.clientConfig.planeDesigns[clientID] = [];
+        state.clientConfig.planeDesigns[clientID] = {};
       }
-      state.clientConfig.planeDesigns[clientID].push(plane);
+      state.clientConfig.planeDesigns[clientID][plane.name] = plane;
       if (clientID == state.clientID) {
         state.clientConfig.planes[plane.name] = 0;
       }
@@ -120,7 +120,7 @@ const initState = () => {
     clientConfig: {
       money: config.startingMoney,
       planes: {}, // {[name]: number}
-      planeDesigns: {}, // {[clientID]: Array<Plane>}
+      planeDesigns: {}, // {[clientID]: {[name]: Plane}}
     },
   };
 }

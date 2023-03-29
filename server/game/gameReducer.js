@@ -16,7 +16,6 @@ const {
 const gameReducer = (state, action, clientID, socket, dispatch) => {
   const {sessions, socketClients, clientToSession} = state;
 
-
   let session = sessions[clientToSession[clientID]];
   if (!session) return state;
 
@@ -25,13 +24,13 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
     case 'ADD_PLANE_DESIGN': {
       const {clientID, plane} = action;
       if (!session.dynamicConfig.planeDesigns[clientID]) {
-        session.dynamicConfig.planeDesigns[clientID] = [];
+        session.dynamicConfig.planeDesigns[clientID] = {};
         if (!session.dynamicConfig.planes[clientID]) {
           session.dynamicConfig.planes[clientID] = {};
         }
         session.dynamicConfig.planes[clientID][plane.name] = 0;
       }
-      session.dynamicConfig.planeDesigns[clientID].push(plane);
+      session.dynamicConfig.planeDesigns[clientID][plane.name] = plane;
       emitToSession(session, socketClients, action, clientID);
       break;
     }

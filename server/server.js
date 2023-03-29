@@ -28,7 +28,7 @@ const newSession = (clientID) => {
     dynamicConfig: {
       money: {[clientID]: config.startingMoney},
       planes: {[clientID]: {}},
-      planeDesigns: {[clientID]: []},
+      planeDesigns: {[clientID]: {}},
     },
     game: null,
   };

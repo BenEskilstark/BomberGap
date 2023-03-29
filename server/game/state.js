@@ -1,4 +1,3 @@
-
 const {randomIn, normalIn} = require('bens_utils').stochastic;
 
 const initGameState = (
@@ -14,8 +13,7 @@ const initGameState = (
     tickInterval: null,
     entities: {},
     stats: {},
-    planeDesigns: {...dynamicConfig.planeDesigns}, // {[clientID]: Array
-      // <{name, cost, fuel, vision, type, speed, productionTime}>}
+    planeDesigns: {...dynamicConfig.planeDesigns}, // {[clientID]: {[name]: {cost, fuel, vision, type, speed, productionTime}}}
   };
 
   let i = 0;
@@ -59,7 +57,7 @@ const makeAirport = (clientID, position, planes) => {
     type: "AIRPORT",
     isBuilding: true,
 
-    planes, // {[name]: number}
+    planes: {...planes}, // {[name]: number}
 
     vision: 50,
 

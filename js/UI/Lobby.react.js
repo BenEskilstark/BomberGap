@@ -127,8 +127,7 @@ const Settings = (props) => {
 
   const planeDesigns = [];
   for (const name in state.clientConfig.planes) {
-    const planeDesign = state.clientConfig.planeDesigns[state.clientID]
-      .filter(p => p.name == name)[0];
+    const planeDesign = state.clientConfig.planeDesigns[state.clientID][name];
     planeDesigns.push(
       <PlaneDesignDisplay
         key={"plane_design_" + planeDesign.name}
