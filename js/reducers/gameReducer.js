@@ -65,7 +65,7 @@ const gameReducer = (game, action) => {
           entity.position.x >= square.x && entity.position.x <= square.x + square.width &&
           entity.position.y >= square.y && entity.position.y <= square.y + square.height
         ) {
-          if (entity.type == 'CARRIER') {
+          if (entity.type == 'AIRPORT') {
             selectedIDs = [entityID];
             break;
           }

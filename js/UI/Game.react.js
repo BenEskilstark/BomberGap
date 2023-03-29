@@ -68,9 +68,9 @@ function Game(props) {
         const pos = normalizePos(p, state.game.worldSize, state.game.canvasSize);
         for (const entityID of state.game.selectedIDs) {
           const entity = state.game.entities[entityID];
-          if (entity.type == 'CARRIER' && state.game.clickMode == 'LAUNCH') {
+          if (entity.type == 'AIRPORT' && state.game.clickMode == 'LAUNCH') {
             dispatchToServer({
-              type: 'LAUNCH_PLANE', targetPos: pos, carrierID: entityID,
+              type: 'LAUNCH_PLANE', targetPos: pos, airportID: entityID,
               planeType: state.game.launchType,
             });
           } else {
@@ -108,7 +108,7 @@ function Game(props) {
   let selectionCard = null;
   if (game.selectedIDs.length > 0) {
     const selections = {
-      'CARRIER': 0,
+      'AIRPORT': 0,
       'FIGHTER': 0,
       'BOMBER': 0,
     };
@@ -123,7 +123,7 @@ function Game(props) {
       </div>
     );
     if (selections.AIRPORT> 0) {
-     const carrier = game.entities[game.selectedIDs[0]];
+     const airport = game.entities[game.selectedIDs[0]];
      selectionContent = (
         <div>
           Airport
@@ -132,8 +132,8 @@ function Game(props) {
 
             }}
           >
-            <div>Fighters: {carrier.planes.FIGHTER}</div>
-            <div>Bombers: {carrier.planes.BOMBER}</div>
+            <div>Fighters: {airport.planes.FIGHTER}</div>
+            <div>Bombers: {airport.planes.BOMBER}</div>
           </div>
           <div>
             <div>Control Mode:</div>

@@ -1,4 +1,3 @@
-
 const {isHost} = require('./selectors/sessions');
 const {subtract, vectorTheta} = require('bens_utils').vectors;
 
@@ -44,7 +43,7 @@ const render = (state) => {
     let width = 4;
     let height = 4;
     switch (entity.type) {
-      case 'CARRIER':
+      case 'AIRPORT':
         width = 16;
       case 'BOMBER':
         height = 8;

@@ -109,11 +109,11 @@ function Game(props) {
       const pos = normalizePos(p, state.game.worldSize, state.game.canvasSize);
       for (const entityID of state.game.selectedIDs) {
         const entity = state.game.entities[entityID];
-        if (entity.type == 'CARRIER' && state.game.clickMode == 'LAUNCH') {
+        if (entity.type == 'AIRPORT' && state.game.clickMode == 'LAUNCH') {
           dispatchToServer({
             type: 'LAUNCH_PLANE',
             targetPos: pos,
-            carrierID: entityID,
+            airportID: entityID,
             planeType: state.game.launchType
           });
         } else {
@@ -180,7 +180,7 @@ function Game(props) {
   let selectionCard = null;
   if (game.selectedIDs.length > 0) {
     const selections = {
-      'CARRIER': 0,
+      'AIRPORT': 0,
       'FIGHTER': 0,
       'BOMBER': 0
     };
@@ -190,10 +190,10 @@ function Game(props) {
     }
     let selectionContent = /*#__PURE__*/React.createElement("div", null, selections.FIGHTER > 0 ? /*#__PURE__*/React.createElement("div", null, "Fighters: ", selections.FIGHTER) : null, selections.BOMBER > 0 ? /*#__PURE__*/React.createElement("div", null, "Bombers: ", selections.BOMBER) : null);
     if (selections.AIRPORT > 0) {
-      const carrier = game.entities[game.selectedIDs[0]];
+      const airport = game.entities[game.selectedIDs[0]];
       selectionContent = /*#__PURE__*/React.createElement("div", null, "Airport", /*#__PURE__*/React.createElement("div", {
         style: {}
-      }, /*#__PURE__*/React.createElement("div", null, "Fighters: ", carrier.planes.FIGHTER), /*#__PURE__*/React.createElement("div", null, "Bombers: ", carrier.planes.BOMBER)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, "Control Mode:"), /*#__PURE__*/React.createElement(RadioPicker, {
+      }, /*#__PURE__*/React.createElement("div", null, "Fighters: ", airport.planes.FIGHTER), /*#__PURE__*/React.createElement("div", null, "Bombers: ", airport.planes.BOMBER)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, "Control Mode:"), /*#__PURE__*/React.createElement(RadioPicker, {
         options: ['MOVE', 'LAUNCH'],
         selected: state.game.clickMode,
         onChange: clickMode => dispatch({
@@ -273,7 +273,7 @@ const GameOverModal = props => {
   const state = getState(); // HACK this comes from window;
 
   let title = winner == state.clientID ? 'You Win!' : 'You Lose!';
-  let body = winner == state.clientID ? "You sunk the enemy carrier" : "Your carrier was sunk";
+  let body = winner == state.clientID ? "You sunk the enemy airport" : "Your airport was sunk";
   if (disconnect) {
     title = "Opponent Disconnected";
     body = "The other player has closed the tab and disconnected. So I guess you win by forfeit...";
@@ -332,7 +332,7 @@ const PlayerStats = props => {
   } = props;
   return /*#__PURE__*/React.createElement("div", {
     style: {}
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, isYou ? 'You' : 'Opponent')), /*#__PURE__*/React.createElement("div", null, "Fighter sorties flown: ", stats[clientID].fighter_sorties), /*#__PURE__*/React.createElement("div", null, "Bomber sorties flown: ", stats[clientID].bomber_sorties), /*#__PURE__*/React.createElement("div", null, "Enemy fighters shot down: ", stats[otherID].fighters_shot_down), /*#__PURE__*/React.createElement("div", null, "Enemy bombers shot down: ", stats[otherID].bombers_shot_down), /*#__PURE__*/React.createElement("div", null, "Fighter aces: ", stats[clientID].fighter_aces), /*#__PURE__*/React.createElement("div", null, "Fighters lost to no fuel: ", stats[clientID].fighters_no_fuel), /*#__PURE__*/React.createElement("div", null, "Bombers lost to no fuel: ", stats[clientID].bombers_no_fuel), /*#__PURE__*/React.createElement("div", null, "Enemy ships sunk: ", stats[otherID].ships_sunk));
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, isYou ? 'You' : 'Opponent')), /*#__PURE__*/React.createElement("div", null, "Fighter sorties flown: ", stats[clientID].fighter_sorties), /*#__PURE__*/React.createElement("div", null, "Bomber sorties flown: ", stats[clientID].bomber_sorties), /*#__PURE__*/React.createElement("div", null, "Enemy fighters shot down: ", stats[otherID].fighters_shot_down), /*#__PURE__*/React.createElement("div", null, "Enemy bombers shot down: ", stats[otherID].bombers_shot_down), /*#__PURE__*/React.createElement("div", null, "Fighter aces: ", stats[clientID].fighter_aces), /*#__PURE__*/React.createElement("div", null, "Planes lost to no fuel: ", stats[clientID].planes_no_fuel), /*#__PURE__*/React.createElement("div", null, "Enemy ships sunk: ", stats[otherID].ships_sunk));
 };
 module.exports = GameOverModal;
 },{"../clientToServer":7,"bens_ui_components":83,"react":100}],3:[function(require,module,exports){
@@ -1022,7 +1022,7 @@ const gameReducer = (game, action) => {
           const entity = game.entities[entityID];
           if (entity.clientID != game.clientID) continue;
           if (entity.position.x >= square.x && entity.position.x <= square.x + square.width && entity.position.y >= square.y && entity.position.y <= square.y + square.height) {
-            if (entity.type == 'CARRIER') {
+            if (entity.type == 'AIRPORT') {
               selectedIDs = [entityID];
               break;
             }
@@ -1409,7 +1409,7 @@ const render = state => {
     let width = 4;
     let height = 4;
     switch (entity.type) {
-      case 'CARRIER':
+      case 'AIRPORT':
         width = 16;
       case 'BOMBER':
         height = 8;

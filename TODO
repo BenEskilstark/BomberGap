@@ -1,5 +1,4 @@
 
-  - replace all references to carrier or CARRIER with airport
   - Lobby:
     - don't allow planes with the same name
   - game start

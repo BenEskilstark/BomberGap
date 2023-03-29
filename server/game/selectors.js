@@ -1,19 +1,19 @@
 const {dist} = require('bens_utils').vectors;
 
-const getNearestCarrier = (game, plane) => {
-  let nearestCarrier = null;
+const getNearestAirport = (game, plane) => {
+  let nearestAirport = null;
   let nearestDist = Infinity;
   for (const entityID in game.entities) {
     const entity = game.entities[entityID];
     if (
-      entity.type == 'CARRIER' && entity.clientID == plane.clientID &&
+      entity.type == 'AIRPORT' && entity.clientID == plane.clientID &&
       dist(entity.position, plane.position) < nearestDist
     ) {
       nearestDist = dist(entity.position, plane.position);
-      nearestCarrier = entity;
+      nearestAirport = entity;
     }
   }
-  return nearestCarrier;
+  return nearestAirport;
 };
 
 const getEntitiesByPlayer = (game, clientID) => {
@@ -27,15 +27,15 @@ const getEntitiesByPlayer = (game, clientID) => {
   return entities;
 }
 
-const getNumCarriers = (game, clientID) => {
-  let numCarriers = 0;
+const getNumAirports = (game, clientID) => {
+  let numAirports = 0;
   for (const entityID in game.entities) {
     const entity = game.entities[entityID];
-    if (entity.clientID == clientID && entity.type == 'CARRIER') {
-      numCarriers++;
+    if (entity.clientID == clientID && entity.type == 'AIRPORT') {
+      numAirports++;
     }
   }
-  return numCarriers;
+  return numAirports;
 }
 
 const getOtherClientID = (session, clientID) => {
@@ -45,8 +45,8 @@ const getOtherClientID = (session, clientID) => {
 };
 
 module.exports = {
-  getNearestCarrier,
+  getNearestAirport,
   getEntitiesByPlayer,
   getOtherClientID,
-  getNumCarriers,
+  getNumAirports,
 };

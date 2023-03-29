@@ -2,14 +2,14 @@ const {
   leaveSession, emitToSession, emitToAllClients,
 } = require('../sessions');
 const {
-  initGameState, makeCarrier, makePlane,
+  initGameState, makeAirport, makePlane,
 } = require('./state');
 const {
   makeVector, vectorTheta, subtract, add, dist, equals,
 } = require('bens_utils').vectors;
 const {
-  getEntitiesByPlayer, getNearestCarrier, getOtherClientID,
-  getNumCarriers,
+  getEntitiesByPlayer, getNearestAirport, getOtherClientID,
+  getNumAirports,
 } = require('./selectors');
 
 const tick = (game, session, socketClients) => {
@@ -36,20 +36,20 @@ const tick = (game, session, socketClients) => {
 
     // no target
     if (targetPos == null) {
-      // planes without target go back to ship
+      // planes without target go back to airport
       if (entity.isPlane) {
-        targetPos = {...getNearestCarrier(game, entity).position};
+        targetPos = {...getNearestAirport(game, entity).position};
       }
     }
 
     // arrived at target
     if (targetPos != null && dist(targetPos, entity.position) < 2) {
-      if (entity.isShip) {
-        entity.targetPos = null; // ships can stay still
+      if (entity.isBuilding) {
+        entity.targetPos = null; // airports can stay still
       } else if (entity.targetPos == null) {
-        // we've arrived at home carrier
+        // we've arrived at home airport
         delete game.entities[entity.id];
-        getNearestCarrier(game, entity).planes[entity.type]++;
+        getNearestAirport(game, entity).planes[entity.type]++;
       } else if (isEnemy) {
         // kill the enemy
         const targetEntity = game.entities[entity.targetEnemy];
@@ -70,7 +70,7 @@ const tick = (game, session, socketClients) => {
         if (targetEntity.type == 'AIRPORT') {
           delete game.entities[targetEntity.id];
           game.stats[targetEntity.clientID].ships_sunk++;
-          if (getNumCarriers(game, targetEntity.clientID) == 0) {
+          if (getNumAirports(game, targetEntity.clientID) == 0) {
             doGameOver(session, socketClients, entity.clientID, entity.clientID);
             return state;
           }
@@ -94,7 +94,7 @@ const tick = (game, session, socketClients) => {
           }
         }
       } else {
-        entity.targetPos = null; // return to carrier on next tick
+        entity.targetPos = null; // return to airport on next tick
       }
     }
 
@@ -133,7 +133,7 @@ const tick = (game, session, socketClients) => {
           if (entity.type == 'FIGHTER' && entity.targetEnemy == null && other.isPlane) {
             entity.targetEnemy = otherID;
           }
-          if (entity.type == 'BOMBER' && entity.targetEnemy == null && other.isShip) {
+          if (entity.type == 'BOMBER' && entity.targetEnemy == null && other.isBuilding) {
             entity.targetEnemy = otherID;
           }
           if (entity.type == 'RECON' && entity.targetEnemy == null && other.isPlane) { // update targetting based on RECON
