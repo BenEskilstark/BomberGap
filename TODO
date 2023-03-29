@@ -1,6 +1,6 @@
 
   - refactor
-    - planeDesigns should be keyed by name
+    - planeDesigns should be keyed by name instead of being an array
     - client/dynamic config should be keyed by clientID instead of per-property
       - both reducers, lobby,
   - Lobby:
