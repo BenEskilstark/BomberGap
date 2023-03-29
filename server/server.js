@@ -1,4 +1,3 @@
-
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
@@ -26,9 +25,11 @@ const newSession = (clientID) => {
     clients: [clientID],
     config: deepCopy(config),
     dynamicConfig: {
-      money: {[clientID]: config.startingMoney},
-      planes: {[clientID]: {}},
-      planeDesigns: {[clientID]: {}},
+      [clientID]: {
+        money: config.startingMoney,
+        planes: {},
+        planeDesigns: {},
+      }
     },
     game: null,
   };

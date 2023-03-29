@@ -1,7 +1,4 @@
 
-  - refactor
-    - client/dynamic config should be keyed by clientID instead of per-property
-      - both reducers, lobby,
   - Lobby:
     - don't allow planes with the same name
     - don't allow more than maxDesigns

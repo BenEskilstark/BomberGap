@@ -1,3 +1,4 @@
+
 const leaveSession = (state, clientID) => {
   const {sessions, socketClients, clientToSession} = state;
   const session = sessions[clientToSession[clientID]];
@@ -74,12 +75,10 @@ const sessionReducer = (state, action, clientID, socket, newSession) => {
       clientToSession[clientID] = session.id;
 
       // update dynamic config items
-      session.dynamicConfig.money[clientID] = session.config.startingMoney;
-      session.dynamicConfig.planes[clientID] = {};
-
-      if(!session.dynamicConfig.planeDesigns[clientID]){
-        session.dynamicConfig.planeDesigns[clientID] = {};
-      }
+      session.dynamicConfig[clientID] = {};
+      session.dynamicConfig[clientID].money = session.config.startingMoney;
+      session.dynamicConfig[clientID].planes = {};
+      session.dynamicConfig[clientID].planeDesigns = {};
 
       // tell the rest of the clients this one joined the session
       emitToAllClients(socketClients, {...action, clientID}, clientID, true);
@@ -87,11 +86,11 @@ const sessionReducer = (state, action, clientID, socket, newSession) => {
       // tell the client that just joined what the settings are:
       socket.emit('receiveAction', {type: 'EDIT_SESSION_PARAMS', ...session.config});
       for (const alreadyJoinedClientID of session.clients) {
-        if (session.dynamicConfig.planeDesigns[alreadyJoinedClientID]) {
-          for (const key in session.dynamicConfig.planeDesigns[alreadyJoinedClientID]) {
+        if (session.dynamicConfig[alreadyJoinedClientID].planeDesigns) {
+          for (const name in session.dynamicConfig[alreadyJoinedClientID].planeDesigns) {
             socket.emit('receiveAction',
               {type: 'ADD_PLANE_DESIGN',
-              plane: session.dynamicConfig.planeDesigns[alreadyJoinedClientID][key],
+              plane: session.dynamicConfig[alreadyJoinedClientID].planeDesigns[name],
               clientID: alreadyJoinedClientID},
             );
           }
