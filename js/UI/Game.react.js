@@ -20,6 +20,20 @@ const normalizePos = (pos, worldSize, canvasSize) => {
   };
 }
 
+const getCanvasSize = () => {
+  if (window.innerWidth > window.innerHeight) {
+    return {
+      width: window.innerHeight,
+      height: window.innerHeight,
+    };
+  } else {
+    return {
+      width: window.innerWidth,
+      height: window.innerWidth,
+    };
+  }
+}
+
 function Game(props) {
   const {state, dispatch, getState} = props;
   const game = state.game;
@@ -39,11 +53,11 @@ function Game(props) {
     "canvas", {dispatch, getState},
     {
       leftDown: (state, dispatch, p) => {
-        const pos = normalizePos(p, state.game.worldSize, state.game.canvasSize);
+        const pos = normalizePos(p, state.game.worldSize, getCanvasSize());
         dispatch({type: 'SET', marquee: {...pos, width: 0, height: 0}});
       },
       mouseMove: (state, dispatch, p) => {
-        const pos = normalizePos(p, state.game.worldSize, state.game.canvasSize);
+        const pos = normalizePos(p, state.game.worldSize, getCanvasSize());
         if (!state?.mouse?.isLeftDown) return;
         dispatch({type: 'SET', marquee: {...state.game.marquee,
           width: pos.x - state.game.marquee.x,
@@ -51,7 +65,7 @@ function Game(props) {
         }});
       },
       leftUp: (state, dispatch, p) => {
-        const pos = normalizePos(p, state.game.worldSize, state.game.canvasSize);
+        const pos = normalizePos(p, state.game.worldSize, getCanvasSize());
         let square = {...state.game.marquee};
         if (square.width < 0) {
           square.x += square.width;
@@ -65,13 +79,13 @@ function Game(props) {
         dispatch({type: 'SET', marquee: null});
       },
       rightDown: (state, dispatch, p) => {
-        const pos = normalizePos(p, state.game.worldSize, state.game.canvasSize);
+        const pos = normalizePos(p, state.game.worldSize, getCanvasSize());
         for (const entityID of state.game.selectedIDs) {
           const entity = state.game.entities[entityID];
           if (entity.type == 'AIRPORT' && state.game.clickMode == 'LAUNCH') {
             dispatchToServer({
               type: 'LAUNCH_PLANE', targetPos: pos, airportID: entityID,
-              planeType: state.game.launchType,
+              name: state.game.launchName,
             });
           } else {
             dispatchToServer({type: 'SET_TARGET', targetPos: pos, entityID});
@@ -84,77 +98,69 @@ function Game(props) {
   // hotKeys
   useHotKeyHandler({dispatch, getState: () => getState().game.hotKeys});
   useEffect(() => {
-    dispatch({type: 'SET_HOTKEY', key: 'F', press: 'onKeyDown',
-      fn: () => {
-        dispatch({type: 'SET', launchType: 'FIGHTER'});
-        dispatch({type: 'SET', clickMode: 'LAUNCH'});
-      }
-    });
-    dispatch({type: 'SET_HOTKEY', key: 'B', press: 'onKeyDown',
-      fn: () => {
-        dispatch({type: 'SET', launchType: 'BOMBER'});
-        dispatch({type: 'SET', clickMode: 'LAUNCH'});
-      }
-    });
-    dispatch({type: 'SET_HOTKEY', key: 'M', press: 'onKeyDown',
-      fn: () => {
-        dispatch({type: 'SET', clickMode: 'MOVE'});
-      }
-    });
+    const planeNames = Object.keys(game.planeDesigns[state.clientID]);
+    for (let i = 0; i < planeNames.length; i++) {
+      const name = planeNames[i];
+      dispatch({type: 'SET_HOTKEY', key: ""+(i+1), press: 'onKeyDown',
+        fn: () => {
+          dispatch({type: 'SET', launchName: name});
+          dispatch({type: 'SET', clickMode: 'LAUNCH'});
+        }
+      });
+    }
   }, []);
 
 
   // selectionCard
   let selectionCard = null;
+  const planeNames = Object.keys(game.planeDesigns[state.clientID]);
   if (game.selectedIDs.length > 0) {
     const selections = {
       'AIRPORT': 0,
-      'FIGHTER': 0,
-      'BOMBER': 0,
     };
+    for (const name of planeNames) {
+      selections[name] = 0;
+    }
     for (const entityID of game.selectedIDs) {
       const entity = game.entities[entityID];
-      selections[entity.type] += 1;
+      selections[entity.name] += 1;
     }
-    let selectionContent = (
-      <div>
-        {selections.FIGHTER > 0 ? (<div>Fighters: {selections.FIGHTER}</div>) : null}
-        {selections.BOMBER > 0 ? (<div>Bombers: {selections.BOMBER}</div>) : null}
-      </div>
-    );
-    if (selections.AIRPORT> 0) {
-     const airport = game.entities[game.selectedIDs[0]];
-     selectionContent = (
-        <div>
-          Airport
-          <div
-            style={{
-
-            }}
-          >
-            <div>Fighters: {airport.planes.FIGHTER}</div>
-            <div>Bombers: {airport.planes.BOMBER}</div>
-          </div>
-          <div>
-            <div>Control Mode:</div>
-            <RadioPicker
-              options={['MOVE', 'LAUNCH']}
-              selected={state.game.clickMode}
-              onChange={(clickMode) => dispatch({type: 'SET', clickMode})}
-            />
-          </div>
-          {state.game.clickMode == 'LAUNCH' ? (
-            <div>
-              <div>Launch Type: </div>
-              <RadioPicker
-                options={['FIGHTER', 'BOMBER']}
-                selected={state.game.launchType}
-                onChange={(launchType) => dispatch({type: 'SET', launchType})}
-              />
-            </div>
-          ) : null}
-        </div>
-      );
+    const planesSelected = [];
+    for (const name in selections) {
+      if (selections[name] > 0) {
+        planesSelected.push(<div key={"plane_" + name}>
+          {name}: {selections[name]}
+        </div>)
+      }
+    }
+    let selectionContent = (<div>{planesSelected}</div>);
+    if (selections.AIRPORT > 0) {
+      const airport = game.entities[game.selectedIDs[0]];
+      const airportPlanes = [];
+      for (const name in airport.planes) {
+        airportPlanes.push(<div key={"airport_plane_" + name}>
+          {name}: {airport.planes[name]}
+        </div>);
+      }
+      selectionContent = (
+         <div>
+           Airport
+           {state.game.clickMode == 'LAUNCH' ? (
+             <div>
+               <div>Launch Type: </div>
+               <RadioPicker
+                 options={planeNames}
+                 displayOptions={planeNames.map(name => {
+                   const planeType = game.planeDesigns[state.clientID][name].type;
+                   return `${name} (${planeType}): ${airport.planes[name]}`;
+                 })}
+                 selected={state.game.launchName}
+                 onChange={(launchName) => dispatch({type: 'SET', launchName})}
+               />
+             </div>
+           ) : null}
+         </div>
+       );
     }
     selectionCard = (
       <div
@@ -183,19 +189,28 @@ function Game(props) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: 'rgb(35,36,38)',
       }}
     >
+      <img
+        style={{
+          position: 'absolute',
+        }}
+        src="./img/polar_world_map_2.png"
+        width={getCanvasSize().width}
+        height={getCanvasSize().height}
+      />
       <Canvas
+        style={{
+          opacity: 0.7,
+          borderRadius: '49%',
+        }}
         view={game.worldSize}
-        useFullScreen={true}
         onResize={(width, height) => {
           dispatch({type: 'SET', canvasSize: {width, height}});
         }}
-        // width={window.innerWidth * 0.9}
-        // height={
-        //   Math.min(window.innerHeight,
-        //     window.innerWidth * 0.9 * game.worldSize.height / game.worldSize.width,
-        //   )}
+        width={getCanvasSize().width}
+        height={getCanvasSize().height}
       />
       {selectionCard}
     </div>

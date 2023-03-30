@@ -4,7 +4,6 @@ const {sessionReducer} = require('./sessionReducer');
 const {modalReducer} = require('./modalReducer');
 const GameOverModal = require('../UI/GameOverModal.react');
 const {mouseReducer, hotKeyReducer} = require('bens_ui_components');
-const {getSession} = require('../selectors/sessions');
 const {config} = require('../config');
 const {deepCopy} = require('bens_utils').helpers;
 
@@ -76,11 +75,11 @@ const rootReducer = (state, action) => {
     case 'BUY_PLANE': {
       const {plane} = action;
       if (plane.cost > state.clientConfig.money) return state;
-      state.clientConfig.money -= plane.cost;
       if (!state.clientConfig.planes[plane.name]) {
         state.clientConfig.planes[plane.name] = 0;
       }
       state.clientConfig.planes[plane.name]++;
+      state.clientConfig.money -= plane.cost;
       return {...state};
     }
     case 'ADD_PLANE_DESIGN': {
@@ -128,14 +127,16 @@ const initState = () => {
 const initGameState = (config, clientID, planeDesigns) => {
   const game = {
     worldSize: {...config.worldSize},
-    canvasSize: {width: window.innerWidth, height: window.innerHeight},
+    canvasSize: {
+      width: Math.min(window.innerWidth * 0.9, window.innerHeight * 0.9),
+      height: window.innerHeight * 0.9},
     entities: {},
     fogLocations: [],
     selectedIDs: [],
     marquee: null,
     clientID,
     clickMode: 'LAUNCH',
-    launchType: null,
+    launchName: Object.keys(planeDesigns[clientID])[0],
 
     planeDesigns,
 

@@ -1,3 +1,6 @@
+
+const {getSession} = require('../selectors/sessions');
+
 const sessionReducer = (state, action) => {
   if (state === undefined) return {};
 

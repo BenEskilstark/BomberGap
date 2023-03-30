@@ -25,9 +25,9 @@ const initGameState = (
           clientID,
           {
             x: i == 0
-              ? randomIn(40, 160)
-              : randomIn(game.worldSize.width - 40, game.worldSize.width - 160),
-            y: normalIn(40, game.worldSize.height - 40),
+              ? randomIn(40, 250)
+              : randomIn(game.worldSize.width - 40, game.worldSize.width - 250),
+            y: normalIn(200, game.worldSize.height - 200),
           },
           {...dynamicConfig[clientID].planes},
         );
@@ -57,6 +57,7 @@ const makeAirport = (clientID, position, planes) => {
   return {
     clientID, id: nextID++,
     type: "AIRPORT",
+    name: "AIRPORT", // helps with selection
     isBuilding: true,
 
     planes: {...planes}, // {[name]: number}

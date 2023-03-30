@@ -1,21 +1,14 @@
 
-  - game start
-    - change session start to handle plane designs
-    - change reducer to handle plane designs
-  - in game
-    - change launch plane based on names
-    - change selection UI to be generalized across planes
-  - new world map
-  - toggle to display plane stats next to them
+  - play test
 
-  - bugs:
+  - better randomized positioning of airports
+  - toggle to display plane stats next to them
+  - shouldn't let you do ready/start if you don't have any plane designs
+
+
+  - old bugs:
     - menu of carrier can disappear?
     - fix finished games not clearing sometimes
-
-
-  - fighting:
-    - should detect collision range based on speed radius
-      ( faster planes would have higher priority)
 
 
   - additional features:

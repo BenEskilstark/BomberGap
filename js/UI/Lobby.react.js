@@ -160,21 +160,12 @@ const Settings = (props) => {
         }}
       />
       <div></div>
-      Map Width:
+      Map Width/Height:
       <Slider value={state.config.worldSize.width} min={100} max={1500}
         noOriginalValue={true}
         onChange={(width) => {
-          dispatch({type: 'EDIT_SESSION_PARAMS', worldSize: {...state.config.worldSize, width}});
-          dispatchToServer({type: 'EDIT_SESSION_PARAMS', worldSize: {...state.config.worldSize, width}});
-        }}
-      />
-      <div></div>
-      Map Height:
-      <Slider value={state.config.worldSize.height} min={100} max={800}
-        noOriginalValue={true}
-        onChange={(height) => {
-          dispatch({type: 'EDIT_SESSION_PARAMS', worldSize: {...state.config.worldSize, height}});
-          dispatchToServer({type: 'EDIT_SESSION_PARAMS', worldSize: {...state.config.worldSize, height}});
+          dispatch({type: 'EDIT_SESSION_PARAMS', worldSize: {height: width, width}});
+          dispatchToServer({type: 'EDIT_SESSION_PARAMS', worldSize: {height: width, width}});
         }}
       />
       <div></div>

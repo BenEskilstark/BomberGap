@@ -36,6 +36,19 @@ const normalizePos = (pos, worldSize, canvasSize) => {
     y: pos.y * worldSize.height / canvasSize.height
   };
 };
+const getCanvasSize = () => {
+  if (window.innerWidth > window.innerHeight) {
+    return {
+      width: window.innerHeight,
+      height: window.innerHeight
+    };
+  } else {
+    return {
+      width: window.innerWidth,
+      height: window.innerWidth
+    };
+  }
+};
 function Game(props) {
   const {
     state,
@@ -60,7 +73,7 @@ function Game(props) {
     getState
   }, {
     leftDown: (state, dispatch, p) => {
-      const pos = normalizePos(p, state.game.worldSize, state.game.canvasSize);
+      const pos = normalizePos(p, state.game.worldSize, getCanvasSize());
       dispatch({
         type: 'SET',
         marquee: {
@@ -72,7 +85,7 @@ function Game(props) {
     },
     mouseMove: (state, dispatch, p) => {
       var _state$mouse;
-      const pos = normalizePos(p, state.game.worldSize, state.game.canvasSize);
+      const pos = normalizePos(p, state.game.worldSize, getCanvasSize());
       if (!(state !== null && state !== void 0 && (_state$mouse = state.mouse) !== null && _state$mouse !== void 0 && _state$mouse.isLeftDown)) return;
       dispatch({
         type: 'SET',
@@ -84,7 +97,7 @@ function Game(props) {
       });
     },
     leftUp: (state, dispatch, p) => {
-      const pos = normalizePos(p, state.game.worldSize, state.game.canvasSize);
+      const pos = normalizePos(p, state.game.worldSize, getCanvasSize());
       let square = {
         ...state.game.marquee
       };
@@ -106,7 +119,7 @@ function Game(props) {
       });
     },
     rightDown: (state, dispatch, p) => {
-      const pos = normalizePos(p, state.game.worldSize, state.game.canvasSize);
+      const pos = normalizePos(p, state.game.worldSize, getCanvasSize());
       for (const entityID of state.game.selectedIDs) {
         const entity = state.game.entities[entityID];
         if (entity.type == 'AIRPORT' && state.game.clickMode == 'LAUNCH') {
@@ -114,7 +127,7 @@ function Game(props) {
             type: 'LAUNCH_PLANE',
             targetPos: pos,
             airportID: entityID,
-            planeType: state.game.launchType
+            name: state.game.launchName
           });
         } else {
           dispatchToServer({
@@ -133,79 +146,68 @@ function Game(props) {
     getState: () => getState().game.hotKeys
   });
   useEffect(() => {
-    dispatch({
-      type: 'SET_HOTKEY',
-      key: 'F',
-      press: 'onKeyDown',
-      fn: () => {
-        dispatch({
-          type: 'SET',
-          launchType: 'FIGHTER'
-        });
-        dispatch({
-          type: 'SET',
-          clickMode: 'LAUNCH'
-        });
-      }
-    });
-    dispatch({
-      type: 'SET_HOTKEY',
-      key: 'B',
-      press: 'onKeyDown',
-      fn: () => {
-        dispatch({
-          type: 'SET',
-          launchType: 'BOMBER'
-        });
-        dispatch({
-          type: 'SET',
-          clickMode: 'LAUNCH'
-        });
-      }
-    });
-    dispatch({
-      type: 'SET_HOTKEY',
-      key: 'M',
-      press: 'onKeyDown',
-      fn: () => {
-        dispatch({
-          type: 'SET',
-          clickMode: 'MOVE'
-        });
-      }
-    });
+    const planeNames = Object.keys(game.planeDesigns[state.clientID]);
+    for (let i = 0; i < planeNames.length; i++) {
+      const name = planeNames[i];
+      dispatch({
+        type: 'SET_HOTKEY',
+        key: "" + (i + 1),
+        press: 'onKeyDown',
+        fn: () => {
+          dispatch({
+            type: 'SET',
+            launchName: name
+          });
+          dispatch({
+            type: 'SET',
+            clickMode: 'LAUNCH'
+          });
+        }
+      });
+    }
   }, []);
 
   // selectionCard
   let selectionCard = null;
+  const planeNames = Object.keys(game.planeDesigns[state.clientID]);
   if (game.selectedIDs.length > 0) {
     const selections = {
-      'AIRPORT': 0,
-      'FIGHTER': 0,
-      'BOMBER': 0
+      'AIRPORT': 0
     };
+    for (const name of planeNames) {
+      selections[name] = 0;
+    }
     for (const entityID of game.selectedIDs) {
       const entity = game.entities[entityID];
-      selections[entity.type] += 1;
+      selections[entity.name] += 1;
     }
-    let selectionContent = /*#__PURE__*/React.createElement("div", null, selections.FIGHTER > 0 ? /*#__PURE__*/React.createElement("div", null, "Fighters: ", selections.FIGHTER) : null, selections.BOMBER > 0 ? /*#__PURE__*/React.createElement("div", null, "Bombers: ", selections.BOMBER) : null);
+    const planesSelected = [];
+    for (const name in selections) {
+      if (selections[name] > 0) {
+        planesSelected.push( /*#__PURE__*/React.createElement("div", {
+          key: "plane_" + name
+        }, name, ": ", selections[name]));
+      }
+    }
+    let selectionContent = /*#__PURE__*/React.createElement("div", null, planesSelected);
     if (selections.AIRPORT > 0) {
       const airport = game.entities[game.selectedIDs[0]];
-      selectionContent = /*#__PURE__*/React.createElement("div", null, "Airport", /*#__PURE__*/React.createElement("div", {
-        style: {}
-      }, /*#__PURE__*/React.createElement("div", null, "Fighters: ", airport.planes.FIGHTER), /*#__PURE__*/React.createElement("div", null, "Bombers: ", airport.planes.BOMBER)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, "Control Mode:"), /*#__PURE__*/React.createElement(RadioPicker, {
-        options: ['MOVE', 'LAUNCH'],
-        selected: state.game.clickMode,
-        onChange: clickMode => dispatch({
+      const airportPlanes = [];
+      for (const name in airport.planes) {
+        airportPlanes.push( /*#__PURE__*/React.createElement("div", {
+          key: "airport_plane_" + name
+        }, name, ": ", airport.planes[name]));
+      }
+      selectionContent = /*#__PURE__*/React.createElement("div", null, "Airport", state.game.clickMode == 'LAUNCH' ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, "Launch Type: "), /*#__PURE__*/React.createElement(RadioPicker, {
+        options: planeNames,
+        displayOptions: planeNames.map(name => {
+          const planeType = game.planeDesigns[state.clientID][name].type;
+          return `${name} (${planeType}): ${airport.planes[name]}`;
+        }),
+        selected: state.game.launchName,
+        onChange: launchName => dispatch({
           type: 'SET',
-          clickMode
-        })
-      })), state.game.clickMode == 'LAUNCH' ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, "Launch Type: "), /*#__PURE__*/React.createElement(RadioPicker, {
-        options: ['FIGHTER', 'BOMBER'],
-        selected: state.game.launchType,
-        onChange: launchType => dispatch({
-          type: 'SET',
-          launchType
+          launchName
         })
       })) : null);
     }
@@ -228,11 +230,22 @@ function Game(props) {
       height: '100%',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
+      backgroundColor: 'rgb(35,36,38)'
     }
-  }, /*#__PURE__*/React.createElement(Canvas, {
+  }, /*#__PURE__*/React.createElement("img", {
+    style: {
+      position: 'absolute'
+    },
+    src: "./img/polar_world_map_2.png",
+    width: getCanvasSize().width,
+    height: getCanvasSize().height
+  }), /*#__PURE__*/React.createElement(Canvas, {
+    style: {
+      opacity: 0.7,
+      borderRadius: '49%'
+    },
     view: game.worldSize,
-    useFullScreen: true,
     onResize: (width, height) => {
       dispatch({
         type: 'SET',
@@ -241,12 +254,9 @@ function Game(props) {
           height
         }
       });
-    }
-    // width={window.innerWidth * 0.9}
-    // height={
-    //   Math.min(window.innerHeight,
-    //     window.innerWidth * 0.9 * game.worldSize.height / game.worldSize.width,
-    //   )}
+    },
+    width: getCanvasSize().width,
+    height: getCanvasSize().height
   }), selectionCard);
 }
 module.exports = Game;
@@ -514,7 +524,7 @@ const Settings = props => {
         msPerTick
       });
     }
-  }), /*#__PURE__*/React.createElement("div", null), "Map Width:", /*#__PURE__*/React.createElement(Slider, {
+  }), /*#__PURE__*/React.createElement("div", null), "Map Width/Height:", /*#__PURE__*/React.createElement(Slider, {
     value: state.config.worldSize.width,
     min: 100,
     max: 1500,
@@ -523,36 +533,15 @@ const Settings = props => {
       dispatch({
         type: 'EDIT_SESSION_PARAMS',
         worldSize: {
-          ...state.config.worldSize,
+          height: width,
           width
         }
       });
       dispatchToServer({
         type: 'EDIT_SESSION_PARAMS',
         worldSize: {
-          ...state.config.worldSize,
+          height: width,
           width
-        }
-      });
-    }
-  }), /*#__PURE__*/React.createElement("div", null), "Map Height:", /*#__PURE__*/React.createElement(Slider, {
-    value: state.config.worldSize.height,
-    min: 100,
-    max: 800,
-    noOriginalValue: true,
-    onChange: height => {
-      dispatch({
-        type: 'EDIT_SESSION_PARAMS',
-        worldSize: {
-          ...state.config.worldSize,
-          height
-        }
-      });
-      dispatchToServer({
-        type: 'EDIT_SESSION_PARAMS',
-        worldSize: {
-          ...state.config.worldSize,
-          height
         }
       });
     }
@@ -858,8 +847,8 @@ const config = {
   path: isLocalHost ? null : "/midway/socket.io",
   msPerTick: 200,
   worldSize: {
-    width: 1100,
-    height: 650
+    width: 1000,
+    height: 1000
   },
   numAirports: 3,
   startingMoney: 5000,
@@ -874,20 +863,20 @@ const config = {
   // 10 range per dollar
   vision: {
     min: 0,
-    max: 200,
+    max: 100,
     cost: 1,
     inc: 1
   },
   // 1 vision per dollar
   speed: {
     min: 1,
-    max: 5,
+    max: 3,
     cost: 100,
     inc: 1
   },
   // 100 cost per speed (inc is actually 0.1)
-  airAttackCost: 30,
-  groundAttackCost: 30
+  airAttackCost: 50,
+  groundAttackCost: 50
   // fighter cost:
   //  60 fuel + 30 vision + 120 speed + 30 attack = 240
   // bomber cost:
@@ -1086,9 +1075,6 @@ const {
   hotKeyReducer
 } = require('bens_ui_components');
 const {
-  getSession
-} = require('../selectors/sessions');
-const {
   config
 } = require('../config');
 const {
@@ -1177,11 +1163,11 @@ const rootReducer = (state, action) => {
           plane
         } = action;
         if (plane.cost > state.clientConfig.money) return state;
-        state.clientConfig.money -= plane.cost;
         if (!state.clientConfig.planes[plane.name]) {
           state.clientConfig.planes[plane.name] = 0;
         }
         state.clientConfig.planes[plane.name]++;
+        state.clientConfig.money -= plane.cost;
         return {
           ...state
         };
@@ -1241,8 +1227,8 @@ const initGameState = (config, clientID, planeDesigns) => {
       ...config.worldSize
     },
     canvasSize: {
-      width: window.innerWidth,
-      height: window.innerHeight
+      width: Math.min(window.innerWidth * 0.9, window.innerHeight * 0.9),
+      height: window.innerHeight * 0.9
     },
     entities: {},
     fogLocations: [],
@@ -1250,7 +1236,7 @@ const initGameState = (config, clientID, planeDesigns) => {
     marquee: null,
     clientID,
     clickMode: 'LAUNCH',
-    launchType: null,
+    launchName: Object.keys(planeDesigns[clientID])[0],
     planeDesigns,
     hotKeys: {
       onKeyDown: {},
@@ -1265,7 +1251,10 @@ module.exports = {
   rootReducer,
   initState
 };
-},{"../UI/GameOverModal.react":2,"../config":8,"../selectors/sessions":16,"./gameReducer":11,"./modalReducer":12,"./sessionReducer":14,"bens_ui_components":83,"bens_utils":90,"react":100}],14:[function(require,module,exports){
+},{"../UI/GameOverModal.react":2,"../config":8,"./gameReducer":11,"./modalReducer":12,"./sessionReducer":14,"bens_ui_components":83,"bens_utils":90,"react":100}],14:[function(require,module,exports){
+const {
+  getSession
+} = require('../selectors/sessions');
 const sessionReducer = (state, action) => {
   if (state === undefined) return {};
   switch (action.type) {
@@ -1370,7 +1359,7 @@ const sessionReducer = (state, action) => {
 module.exports = {
   sessionReducer
 };
-},{}],15:[function(require,module,exports){
+},{"../selectors/sessions":16}],15:[function(require,module,exports){
 const {
   isHost
 } = require('./selectors/sessions');
@@ -1383,7 +1372,7 @@ const render = state => {
   const canvas = document.getElementById('canvas');
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "black";
+  ctx.fillStyle = 'black';
   ctx.fillRect(0, 0, game.worldSize.width, game.worldSize.height);
 
   // fog
@@ -1413,67 +1402,110 @@ const render = state => {
     }
     let width = 4;
     let height = 4;
-    switch (entity.type) {
-      case 'AIRPORT':
-        width = 16;
-      case 'BOMBER':
-        height = 8;
-      case 'FIGHTER':
-        // rotate
-        ctx.save();
-        ctx.translate(entity.position.x, entity.position.y);
-        if (entity.targetEnemy != null && game.entities[entity.targetEnemy]) {
-          const target = game.entities[entity.targetEnemy];
-          ctx.rotate(vectorTheta(subtract(target.position, entity.position)));
-        } else if (entity.targetPos != null) {
-          ctx.rotate(vectorTheta(subtract(entity.targetPos, entity.position)));
-        }
-        ctx.translate(-1 * entity.position.x, -1 * entity.position.y);
-        if (game.selectedIDs.includes(entityID)) {
-          // fuel remaining
-          if (entity.fuel && entity.clientID == state.clientID) {
-            ctx.strokeStyle = "#7CFC00";
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.arc(entity.position.x, entity.position.y, entity.fuel, 0, 2 * Math.PI);
-            ctx.closePath();
-            ctx.stroke();
-          }
-          // selection outline
-          ctx.lineWidth = 1;
-          ctx.strokeStyle = "gold";
-          ctx.beginPath();
-          ctx.rect(entity.position.x - width / 2, entity.position.y - height / 2, width, height);
-          ctx.closePath();
-          ctx.stroke();
-        }
-        ctx.fillRect(entity.position.x - width / 2, entity.position.y - height / 2, width, height);
-        ctx.restore(); // unrotate
+    let shape = 'square'; // default shape is square
+    if (entity.type === 'AIRPORT') {
+      width = 16;
+      height = 8;
+    } else if (entity.type === 'BOMBER') {
+      height = 8;
+    } else if (entity.type === 'RECON') {
+      shape = 'circle'; // change shape to circle
+      width = 6;
+    } else if (entity.type === 'FIGHTER') {
+      shape = 'triangle'; // change shape to triangle
+      width = 8;
+      height = 8;
+    }
 
-        // Target
-        if (entity.targetEnemy != null && entity.clientID == state.clientID) {
-          const target = game.entities[entity.targetEnemy];
-          if (target) {
-            ctx.strokeStyle = "gold";
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(entity.position.x, entity.position.y);
-            ctx.lineTo(target.position.x, target.position.y);
-            ctx.closePath();
-            ctx.stroke();
-          }
-        } else if (entity.targetPos != null && entity.clientID == state.clientID
-        // && game.selectedIDs.includes(entityID)
-        ) {
-          ctx.strokeStyle = "white";
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(entity.position.x, entity.position.y);
-          ctx.lineTo(entity.targetPos.x, entity.targetPos.y);
-          ctx.closePath();
-          ctx.stroke();
-        }
-        break;
+    // rotate
+    ctx.save();
+    ctx.translate(entity.position.x, entity.position.y);
+    if (entity.targetEnemy != null && game.entities[entity.targetEnemy]) {
+      const target = game.entities[entity.targetEnemy];
+      ctx.rotate(vectorTheta(subtract(target.position, entity.position)));
+    } else if (entity.targetPos != null) {
+      ctx.rotate(vectorTheta(subtract(entity.targetPos, entity.position)));
+    }
+    ctx.translate(-1 * entity.position.x, -1 * entity.position.y);
+    if (game.selectedIDs.includes(entityID)) {
+      // fuel remaining
+      if (entity.fuel && entity.clientID == state.clientID) {
+        ctx.strokeStyle = "#7CFC00";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(entity.position.x, entity.position.y, entity.fuel, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.stroke();
+      }
+      // selection outline
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "gold";
+      ctx.beginPath();
+      if (shape === 'square') {
+        ctx.rect(entity.position.x - width / 2, entity.position.y - height / 2, width, height);
+      } else if (shape === 'circle') {
+        ctx.arc(entity.position.x, entity.position.y, width / 2, 0, 2 * Math.PI);
+      } else if (shape === 'triangle') {
+        // add triangle shape
+        // rotate an additional 90 degrees
+        ctx.translate(entity.position.x, entity.position.y);
+        ctx.rotate(Math.PI / 2);
+        ctx.translate(-1 * entity.position.x, -1 * entity.position.y);
+        ctx.moveTo(entity.position.x, entity.position.y - height / 2);
+        ctx.lineTo(entity.position.x + width / 2, entity.position.y + height / 2);
+        ctx.lineTo(entity.position.x - width / 2, entity.position.y + height / 2);
+        ctx.closePath();
+        // unrotate
+        ctx.translate(entity.position.x, entity.position.y);
+        ctx.rotate(-Math.PI / 2);
+        ctx.translate(-1 * entity.position.x, -1 * entity.position.y);
+      }
+      ctx.stroke();
+    }
+    if (shape === 'square') {
+      ctx.fillRect(entity.position.x - width / 2, entity.position.y - height / 2, width, height);
+    } else if (shape === 'circle') {
+      ctx.beginPath();
+      ctx.arc(entity.position.x, entity.position.y, width / 2, 0, 2 * Math.PI);
+      ctx.closePath();
+      ctx.fill();
+    } else if (shape === 'triangle') {
+      // add triangle shape
+      // rotate an additional 90 degrees
+      ctx.translate(entity.position.x, entity.position.y);
+      ctx.rotate(Math.PI / 2);
+      ctx.translate(-1 * entity.position.x, -1 * entity.position.y);
+      ctx.beginPath();
+      ctx.moveTo(entity.position.x, entity.position.y - height / 2);
+      ctx.lineTo(entity.position.x + width / 2, entity.position.y + height / 2);
+      ctx.lineTo(entity.position.x - width / 2, entity.position.y + height / 2);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore(); // unrotate
+
+    // Target
+    if (entity.targetEnemy != null && entity.clientID == state.clientID) {
+      const target = game.entities[entity.targetEnemy];
+      if (target) {
+        ctx.strokeStyle = "gold";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(entity.position.x, entity.position.y);
+        ctx.lineTo(target.position.x, target.position.y);
+        ctx.closePath();
+        ctx.stroke();
+      }
+    } else if (entity.targetPos != null && entity.clientID == state.clientID
+    // && game.selectedIDs.includes(entityID)
+    ) {
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(entity.position.x, entity.position.y);
+      ctx.lineTo(entity.targetPos.x, entity.targetPos.y);
+      ctx.closePath();
+      ctx.stroke();
     }
   }
 
@@ -6310,7 +6342,7 @@ class RadioPicker extends React.Component {
         style: {
           display: this.props.isInline ? 'inline' : 'block'
         }
-      }, option, /*#__PURE__*/React.createElement("input", {
+      }, displayOption, /*#__PURE__*/React.createElement("input", {
         type: "radio",
         className: "radioCheckbox",
         value: displayOption,

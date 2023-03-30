@@ -25,7 +25,7 @@ const tick = (game, session, socketClients) => {
     let isEnemy = false;
     if (entity.targetEnemy) {
       let targetEntity = game.entities[entity.targetEnemy];
-      if (dist(targetEntity.position, entity.position) > entity.vision) {
+      if (targetEntity && dist(targetEntity.position, entity.position) > entity.vision) {
         targetEntity = null;
       }
       if (!targetEntity) {
@@ -46,9 +46,13 @@ const tick = (game, session, socketClients) => {
     }
 
     // arrived at target
+    let targetSpeed = 0;
+    if (entity.targetEnemy) {
+      targetSpeed = game.entities[entity.targetEnemy].speed;
+    }
     if (
       targetPos != null &&
-      dist(targetPos, entity.position) < Math.max(entity.speed + 1, 2)
+      dist(targetPos, entity.position) < entity.speed + targetSpeed + 1
     ) {
       if (entity.isBuilding) {
         entity.targetPos = null; // airports can stay still
@@ -57,8 +61,8 @@ const tick = (game, session, socketClients) => {
         delete game.entities[entity.id];
         getNearestAirport(game, entity).planes[entity.type]++;
       } else if (isEnemy) {
-        // kill the enemy
         const targetEntity = game.entities[entity.targetEnemy];
+        // kill the enemy
         // if enemy is targeting you too, then flip a coin whether you die instead
         if (entity.type == 'FIGHTER' && targetEntity.type == 'FIGHTER' &&
           targetEntity.targetEnemy == entityID && Math.random() < 0.5
@@ -78,7 +82,7 @@ const tick = (game, session, socketClients) => {
           game.stats[targetEntity.clientID].ships_sunk++;
           if (getNumAirports(game, targetEntity.clientID) == 0) {
             doGameOver(session, socketClients, entity.clientID, entity.clientID);
-            return state;
+            return;
           }
         } else if (targetEntity.type == 'FIGHTER') {
           delete game.entities[targetEntity.id];
@@ -133,8 +137,14 @@ const tick = (game, session, socketClients) => {
       for (const otherID in getEntitiesByPlayer(game, otherClientID)) {
         // if (visibleEntities[otherID]) continue;
         const other = game.entities[otherID];
+        if (other.hasBeenDiscovered) {
+          visibleEntities[otherID] = other;
+        }
         if (dist(entity.position, other.position) <= entity.vision) {
           visibleEntities[otherID] = other;
+          if (other.isBuilding) {
+            other.hasBeenDiscovered = true;
+          }
           // target:
           if (entity.type == 'FIGHTER' && entity.targetEnemy == null && other.isPlane) {
             entity.targetEnemy = otherID;
@@ -153,4 +163,16 @@ const tick = (game, session, socketClients) => {
   }
 }
 
-module.exports = {tick};
+const doGameOver = (session, socketClients, clientID, winner, disconnect) => {
+  const game = session.game;
+  if (!game) return;
+  emitToSession(
+    session, socketClients,
+    {type: 'GAME_OVER', winner, disconnect, stats: game.stats},
+    clientID, true, // include self
+  );
+  clearInterval(game.tickInterval);
+  game.tickInterval = null;
+}
+
+module.exports = {tick, doGameOver};

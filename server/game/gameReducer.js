@@ -11,6 +11,7 @@ const {
   getEntitiesByPlayer, getNearestAirport, getOtherClientID,
   getNumAirports,
 } = require('./selectors');
+const {tick, doGameOver} = require('./tick');
 
 
 const gameReducer = (state, action, clientID, socket, dispatch) => {
@@ -62,7 +63,7 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
     case 'START': {
       console.log("Start", session.id);
       session.game = {
-        ...initGameState(session.clients, session.config),
+        ...initGameState(session.clients, session.config, session.dynamicConfig),
         prevTickTime: new Date().getTime(),
         tickInterval: setInterval(
           // HACK: dispatch is only available via dispatch function above
@@ -96,6 +97,7 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
         clientID, {...airport.position},
         game.planeDesigns[clientID][name].type,
         targetPos,
+        {...game.planeDesigns[clientID][name]},
       );
       game.entities[plane.id] = plane;
 
@@ -139,17 +141,6 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
   return state;
 };
 
-const doGameOver = (session, socketClients, clientID, winner, disconnect) => {
-  const game = session.game;
-  if (!game) return;
-  emitToSession(
-    session, socketClients,
-    {type: 'GAME_OVER', winner, disconnect, stats: game.stats},
-    clientID, true, // include self
-  );
-  clearInterval(game.tickInterval);
-  game.tickInterval = null;
-}
 
 
 module.exports = {gameReducer};
