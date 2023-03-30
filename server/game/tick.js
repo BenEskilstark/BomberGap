@@ -24,9 +24,12 @@ const tick = (game, session, socketClients) => {
     let targetPos = entity.targetPos;
     let isEnemy = false;
     if (entity.targetEnemy) {
-      const targetEntity = game.entities[entity.targetEnemy];
+      let targetEntity = game.entities[entity.targetEnemy];
+      if (dist(targetEntity.position, entity.position) > entity.vision) {
+        targetEntity = null;
+      }
       if (!targetEntity) {
-        // if enemy is dead
+        // if enemy is dead or out of range
         entity.targetEnemy = null;
       } else {
         isEnemy = true;
@@ -43,7 +46,10 @@ const tick = (game, session, socketClients) => {
     }
 
     // arrived at target
-    if (targetPos != null && dist(targetPos, entity.position) < 2) {
+    if (
+      targetPos != null &&
+      dist(targetPos, entity.position) < Math.max(entity.speed + 1, 2)
+    ) {
       if (entity.isBuilding) {
         entity.targetPos = null; // airports can stay still
       } else if (entity.targetPos == null) {
@@ -134,9 +140,6 @@ const tick = (game, session, socketClients) => {
             entity.targetEnemy = otherID;
           }
           if (entity.type == 'BOMBER' && entity.targetEnemy == null && other.isBuilding) {
-            entity.targetEnemy = otherID;
-          }
-          if (entity.type == 'RECON' && entity.targetEnemy == null && other.isPlane) { // update targetting based on RECON
             entity.targetEnemy = otherID;
           }
         }

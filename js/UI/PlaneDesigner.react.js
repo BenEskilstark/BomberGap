@@ -6,7 +6,7 @@ const {oneOf, randomIn} = require('bens_utils').stochastic;
 const {useEffect, useState, useMemo} = React;
 
 const PlaneDesigner = (props) => {
-  const {dispatch, config, clientID} = props;
+  const {dispatch, config, clientID, planeNames} = props;
 
   const [plane, setPlane] = useState({
     name: oneOf([
@@ -77,6 +77,7 @@ const PlaneDesigner = (props) => {
           width: '100%',
         }}
         label="Finalize Design"
+        disabled={planeNames.includes(plane.name)}
         onClick={() => {
           dispatch({type: 'ADD_PLANE_DESIGN', clientID, plane});
           setPlane({

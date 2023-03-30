@@ -94,7 +94,7 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
 
       const plane = makePlane(
         clientID, {...airport.position},
-        game.planeDesigns[clientID][name].type, i
+        game.planeDesigns[clientID][name].type,
         targetPos,
       );
       game.entities[plane.id] = plane;

@@ -142,9 +142,12 @@ const Settings = (props) => {
   }
 
   let numPlaneDesigns = 0;
+  let planeNames = [];
   if (state.clientConfig.planeDesigns[state.clientID]) {
     numPlaneDesigns = Object.keys(state.clientConfig.planeDesigns[state.clientID]).length;
+    planeNames = Object.keys(state.clientConfig.planeDesigns[state.clientID]);
   }
+
   return (
     <div>
       <div><b>Settings:</b></div>
@@ -199,6 +202,7 @@ const Settings = (props) => {
               dispatch(action);
               dispatchToServer(action);
             }}
+            planeNames={planeNames}
           /> :
           'Max Planes Designed'
       }

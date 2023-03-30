@@ -1,6 +1,4 @@
 
-  - Lobby:
-    - don't allow planes with the same name
   - game start
     - change session start to handle plane designs
     - change reducer to handle plane designs
@@ -16,7 +14,6 @@
 
 
   - fighting:
-    - remove target if you can't see it
     - should detect collision range based on speed radius
       ( faster planes would have higher priority)
 

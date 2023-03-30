@@ -494,8 +494,10 @@ const Settings = props => {
     }));
   }
   let numPlaneDesigns = 0;
+  let planeNames = [];
   if (state.clientConfig.planeDesigns[state.clientID]) {
     numPlaneDesigns = Object.keys(state.clientConfig.planeDesigns[state.clientID]).length;
+    planeNames = Object.keys(state.clientConfig.planeDesigns[state.clientID]);
   }
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, "Settings:")), "Game ms per tick:", /*#__PURE__*/React.createElement(Slider, {
     value: state.config.msPerTick,
@@ -575,7 +577,8 @@ const Settings = props => {
     dispatch: action => {
       dispatch(action);
       dispatchToServer(action);
-    }
+    },
+    planeNames: planeNames
   }) : 'Max Planes Designed');
 };
 module.exports = Lobby;
@@ -701,7 +704,8 @@ const PlaneDesigner = props => {
   const {
     dispatch,
     config,
-    clientID
+    clientID,
+    planeNames
   } = props;
   const [plane, setPlane] = useState({
     name: oneOf(["MIG-15", "MIG-17", "MIG-21", "MIG-22", "SU-27", "F-4", "F14", "F-15", "F-16", "F-18", "F-22", "B-1", "B-2", "B-17", "B-29", "Tu-99", "Tu-101", "Tu-27", "SR-71"]),
@@ -767,6 +771,7 @@ const PlaneDesigner = props => {
       width: '100%'
     },
     label: "Finalize Design",
+    disabled: planeNames.includes(plane.name),
     onClick: () => {
       dispatch({
         type: 'ADD_PLANE_DESIGN',
