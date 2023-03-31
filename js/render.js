@@ -124,7 +124,16 @@ const render = (state) => {
       ctx.fill();
     }
 
+
     ctx.restore(); // unrotate
+
+    // add condition to render plane name
+    if (state.game.showStats) {
+      ctx.fillStyle = "white";
+      ctx.font = "10px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(entity.name, entity.position.x, entity.position.y + height / 2 + 10);
+    }
 
     // Target
     if (entity.targetEnemy != null && entity.clientID == state.clientID) {

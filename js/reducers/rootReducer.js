@@ -137,6 +137,7 @@ const initGameState = (config, clientID, planeDesigns) => {
     clientID,
     clickMode: 'LAUNCH',
     launchName: Object.keys(planeDesigns[clientID])[0],
+    showStats: true,
 
     planeDesigns,
 
