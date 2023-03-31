@@ -395,7 +395,7 @@ const Lobby = props => {
   }
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      width: 300,
+      width: 600,
       margin: 'auto',
       marginTop: 100
     }
@@ -405,7 +405,7 @@ const CreateGameCard = props => {
   const [name, setName] = useState('');
   return /*#__PURE__*/React.createElement(InfoCard, {
     style: {
-      width: 300,
+      width: 600,
       marginLeft: 0
     }
   }, "Game Name:\xA0", /*#__PURE__*/React.createElement(TextField, {
@@ -440,7 +440,7 @@ const SessionCard = props => {
   } = session;
   return /*#__PURE__*/React.createElement(InfoCard, {
     style: {
-      width: 300,
+      width: 600,
       marginLeft: 0
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -509,7 +509,12 @@ const Settings = props => {
     numPlaneDesigns = Object.keys(state.clientConfig.planeDesigns[state.clientID]).length;
     planeNames = Object.keys(state.clientConfig.planeDesigns[state.clientID]);
   }
-  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, "Settings:")), "Game ms per tick:", /*#__PURE__*/React.createElement(Slider, {
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, "Settings:")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between'
+    }
+  }, /*#__PURE__*/React.createElement("div", null, "Game ms per tick:", /*#__PURE__*/React.createElement(Slider, {
     value: state.config.msPerTick,
     min: 1,
     max: 1000,
@@ -524,10 +529,10 @@ const Settings = props => {
         msPerTick
       });
     }
-  }), /*#__PURE__*/React.createElement("div", null), "Map Width/Height:", /*#__PURE__*/React.createElement(Slider, {
+  })), /*#__PURE__*/React.createElement("div", null, "Map Width/Height:", /*#__PURE__*/React.createElement(Slider, {
     value: state.config.worldSize.width,
     min: 100,
-    max: 1500,
+    max: 1600,
     noOriginalValue: true,
     onChange: width => {
       dispatch({
@@ -545,7 +550,7 @@ const Settings = props => {
         }
       });
     }
-  }), /*#__PURE__*/React.createElement("div", null), "Airports per player:", /*#__PURE__*/React.createElement(Slider, {
+  })), /*#__PURE__*/React.createElement("div", null, "Airports per player:", /*#__PURE__*/React.createElement(Slider, {
     value: state.config.numAirports,
     min: 1,
     max: 5,
@@ -560,7 +565,17 @@ const Settings = props => {
         numAirports
       });
     }
-  }), /*#__PURE__*/React.createElement("div", null), /*#__PURE__*/React.createElement(Divider, null), "Money Available: ", state.clientConfig.money, /*#__PURE__*/React.createElement("div", null), "Designs Remaining: ", state.config.maxPlaneDesigns - numPlaneDesigns, planeDesigns, numPlaneDesigns < state.config.maxPlaneDesigns ? /*#__PURE__*/React.createElement(PlaneDesigner, {
+  }))), /*#__PURE__*/React.createElement(Divider, {
+    style: {
+      marginTop: 4,
+      marginBottom: 4
+    }
+  }), "Money Available: ", state.clientConfig.money, /*#__PURE__*/React.createElement("div", null), "Designs Remaining: ", state.config.maxPlaneDesigns - numPlaneDesigns, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexWrap: 'wrap'
+    }
+  }, planeDesigns), numPlaneDesigns < state.config.maxPlaneDesigns ? /*#__PURE__*/React.createElement(PlaneDesigner, {
     config: state.config,
     clientID: state.clientID,
     dispatch: action => {
@@ -568,7 +583,12 @@ const Settings = props => {
       dispatchToServer(action);
     },
     planeNames: planeNames
-  }) : 'Max Planes Designed');
+  }) : 'Max Planes Designed', /*#__PURE__*/React.createElement(Divider, {
+    style: {
+      marginTop: 4,
+      marginBottom: 4
+    }
+  }));
 };
 module.exports = Lobby;
 },{"../clientToServer":7,"../selectors/sessions":16,"./PlaneDesignDisplay.react":5,"./PlaneDesigner.react":6,"bens_ui_components":83,"react":100}],4:[function(require,module,exports){
@@ -628,7 +648,8 @@ module.exports = Main;
 },{"../clientToServer":7,"../postVisit":10,"../reducers/rootReducer":13,"./Game.react":1,"./Lobby.react":3,"bens_ui_components":83,"react":100}],5:[function(require,module,exports){
 const React = require('react');
 const {
-  Button
+  Button,
+  Divider
 } = require('bens_ui_components');
 const {
   useEffect,
@@ -644,7 +665,7 @@ const PlaneDesignDisplay = props => {
   } = props;
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      width: '100%'
+      width: '50%'
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -652,16 +673,11 @@ const PlaneDesignDisplay = props => {
     }
   }, /*#__PURE__*/React.createElement("b", null, planeDesign.name, " ", planeDesign.type)), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: 'flex',
-      flexDirection: 'row'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: '50%',
+      width: '100%',
       padding: 5
     }
-  }, /*#__PURE__*/React.createElement("div", null, "Cost: ", planeDesign.cost), /*#__PURE__*/React.createElement("div", null, "Speed: ", planeDesign.speed), /*#__PURE__*/React.createElement("div", null, "Fuel: ", planeDesign.fuel), /*#__PURE__*/React.createElement("div", null, "Vision: ", planeDesign.vision)), /*#__PURE__*/React.createElement("div", null, "Purchased: ", quantity, /*#__PURE__*/React.createElement(Button, {
-    label: "Purchase",
+  }, /*#__PURE__*/React.createElement("div", null, "Cost: ", planeDesign.cost), /*#__PURE__*/React.createElement("div", null, "Speed: ", planeDesign.speed), /*#__PURE__*/React.createElement("div", null, "Fuel: ", planeDesign.fuel), /*#__PURE__*/React.createElement("div", null, "Vision: ", planeDesign.vision), /*#__PURE__*/React.createElement("div", null, "Purchased: ", quantity), /*#__PURE__*/React.createElement(Button, {
+    label: "Buy",
     disabled: money < planeDesign.cost,
     onClick: () => {
       dispatch({
@@ -669,7 +685,12 @@ const PlaneDesignDisplay = props => {
         plane: planeDesign
       });
     }
-  }))));
+  })), /*#__PURE__*/React.createElement(Divider, {
+    style: {
+      marginTop: 4,
+      marginBottom: 4
+    }
+  }));
 };
 module.exports = PlaneDesignDisplay;
 },{"bens_ui_components":83,"react":100}],6:[function(require,module,exports){
@@ -734,6 +755,8 @@ const PlaneDesigner = props => {
     }
   }), /*#__PURE__*/React.createElement(RadioPicker, {
     options: ['RECON', 'FIGHTER', 'BOMBER'],
+    displayOptions: ['RECON', '      FIGHTER', '    BOMBER'],
+    isInline: true,
     selected: plane.type,
     onChange: type => {
       let cost = 0;
@@ -844,7 +867,7 @@ const isLocalHost = true;
 const config = {
   isLocalHost,
   URL: isLocalHost ? null : "https://benhub.io",
-  path: isLocalHost ? null : "/midway/socket.io",
+  path: isLocalHost ? null : "/bombergap/socket.io",
   msPerTick: 200,
   worldSize: {
     width: 1000,
@@ -922,7 +945,7 @@ const postVisit = (path, map) => {
   const isUnique = !!!localStorage.getItem('isRevisit_' + path);
   localStorage.setItem('isRevisit_' + path, true);
   return axiosInstance.post('/visit', {
-    hostname: 'midway',
+    hostname: 'bombergap',
     path,
     isUnique,
     map
@@ -1438,7 +1461,7 @@ const render = state => {
         ctx.stroke();
       }
       // selection outline
-      ctx.lineWidth = 1;
+      ctx.lineWidth = 2;
       ctx.strokeStyle = "gold";
       ctx.beginPath();
       if (shape === 'square') {

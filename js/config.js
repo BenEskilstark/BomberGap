@@ -4,7 +4,7 @@ const config = {
   isLocalHost,
 
   URL: isLocalHost ? null : "https://benhub.io",
-  path: isLocalHost ? null : "/midway/socket.io",
+  path: isLocalHost ? null : "/bombergap/socket.io",
 
   msPerTick: 200,
 

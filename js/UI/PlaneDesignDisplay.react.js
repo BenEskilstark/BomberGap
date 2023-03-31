@@ -1,5 +1,5 @@
 const React = require('react');
-const {Button} = require('bens_ui_components');
+const {Button, Divider} = require('bens_ui_components');
 const {useEffect, useState, useMemo} = React;
 
 const PlaneDesignDisplay = (props) => {
@@ -8,7 +8,7 @@ const PlaneDesignDisplay = (props) => {
   return (
     <div
       style={{
-        width: '100%',
+        width: '50%',
       }}
     >
       <div
@@ -20,32 +20,24 @@ const PlaneDesignDisplay = (props) => {
       </div>
       <div
         style={{
-          display: 'flex',
-          flexDirection: 'row',
+          width: '100%',
+          padding: 5,
         }}
       >
-        <div
-          style={{
-            width: '50%',
-            padding: 5,
+        <div>Cost: {planeDesign.cost}</div>
+        <div>Speed: {planeDesign.speed}</div>
+        <div>Fuel: {planeDesign.fuel}</div>
+        <div>Vision: {planeDesign.vision}</div>
+        <div>Purchased: {quantity}</div>
+        <Button
+          label="Buy"
+          disabled={money < planeDesign.cost}
+          onClick={() => {
+            dispatch({type: 'BUY_PLANE', plane: planeDesign});
           }}
-        >
-          <div>Cost: {planeDesign.cost}</div>
-          <div>Speed: {planeDesign.speed}</div>
-          <div>Fuel: {planeDesign.fuel}</div>
-          <div>Vision: {planeDesign.vision}</div>
-        </div>
-        <div>
-          Purchased: {quantity}
-          <Button
-            label="Purchase"
-            disabled={money < planeDesign.cost}
-            onClick={() => {
-              dispatch({type: 'BUY_PLANE', plane: planeDesign});
-            }}
-          />
-        </div>
+        />
       </div>
+      <Divider style={{marginTop: 4, marginBottom: 4}} />
     </div>
   );
 };

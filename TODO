@@ -1,6 +1,12 @@
 
   - play test
 
+  - CPU opponent:
+    - UI for selecting AI opponent
+    - server state for AI opponent
+    - randomized AI plane designs and deployments
+    - randomized AI daemon for launching planes
+
   - better randomized positioning of airports
   - toggle to display plane stats next to them
   - shouldn't let you do ready/start if you don't have any plane designs

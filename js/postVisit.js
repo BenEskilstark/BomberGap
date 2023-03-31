@@ -16,7 +16,7 @@ const postVisit = (path, map) => {
   localStorage.setItem('isRevisit_' + path, true);
   return axiosInstance
     .post('/visit', {
-      hostname: 'midway', path, isUnique, map,
+      hostname: 'bombergap', path, isUnique, map,
     })
 };
 

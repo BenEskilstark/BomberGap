@@ -29,7 +29,7 @@ const Lobby = (props) => {
   return (
     <div
       style={{
-        width: 300,
+        width: 600,
         margin: 'auto',
         marginTop: 100,
       }}
@@ -45,7 +45,7 @@ const CreateGameCard = (props) => {
   return (
     <InfoCard
       style={{
-        width: 300,
+        width: 600,
         marginLeft: 0,
       }}
     >
@@ -76,7 +76,7 @@ const SessionCard = (props) => {
   return (
     <InfoCard
       style={{
-        width: 300,
+        width: 600,
         marginLeft: 0,
       }}
     >
@@ -151,38 +151,55 @@ const Settings = (props) => {
   return (
     <div>
       <div><b>Settings:</b></div>
-      Game ms per tick:
-      <Slider value={state.config.msPerTick} min={1} max={1000}
-        noOriginalValue={true}
-        onChange={(msPerTick) => {
-          dispatch({type: 'EDIT_SESSION_PARAMS', msPerTick});
-          dispatchToServer({type: 'EDIT_SESSION_PARAMS', msPerTick});
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
         }}
-      />
-      <div></div>
-      Map Width/Height:
-      <Slider value={state.config.worldSize.width} min={100} max={1500}
-        noOriginalValue={true}
-        onChange={(width) => {
-          dispatch({type: 'EDIT_SESSION_PARAMS', worldSize: {height: width, width}});
-          dispatchToServer({type: 'EDIT_SESSION_PARAMS', worldSize: {height: width, width}});
-        }}
-      />
-      <div></div>
-      Airports per player:
-      <Slider value={state.config.numAirports} min={1} max={5}
-        noOriginalValue={true}
-        onChange={(numAirports) => {
-          dispatch({type: 'EDIT_SESSION_PARAMS', numAirports});
-          dispatchToServer({type: 'EDIT_SESSION_PARAMS', numAirports});
-        }}
-      />
-      <div></div>
-      <Divider />
+      >
+        <div>
+          Game ms per tick:
+          <Slider value={state.config.msPerTick} min={1} max={1000}
+            noOriginalValue={true}
+            onChange={(msPerTick) => {
+              dispatch({type: 'EDIT_SESSION_PARAMS', msPerTick});
+              dispatchToServer({type: 'EDIT_SESSION_PARAMS', msPerTick});
+            }}
+          />
+        </div>
+        <div>
+          Map Width/Height:
+          <Slider value={state.config.worldSize.width} min={100} max={1600}
+            noOriginalValue={true}
+            onChange={(width) => {
+              dispatch({type: 'EDIT_SESSION_PARAMS', worldSize: {height: width, width}});
+              dispatchToServer({type: 'EDIT_SESSION_PARAMS', worldSize: {height: width, width}});
+            }}
+          />
+        </div>
+        <div>
+          Airports per player:
+          <Slider value={state.config.numAirports} min={1} max={5}
+            noOriginalValue={true}
+            onChange={(numAirports) => {
+              dispatch({type: 'EDIT_SESSION_PARAMS', numAirports});
+              dispatchToServer({type: 'EDIT_SESSION_PARAMS', numAirports});
+            }}
+          />
+        </div>
+      </div>
+      <Divider style={{marginTop: 4, marginBottom: 4}} />
       Money Available: {state.clientConfig.money}
       <div></div>
       Designs Remaining: {state.config.maxPlaneDesigns - numPlaneDesigns}
-      {planeDesigns}
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+        }}
+      >
+        {planeDesigns}
+      </div>
 
       {
         numPlaneDesigns < state.config.maxPlaneDesigns ?
@@ -197,6 +214,7 @@ const Settings = (props) => {
           /> :
           'Max Planes Designed'
       }
+      <Divider style={{marginTop: 4, marginBottom: 4}} />
     </div>
   );
 };

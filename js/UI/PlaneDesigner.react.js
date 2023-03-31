@@ -52,6 +52,8 @@ const PlaneDesigner = (props) => {
       />
       <RadioPicker
         options={['RECON', 'FIGHTER', 'BOMBER']}
+        displayOptions={['RECON', '      FIGHTER', '    BOMBER']}
+        isInline={true}
         selected={plane.type}
         onChange={(type) => {
           let cost = 0;
