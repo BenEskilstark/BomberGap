@@ -8,7 +8,7 @@ const GameOverModal = (props) => {
   const state = getState(); // HACK this comes from window;
 
   let title = winner == state.clientID ? 'You Win!' : 'You Lose!';
-  let body = winner == state.clientID ? "You sunk the enemy airport" : "Your airport was sunk";
+  let body = winner == state.clientID ? "You destroyed the enemy airport" : "Your airport was destroyed";
   if (disconnect) {
     title = "Opponent Disconnected";
     body = "The other player has closed the tab and disconnected. So I guess you win by forfeit...";
@@ -71,7 +71,7 @@ const PlayerStats = (props) => {
       <div>Enemy bombers shot down: {stats[otherID].bombers_shot_down}</div>
       <div>Fighter aces: {stats[clientID].fighter_aces}</div>
       <div>Planes lost to no fuel: {stats[clientID].planes_no_fuel}</div>
-      <div>Enemy ships sunk: {stats[otherID].ships_sunk}</div>
+      <div>Enemy airports destroyed: {stats[otherID].airports_destroyed}</div>
     </div>
   );
 }

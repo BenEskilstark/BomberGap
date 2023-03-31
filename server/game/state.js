@@ -44,7 +44,7 @@ const initGameState = (
       'bomber_sorties': 0,
       'recon_sorties': 0,
       'fighter_aces': 0,
-      'ships_sunk': 0,
+      'airports_destroyed': 0, // changed from 'ships_sunk'
     },
     i++;
   }

@@ -79,7 +79,7 @@ const tick = (game, session, socketClients) => {
         let didKill = false;
         if (targetEntity.type == 'AIRPORT') {
           delete game.entities[targetEntity.id];
-          game.stats[targetEntity.clientID].ships_sunk++;
+          game.stats[targetEntity.clientID].airports_destroyed++;
           if (getNumAirports(game, targetEntity.clientID) == 0) {
             doGameOver(session, socketClients, entity.clientID, entity.clientID);
             return;
