@@ -2,14 +2,14 @@ const {
   leaveSession, emitToSession, emitToAllClients,
 } = require('../sessions');
 const {
-  initGameState, makeAirport, makePlane,
+  initGameState, makeAirbase, makePlane,
 } = require('./state');
 const {
   makeVector, vectorTheta, subtract, add, dist, equals,
 } = require('bens_utils').vectors;
 const {
-  getEntitiesByPlayer, getNearestAirport, getOtherClientID,
-  getNumAirports,
+  getEntitiesByPlayer, getNearestAirbase, getOtherClientID,
+  getNumAirbases,
 } = require('./selectors');
 const {tick, doGameOver} = require('./tick');
 
@@ -86,15 +86,15 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
       return state;
     }
     case 'LAUNCH_PLANE': {
-      const {name, airportID, targetPos} = action;
-      const airport = game.entities[airportID];
+      const {name, airbaseID, targetPos} = action;
+      const airbase = game.entities[airbaseID];
 
       // check that this plane is launchable
-      if (airport.planes[name] <= 0) break;
-      airport.planes[name]--;
+      if (airbase.planes[name] <= 0) break;
+      airbase.planes[name]--;
 
       const plane = makePlane(
-        clientID, {...airport.position},
+        clientID, {...airbase.position},
         game.planeDesigns[clientID][name].type,
         targetPos,
         {...game.planeDesigns[clientID][name]},

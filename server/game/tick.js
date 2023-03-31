@@ -2,14 +2,14 @@ const {
   leaveSession, emitToSession, emitToAllClients,
 } = require('../sessions');
 const {
-  initGameState, makeAirport, makePlane,
+  initGameState, makeAirbase, makePlane,
 } = require('./state');
 const {
   makeVector, vectorTheta, subtract, add, dist, equals,
 } = require('bens_utils').vectors;
 const {
-  getEntitiesByPlayer, getNearestAirport, getOtherClientID,
-  getNumAirports,
+  getEntitiesByPlayer, getNearestAirbase, getOtherClientID,
+  getNumAirbases,
 } = require('./selectors');
 
 const tick = (game, session, socketClients) => {
@@ -39,9 +39,9 @@ const tick = (game, session, socketClients) => {
 
     // no target
     if (targetPos == null) {
-      // planes without target go back to airport
+      // planes without target go back to airbase
       if (entity.isPlane) {
-        targetPos = {...getNearestAirport(game, entity).position};
+        targetPos = {...getNearestAirbase(game, entity).position};
       }
     }
 
@@ -55,11 +55,11 @@ const tick = (game, session, socketClients) => {
       dist(targetPos, entity.position) < entity.speed + targetSpeed + 1
     ) {
       if (entity.isBuilding) {
-        entity.targetPos = null; // airports can stay still
+        entity.targetPos = null; // airbases can stay still
       } else if (entity.targetPos == null) {
-        // we've arrived at home airport
+        // we've arrived at home airbase
         delete game.entities[entity.id];
-        getNearestAirport(game, entity).planes[entity.type]++;
+        getNearestAirbase(game, entity).planes[entity.type]++;
       } else if (isEnemy) {
         const targetEntity = game.entities[entity.targetEnemy];
         // kill the enemy
@@ -77,10 +77,10 @@ const tick = (game, session, socketClients) => {
           continue;
         }
         let didKill = false;
-        if (targetEntity.type == 'AIRPORT') {
+        if (targetEntity.type == 'AIRBASE') {
           delete game.entities[targetEntity.id];
-          game.stats[targetEntity.clientID].airports_destroyed++;
-          if (getNumAirports(game, targetEntity.clientID) == 0) {
+          game.stats[targetEntity.clientID].airbases_destroyed++;
+          if (getNumAirbases(game, targetEntity.clientID) == 0) {
             doGameOver(session, socketClients, entity.clientID, entity.clientID);
             return;
           }
@@ -104,7 +104,7 @@ const tick = (game, session, socketClients) => {
           }
         }
       } else {
-        entity.targetPos = null; // return to airport on next tick
+        entity.targetPos = null; // return to airbase on next tick
       }
     }
 

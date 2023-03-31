@@ -67,9 +67,13 @@ const sessionReducer = (state, action, clientID, socket, newSession) => {
       break;
     }
     case 'JOIN_SESSION': {
-      const {sessionID} = action;
+      const {sessionID, AI} = action;
       const session = sessions[sessionID];
       if (!session) break;
+
+      if (AI) {
+        clientID = -1;
+      }
 
       session.clients.push(clientID);
       clientToSession[clientID] = session.id;
@@ -80,19 +84,39 @@ const sessionReducer = (state, action, clientID, socket, newSession) => {
       session.dynamicConfig[clientID].planes = {};
       session.dynamicConfig[clientID].planeDesigns = {};
 
+      if (AI) {
+        session.dynamicConfig[clientID].AI = true;
+        session.dynamicConfig[clientID].planeDesigns = {
+          "Tu-99": {
+            "name":"Tu-99","fuel":1300,"vision":40,"speed":1.5,
+            "type":"BOMBER","cost":370,"productionTime":10000
+          },
+          "MIG-17":{
+            "name":"MIG-17","fuel":750,"vision":60,"speed":2,
+            "type":"FIGHTER","cost":385,"productionTime":10000,
+          },
+        }
+        session.dynamicConfig[clientID].planes = {
+          "Tu-99": 10,
+          "MIG-17": 10,
+        }
+      }
+
       // tell the rest of the clients this one joined the session
       emitToAllClients(socketClients, {...action, clientID}, clientID, true);
 
-      // tell the client that just joined what the settings are:
-      socket.emit('receiveAction', {type: 'EDIT_SESSION_PARAMS', ...session.config});
-      for (const alreadyJoinedClientID of session.clients) {
-        if (session.dynamicConfig[alreadyJoinedClientID].planeDesigns) {
-          for (const name in session.dynamicConfig[alreadyJoinedClientID].planeDesigns) {
-            socket.emit('receiveAction',
-              {type: 'ADD_PLANE_DESIGN',
-              plane: session.dynamicConfig[alreadyJoinedClientID].planeDesigns[name],
-              clientID: alreadyJoinedClientID},
-            );
+      if (!AI) {
+        // tell the client that just joined what the settings are:
+        socket.emit('receiveAction', {type: 'EDIT_SESSION_PARAMS', ...session.config});
+        for (const alreadyJoinedClientID of session.clients) {
+          if (session.dynamicConfig[alreadyJoinedClientID].planeDesigns) {
+            for (const name in session.dynamicConfig[alreadyJoinedClientID].planeDesigns) {
+              socket.emit('receiveAction',
+                {type: 'ADD_PLANE_DESIGN',
+                plane: session.dynamicConfig[alreadyJoinedClientID].planeDesigns[name],
+                clientID: alreadyJoinedClientID},
+              );
+            }
           }
         }
       }

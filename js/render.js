@@ -43,7 +43,7 @@ const render = (state) => {
     let width = 4;
     let height = 4;
     let shape = 'square'; // default shape is square
-    if (entity.type === 'AIRPORT') {
+    if (entity.type === 'AIRBASE') {
       width = 16;
       height = 8;
     } else if (entity.type === 'BOMBER') {

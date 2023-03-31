@@ -19,9 +19,9 @@ const initGameState = (
 
   let i = 0;
   for (const clientID of clientIDs) {
-    for (let j = 0; j < config.numAirports; j++) {
-      const airport =
-        makeAirport(
+    for (let j = 0; j < config.numAirbases; j++) {
+      const airbase =
+        makeAirbase(
           clientID,
           {
             x: i == 0
@@ -31,7 +31,7 @@ const initGameState = (
           },
           {...dynamicConfig[clientID].planes},
         );
-      game.entities[airport.id] = airport;
+      game.entities[airbase.id] = airbase;
       game.planeDesigns[clientID] = {...dynamicConfig[clientID].planeDesigns};
     }
 
@@ -44,7 +44,7 @@ const initGameState = (
       'bomber_sorties': 0,
       'recon_sorties': 0,
       'fighter_aces': 0,
-      'airports_destroyed': 0, // changed from 'ships_sunk'
+      'airbases_destroyed': 0, // changed from 'ships_sunk'
     },
     i++;
   }
@@ -53,11 +53,11 @@ const initGameState = (
 };
 
 let nextID = 1;
-const makeAirport = (clientID, position, planes) => {
+const makeAirbase = (clientID, position, planes) => {
   return {
     clientID, id: nextID++,
-    type: "AIRPORT",
-    name: "AIRPORT", // helps with selection
+    type: "AIRBASE",
+    name: "AIRBASE", // helps with selection
     isBuilding: true,
 
     planes: {...planes}, // {[name]: number}
@@ -107,6 +107,6 @@ const makePlane = (
 
 module.exports = {
   initGameState,
-  makeAirport,
+  makeAirbase,
   makePlane,
 };

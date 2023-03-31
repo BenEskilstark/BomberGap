@@ -122,11 +122,11 @@ function Game(props) {
       const pos = normalizePos(p, state.game.worldSize, getCanvasSize());
       for (const entityID of state.game.selectedIDs) {
         const entity = state.game.entities[entityID];
-        if (entity.type == 'AIRPORT' && state.game.clickMode == 'LAUNCH') {
+        if (entity.type == 'AIRBASE' && state.game.clickMode == 'LAUNCH') {
           dispatchToServer({
             type: 'LAUNCH_PLANE',
             targetPos: pos,
-            airportID: entityID,
+            airbaseID: entityID,
             name: state.game.launchName
           });
         } else {
@@ -172,7 +172,7 @@ function Game(props) {
   const planeNames = Object.keys(game.planeDesigns[state.clientID]);
   if (game.selectedIDs.length > 0) {
     const selections = {
-      'AIRPORT': 0
+      'AIRBASE': 0
     };
     for (const name of planeNames) {
       selections[name] = 0;
@@ -190,19 +190,19 @@ function Game(props) {
       }
     }
     let selectionContent = /*#__PURE__*/React.createElement("div", null, planesSelected);
-    if (selections.AIRPORT > 0) {
-      const airport = game.entities[game.selectedIDs[0]];
-      const airportPlanes = [];
-      for (const name in airport.planes) {
-        airportPlanes.push( /*#__PURE__*/React.createElement("div", {
-          key: "airport_plane_" + name
-        }, name, ": ", airport.planes[name]));
+    if (selections.AIRBASE > 0) {
+      const airbase = game.entities[game.selectedIDs[0]];
+      const airbasePlanes = [];
+      for (const name in airbase.planes) {
+        airbasePlanes.push( /*#__PURE__*/React.createElement("div", {
+          key: "airbase_plane_" + name
+        }, name, ": ", airbase.planes[name]));
       }
-      selectionContent = /*#__PURE__*/React.createElement("div", null, "Airport", state.game.clickMode == 'LAUNCH' ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, "Launch Type: "), /*#__PURE__*/React.createElement(RadioPicker, {
+      selectionContent = /*#__PURE__*/React.createElement("div", null, "Airbase", state.game.clickMode == 'LAUNCH' ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, "Launch Type: "), /*#__PURE__*/React.createElement(RadioPicker, {
         options: planeNames,
         displayOptions: planeNames.map(name => {
           const planeType = game.planeDesigns[state.clientID][name].type;
-          return `${name} (${planeType}): ${airport.planes[name]}`;
+          return `${name} (${planeType}): ${airbase.planes[name]}`;
         }),
         selected: state.game.launchName,
         onChange: launchName => dispatch({
@@ -283,7 +283,7 @@ const GameOverModal = props => {
   const state = getState(); // HACK this comes from window;
 
   let title = winner == state.clientID ? 'You Win!' : 'You Lose!';
-  let body = winner == state.clientID ? "You destroyed the enemy airport" : "Your airport was destroyed";
+  let body = winner == state.clientID ? "You destroyed the enemy airbase" : "Your airbase was destroyed";
   if (disconnect) {
     title = "Opponent Disconnected";
     body = "The other player has closed the tab and disconnected. So I guess you win by forfeit...";
@@ -342,7 +342,7 @@ const PlayerStats = props => {
   } = props;
   return /*#__PURE__*/React.createElement("div", {
     style: {}
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, isYou ? 'You' : 'Opponent')), /*#__PURE__*/React.createElement("div", null, "Fighter sorties flown: ", stats[clientID].fighter_sorties), /*#__PURE__*/React.createElement("div", null, "Bomber sorties flown: ", stats[clientID].bomber_sorties), /*#__PURE__*/React.createElement("div", null, "Enemy fighters shot down: ", stats[otherID].fighters_shot_down), /*#__PURE__*/React.createElement("div", null, "Enemy bombers shot down: ", stats[otherID].bombers_shot_down), /*#__PURE__*/React.createElement("div", null, "Fighter aces: ", stats[clientID].fighter_aces), /*#__PURE__*/React.createElement("div", null, "Planes lost to no fuel: ", stats[clientID].planes_no_fuel), /*#__PURE__*/React.createElement("div", null, "Enemy airports destroyed: ", stats[otherID].airports_destroyed));
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, isYou ? 'You' : 'Opponent')), /*#__PURE__*/React.createElement("div", null, "Fighter sorties flown: ", stats[clientID].fighter_sorties), /*#__PURE__*/React.createElement("div", null, "Bomber sorties flown: ", stats[clientID].bomber_sorties), /*#__PURE__*/React.createElement("div", null, "Enemy fighters shot down: ", stats[otherID].fighters_shot_down), /*#__PURE__*/React.createElement("div", null, "Enemy bombers shot down: ", stats[otherID].bombers_shot_down), /*#__PURE__*/React.createElement("div", null, "Fighter aces: ", stats[clientID].fighter_aces), /*#__PURE__*/React.createElement("div", null, "Planes lost to no fuel: ", stats[clientID].planes_no_fuel), /*#__PURE__*/React.createElement("div", null, "Enemy airbases destroyed: ", stats[otherID].airbases_destroyed));
 };
 module.exports = GameOverModal;
 },{"../clientToServer":7,"bens_ui_components":83,"react":100}],3:[function(require,module,exports){
@@ -447,7 +447,17 @@ const SessionCard = props => {
     style: {
       textAlign: 'center'
     }
-  }, /*#__PURE__*/React.createElement("b", null, name)), "Players: ", clients.length, joinedSessionID == id ? /*#__PURE__*/React.createElement(Settings, {
+  }, /*#__PURE__*/React.createElement("b", null, name)), "Players: ", clients.length, /*#__PURE__*/React.createElement(Button, {
+    label: "VS. AI Opponent",
+    disabled: clients.length >= 2,
+    onClick: () => {
+      dispatchToServer({
+        type: 'JOIN_SESSION',
+        sessionID: id,
+        AI: true
+      });
+    }
+  }), joinedSessionID == id ? /*#__PURE__*/React.createElement(Settings, {
     state: state,
     dispatch: dispatch
   }) : null, joinedSessionID == id ? /*#__PURE__*/React.createElement(Button, {
@@ -549,19 +559,19 @@ const Settings = props => {
         }
       });
     }
-  })), /*#__PURE__*/React.createElement("div", null, "Airports per player:", /*#__PURE__*/React.createElement(Slider, {
-    value: state.config.numAirports,
+  })), /*#__PURE__*/React.createElement("div", null, "Airbases per player:", /*#__PURE__*/React.createElement(Slider, {
+    value: state.config.numAirbases,
     min: 1,
     max: 5,
     noOriginalValue: true,
-    onChange: numAirports => {
+    onChange: numAirbases => {
       dispatch({
         type: 'EDIT_SESSION_PARAMS',
-        numAirports
+        numAirbases
       });
       dispatchToServer({
         type: 'EDIT_SESSION_PARAMS',
-        numAirports
+        numAirbases
       });
     }
   }))), /*#__PURE__*/React.createElement(Divider, {
@@ -872,7 +882,7 @@ const config = {
     width: 1000,
     height: 1000
   },
-  numAirports: 3,
+  numAirbases: 3,
   startingMoney: 5000,
   maxPlaneDesigns: 4,
   // airplane parameters:
@@ -1038,7 +1048,7 @@ const gameReducer = (game, action) => {
           const entity = game.entities[entityID];
           if (entity.clientID != game.clientID) continue;
           if (entity.position.x >= square.x && entity.position.x <= square.x + square.width && entity.position.y >= square.y && entity.position.y <= square.y + square.height) {
-            if (entity.type == 'AIRPORT') {
+            if (entity.type == 'AIRBASE') {
               selectedIDs = [entityID];
               break;
             }
@@ -1426,7 +1436,7 @@ const render = state => {
     let width = 4;
     let height = 4;
     let shape = 'square'; // default shape is square
-    if (entity.type === 'AIRPORT') {
+    if (entity.type === 'AIRBASE') {
       width = 16;
       height = 8;
     } else if (entity.type === 'BOMBER') {

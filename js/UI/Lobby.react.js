@@ -157,6 +157,13 @@ const Settings = (props) => {
           justifyContent: 'space-between',
         }}
       >
+      // <Button
+      //   label="VS. AI Opponent"
+      //   disabled={clients.length >= 2}
+      //   onClick={() => {
+      //     dispatchToServer({type: 'JOIN_SESSION', sessionID: id, AI: true});
+      //   }}
+      // />
         <div>
           Game ms per tick:
           <Slider value={state.config.msPerTick} min={1} max={1000}
@@ -178,12 +185,12 @@ const Settings = (props) => {
           />
         </div>
         <div>
-          Airports per player:
-          <Slider value={state.config.numAirports} min={1} max={5}
+          Airbases per player:
+          <Slider value={state.config.numAirbases} min={1} max={5}
             noOriginalValue={true}
-            onChange={(numAirports) => {
-              dispatch({type: 'EDIT_SESSION_PARAMS', numAirports});
-              dispatchToServer({type: 'EDIT_SESSION_PARAMS', numAirports});
+            onChange={(numAirbases) => {
+              dispatch({type: 'EDIT_SESSION_PARAMS', numAirbases});
+              dispatchToServer({type: 'EDIT_SESSION_PARAMS', numAirbases});
             }}
           />
         </div>

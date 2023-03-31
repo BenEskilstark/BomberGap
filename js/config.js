@@ -10,7 +10,7 @@ const config = {
 
   worldSize: {width: 1000, height: 1000},
 
-  numAirports: 3,
+  numAirbases: 3,
   startingMoney: 5000,
   maxPlaneDesigns: 4,
 

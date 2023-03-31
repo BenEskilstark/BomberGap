@@ -82,9 +82,9 @@ function Game(props) {
         const pos = normalizePos(p, state.game.worldSize, getCanvasSize());
         for (const entityID of state.game.selectedIDs) {
           const entity = state.game.entities[entityID];
-          if (entity.type == 'AIRPORT' && state.game.clickMode == 'LAUNCH') {
+          if (entity.type == 'AIRBASE' && state.game.clickMode == 'LAUNCH') {
             dispatchToServer({
-              type: 'LAUNCH_PLANE', targetPos: pos, airportID: entityID,
+              type: 'LAUNCH_PLANE', targetPos: pos, airbaseID: entityID,
               name: state.game.launchName,
             });
           } else {
@@ -116,7 +116,7 @@ function Game(props) {
   const planeNames = Object.keys(game.planeDesigns[state.clientID]);
   if (game.selectedIDs.length > 0) {
     const selections = {
-      'AIRPORT': 0,
+      'AIRBASE': 0,
     };
     for (const name of planeNames) {
       selections[name] = 0;
@@ -134,17 +134,17 @@ function Game(props) {
       }
     }
     let selectionContent = (<div>{planesSelected}</div>);
-    if (selections.AIRPORT > 0) {
-      const airport = game.entities[game.selectedIDs[0]];
-      const airportPlanes = [];
-      for (const name in airport.planes) {
-        airportPlanes.push(<div key={"airport_plane_" + name}>
-          {name}: {airport.planes[name]}
+    if (selections.AIRBASE > 0) {
+      const airbase = game.entities[game.selectedIDs[0]];
+      const airbasePlanes = [];
+      for (const name in airbase.planes) {
+        airbasePlanes.push(<div key={"airbase_plane_" + name}>
+          {name}: {airbase.planes[name]}
         </div>);
       }
       selectionContent = (
          <div>
-           Airport
+           Airbase
            {state.game.clickMode == 'LAUNCH' ? (
              <div>
                <div>Launch Type: </div>
@@ -152,7 +152,7 @@ function Game(props) {
                  options={planeNames}
                  displayOptions={planeNames.map(name => {
                    const planeType = game.planeDesigns[state.clientID][name].type;
-                   return `${name} (${planeType}): ${airport.planes[name]}`;
+                   return `${name} (${planeType}): ${airbase.planes[name]}`;
                  })}
                  selected={state.game.launchName}
                  onChange={(launchName) => dispatch({type: 'SET', launchName})}
