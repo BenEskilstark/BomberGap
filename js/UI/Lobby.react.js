@@ -45,8 +45,8 @@ const CreateGameCard = (props) => {
   return (
     <InfoCard
       style={{
-        width: 600,
-        marginLeft: 0,
+        width: 300,
+        marginLeft: '25%',
       }}
     >
       Game Name:&nbsp;
@@ -89,11 +89,11 @@ const SessionCard = (props) => {
             width: '100%',
             height: 30,
           }}
-          disabled={clients.length < 2}
           label={isHost(props.state) ? "Start" : "Ready"}
           disabled={
             (isHost(props.state) && !session.ready) ||
-            (!isHost(props.state) && session.ready)
+            (!isHost(props.state) && session.ready) ||
+            Object.keys(state.clientConfig.planeDesigns[state.clientID] ?? {}).length == 0
           }
           onClick={() => {
             if (isHost(props.state)) {

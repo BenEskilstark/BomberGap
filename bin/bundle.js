@@ -283,7 +283,7 @@ const GameOverModal = props => {
   const state = getState(); // HACK this comes from window;
 
   let title = winner == state.clientID ? 'You Win!' : 'You Lose!';
-  let body = winner == state.clientID ? "You sunk the enemy airport" : "Your airport was sunk";
+  let body = winner == state.clientID ? "You destroyed the enemy airport" : "Your airport was destroyed";
   if (disconnect) {
     title = "Opponent Disconnected";
     body = "The other player has closed the tab and disconnected. So I guess you win by forfeit...";
@@ -342,7 +342,7 @@ const PlayerStats = props => {
   } = props;
   return /*#__PURE__*/React.createElement("div", {
     style: {}
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, isYou ? 'You' : 'Opponent')), /*#__PURE__*/React.createElement("div", null, "Fighter sorties flown: ", stats[clientID].fighter_sorties), /*#__PURE__*/React.createElement("div", null, "Bomber sorties flown: ", stats[clientID].bomber_sorties), /*#__PURE__*/React.createElement("div", null, "Enemy fighters shot down: ", stats[otherID].fighters_shot_down), /*#__PURE__*/React.createElement("div", null, "Enemy bombers shot down: ", stats[otherID].bombers_shot_down), /*#__PURE__*/React.createElement("div", null, "Fighter aces: ", stats[clientID].fighter_aces), /*#__PURE__*/React.createElement("div", null, "Planes lost to no fuel: ", stats[clientID].planes_no_fuel), /*#__PURE__*/React.createElement("div", null, "Enemy ships sunk: ", stats[otherID].ships_sunk));
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, isYou ? 'You' : 'Opponent')), /*#__PURE__*/React.createElement("div", null, "Fighter sorties flown: ", stats[clientID].fighter_sorties), /*#__PURE__*/React.createElement("div", null, "Bomber sorties flown: ", stats[clientID].bomber_sorties), /*#__PURE__*/React.createElement("div", null, "Enemy fighters shot down: ", stats[otherID].fighters_shot_down), /*#__PURE__*/React.createElement("div", null, "Enemy bombers shot down: ", stats[otherID].bombers_shot_down), /*#__PURE__*/React.createElement("div", null, "Fighter aces: ", stats[clientID].fighter_aces), /*#__PURE__*/React.createElement("div", null, "Planes lost to no fuel: ", stats[clientID].planes_no_fuel), /*#__PURE__*/React.createElement("div", null, "Enemy airports destroyed: ", stats[otherID].airports_destroyed));
 };
 module.exports = GameOverModal;
 },{"../clientToServer":7,"bens_ui_components":83,"react":100}],3:[function(require,module,exports){
@@ -405,8 +405,8 @@ const CreateGameCard = props => {
   const [name, setName] = useState('');
   return /*#__PURE__*/React.createElement(InfoCard, {
     style: {
-      width: 600,
-      marginLeft: 0
+      width: 300,
+      marginLeft: '25%'
     }
   }, "Game Name:\xA0", /*#__PURE__*/React.createElement(TextField, {
     value: name,
@@ -455,9 +455,8 @@ const SessionCard = props => {
       width: '100%',
       height: 30
     },
-    disabled: clients.length < 2,
     label: isHost(props.state) ? "Start" : "Ready",
-    disabled: isHost(props.state) && !session.ready || !isHost(props.state) && session.ready,
+    disabled: isHost(props.state) && !session.ready || !isHost(props.state) && session.ready || Object.keys(state.clientConfig.planeDesigns[state.clientID] ?? {}).length == 0,
     onClick: () => {
       if (isHost(props.state)) {
         dispatchToServer({
