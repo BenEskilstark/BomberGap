@@ -148,6 +148,13 @@ const Settings = (props) => {
     planeNames = Object.keys(state.clientConfig.planeDesigns[state.clientID]);
   }
 
+      // <Button
+      //   label="VS. AI Opponent"
+      //   disabled={clients.length >= 2}
+      //   onClick={() => {
+      //     dispatchToServer({type: 'JOIN_SESSION', sessionID: id, AI: true});
+      //   }}
+      // />
   return (
     <div>
       <div><b>Settings:</b></div>
@@ -157,13 +164,6 @@ const Settings = (props) => {
           justifyContent: 'space-between',
         }}
       >
-      // <Button
-      //   label="VS. AI Opponent"
-      //   disabled={clients.length >= 2}
-      //   onClick={() => {
-      //     dispatchToServer({type: 'JOIN_SESSION', sessionID: id, AI: true});
-      //   }}
-      // />
         <div>
           Game ms per tick:
           <Slider value={state.config.msPerTick} min={1} max={1000}

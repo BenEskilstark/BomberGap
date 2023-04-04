@@ -447,17 +447,7 @@ const SessionCard = props => {
     style: {
       textAlign: 'center'
     }
-  }, /*#__PURE__*/React.createElement("b", null, name)), "Players: ", clients.length, /*#__PURE__*/React.createElement(Button, {
-    label: "VS. AI Opponent",
-    disabled: clients.length >= 2,
-    onClick: () => {
-      dispatchToServer({
-        type: 'JOIN_SESSION',
-        sessionID: id,
-        AI: true
-      });
-    }
-  }), joinedSessionID == id ? /*#__PURE__*/React.createElement(Settings, {
+  }, /*#__PURE__*/React.createElement("b", null, name)), "Players: ", clients.length, joinedSessionID == id ? /*#__PURE__*/React.createElement(Settings, {
     state: state,
     dispatch: dispatch
   }) : null, joinedSessionID == id ? /*#__PURE__*/React.createElement(Button, {
@@ -518,6 +508,14 @@ const Settings = props => {
     numPlaneDesigns = Object.keys(state.clientConfig.planeDesigns[state.clientID]).length;
     planeNames = Object.keys(state.clientConfig.planeDesigns[state.clientID]);
   }
+
+  // <Button
+  //   label="VS. AI Opponent"
+  //   disabled={clients.length >= 2}
+  //   onClick={() => {
+  //     dispatchToServer({type: 'JOIN_SESSION', sessionID: id, AI: true});
+  //   }}
+  // />
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, "Settings:")), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',

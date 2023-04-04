@@ -59,7 +59,7 @@ const tick = (game, session, socketClients) => {
       } else if (entity.targetPos == null) {
         // we've arrived at home airbase
         delete game.entities[entity.id];
-        getNearestAirbase(game, entity).planes[entity.type]++;
+        getNearestAirbase(game, entity).planes[entity.name]++;
       } else if (isEnemy) {
         const targetEntity = game.entities[entity.targetEnemy];
         // kill the enemy

@@ -90,7 +90,7 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
       const airbase = game.entities[airbaseID];
 
       // check that this plane is launchable
-      if (airbase.planes[name] <= 0) break;
+      if (!airbase || airbase.planes[name] <= 0) break;
       airbase.planes[name]--;
 
       const plane = makePlane(
