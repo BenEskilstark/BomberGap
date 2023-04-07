@@ -44,9 +44,22 @@ const getOtherClientID = (session, clientID) => {
   }
 };
 
+const getEntitiesByType = (game, type, clientID) => {
+  const entities = [];
+  for (const entityID in game.entities) {
+    const entity = game.entities[entityID];
+    if ((entity.clientID == clientID || !clientID) && entity.type == type) {
+      entities.push(entity);
+    }
+  }
+  return entities;
+}
+
+
 module.exports = {
   getNearestAirbase,
   getEntitiesByPlayer,
   getOtherClientID,
   getNumAirbases,
+  getEntitiesByType,
 };

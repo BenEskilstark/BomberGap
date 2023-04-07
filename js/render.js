@@ -32,6 +32,20 @@ const render = (state) => {
 
   for (const entityID in game.entities) {
     const entity = game.entities[entityID];
+
+    if (entity.type == 'EXPLOSION') {
+      ctx.fillStyle = "orange";
+      ctx.beginPath();
+      ctx.arc(
+        entity.position.x, entity.position.y,
+        entity.maxRadius * entity.age / entity.duration,
+        0, 2*Math.PI,
+      );
+      ctx.closePath();
+      ctx.fill();
+      continue;
+    }
+
     ctx.fillStyle = "blue";
     if (
       (!isHost(state) && entity.clientID == state.clientID) ||

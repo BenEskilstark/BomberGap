@@ -883,7 +883,7 @@ module.exports = {
   setupSocket
 };
 },{"./config":8}],8:[function(require,module,exports){
-const isLocalHost = true;
+const isLocalHost = false;
 const config = {
   isLocalHost,
   URL: isLocalHost ? null : "https://benhub.io",
@@ -1163,6 +1163,13 @@ const rootReducer = (state, action) => {
         } = action;
         return {
           ...state,
+          clientConfig: {
+            money: config.startingMoney,
+            planes: {},
+            // {[name]: number}
+            planeDesigns: {} // {[clientID]: {[name]: Plane}}
+          },
+
           modal: /*#__PURE__*/React.createElement(GameOverModal, action)
         };
       }
@@ -1441,6 +1448,14 @@ const render = state => {
   }
   for (const entityID in game.entities) {
     const entity = game.entities[entityID];
+    if (entity.type == 'EXPLOSION') {
+      ctx.fillStyle = "orange";
+      ctx.beginPath();
+      ctx.arc(entity.position.x, entity.position.y, entity.maxRadius * entity.age / entity.duration, 0, 2 * Math.PI);
+      ctx.closePath();
+      ctx.fill();
+      continue;
+    }
     ctx.fillStyle = "blue";
     if (!isHost(state) && entity.clientID == state.clientID || isHost(state) && entity.clientID != state.clientID) {
       ctx.fillStyle = "red";

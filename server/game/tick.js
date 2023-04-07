@@ -9,11 +9,19 @@ const {
 } = require('bens_utils').vectors;
 const {
   getEntitiesByPlayer, getNearestAirbase, getOtherClientID,
-  getNumAirbases,
+  getNumAirbases, getEntitiesByType,
 } = require('./selectors');
 
 const tick = (game, session, socketClients) => {
   game.time += 1;
+
+  // update explosions
+  for (const explosion of getEntitiesByType(game, 'EXPLOSION')) {
+    explosion.age++;
+    if (explosion.age > explosion.duration) {
+      delete game.entities[explosion.id];
+    }
+  }
 
   // move and fight entities
   for (const entityID in game.entities) {

@@ -105,8 +105,25 @@ const makePlane = (
   };
 }
 
+const makeExplosion = (
+  position, maxRadius, duration, clientID,
+) => {
+  return {
+    id: nextID++,
+    clientID,
+    type: 'EXPLOSION',
+    duration,
+    age: 0,
+    position,
+    maxRadius,
+    hasBeenDiscovered: true,
+  }
+};
+
+
 module.exports = {
   initGameState,
   makeAirbase,
   makePlane,
+  makeExplosion,
 };

@@ -4,6 +4,8 @@
   - Things to bring over from SAC:
     - ammo (planeDesign, tick, render)
     - styling (LeftHandSideBar)
+    - explosions (state, tick, render)
+      - tick to create them and to make sure they are visible
 
   - CPU opponent:
     - UI for selecting AI opponent

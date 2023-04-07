@@ -41,6 +41,11 @@ const rootReducer = (state, action) => {
 
       return {
         ...state,
+        clientConfig: {
+          money: config.startingMoney,
+          planes: {}, // {[name]: number}
+          planeDesigns: {}, // {[clientID]: {[name]: Plane}}
+        },
         modal: <GameOverModal {...action} />
       };
     }
