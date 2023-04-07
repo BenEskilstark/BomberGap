@@ -1,6 +1,11 @@
 
   - play test
 
+  - Things to bring over from SAC:
+    - ammo (planeDesign, tick, render)
+    - formations (ui/Game)
+    - styling (LeftHandSideBar)
+
   - CPU opponent:
     - UI for selecting AI opponent
     - server state for AI opponent
