@@ -10,6 +10,8 @@ const config = {
 
   worldSize: {width: 1000, height: 1000},
 
+  formationRadius: 50,
+
   numAirbases: 3,
   startingMoney: 5000,
   maxPlaneDesigns: 4,

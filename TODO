@@ -3,7 +3,6 @@
 
   - Things to bring over from SAC:
     - ammo (planeDesign, tick, render)
-    - formations (ui/Game)
     - styling (LeftHandSideBar)
 
   - CPU opponent:

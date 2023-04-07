@@ -11,6 +11,7 @@ const {
 const {dispatchToServer} = require('../clientToServer');
 import postVisit from '../postVisit';
 const {render} = require('../render');
+const {dist, subtract, add} = require('bens_utils').vectors;
 const {useState, useMemo, useEffect, useReducer} = React;
 
 const normalizePos = (pos, worldSize, canvasSize) => {
@@ -80,15 +81,22 @@ function Game(props) {
       },
       rightDown: (state, dispatch, p) => {
         const pos = normalizePos(p, state.game.worldSize, getCanvasSize());
+        const leadPlaneID = state.game.selectedIDs[0];
         for (const entityID of state.game.selectedIDs) {
           const entity = state.game.entities[entityID];
           if (entity.type == 'AIRBASE' && state.game.clickMode == 'LAUNCH') {
             dispatchToServer({
               type: 'LAUNCH_PLANE', targetPos: pos, airbaseID: entityID,
-              name: state.game.launchName,
+              name: state.game.launchName, clientID: state.game.clientID,
             });
           } else {
-            dispatchToServer({type: 'SET_TARGET', targetPos: pos, entityID});
+            const leadPlane = state.game.entities[leadPlaneID];
+            let adjustedPos = pos;
+            if (dist(entity.position, leadPlane.position) < state.config.formationRadius) {
+              const diff = subtract(leadPlane.position, entity.position);
+              adjustedPos = subtract(pos, diff);
+            }
+            dispatchToServer({type: 'SET_TARGET', targetPos: adjustedPos, entityID});
           }
         }
       },

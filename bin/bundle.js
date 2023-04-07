@@ -25,6 +25,11 @@ const {
   render
 } = require('../render');
 const {
+  dist,
+  subtract,
+  add
+} = require('bens_utils').vectors;
+const {
   useState,
   useMemo,
   useEffect,
@@ -120,6 +125,7 @@ function Game(props) {
     },
     rightDown: (state, dispatch, p) => {
       const pos = normalizePos(p, state.game.worldSize, getCanvasSize());
+      const leadPlaneID = state.game.selectedIDs[0];
       for (const entityID of state.game.selectedIDs) {
         const entity = state.game.entities[entityID];
         if (entity.type == 'AIRBASE' && state.game.clickMode == 'LAUNCH') {
@@ -127,12 +133,19 @@ function Game(props) {
             type: 'LAUNCH_PLANE',
             targetPos: pos,
             airbaseID: entityID,
-            name: state.game.launchName
+            name: state.game.launchName,
+            clientID: state.game.clientID
           });
         } else {
+          const leadPlane = state.game.entities[leadPlaneID];
+          let adjustedPos = pos;
+          if (dist(entity.position, leadPlane.position) < state.config.formationRadius) {
+            const diff = subtract(leadPlane.position, entity.position);
+            adjustedPos = subtract(pos, diff);
+          }
           dispatchToServer({
             type: 'SET_TARGET',
-            targetPos: pos,
+            targetPos: adjustedPos,
             entityID
           });
         }
@@ -261,7 +274,7 @@ function Game(props) {
 }
 module.exports = Game;
 
-},{"../clientToServer":7,"../postVisit":10,"../render":15,"bens_ui_components":83,"react":100}],2:[function(require,module,exports){
+},{"../clientToServer":7,"../postVisit":10,"../render":15,"bens_ui_components":83,"bens_utils":90,"react":100}],2:[function(require,module,exports){
 const React = require('react');
 const {
   Modal
@@ -880,6 +893,7 @@ const config = {
     width: 1000,
     height: 1000
   },
+  formationRadius: 50,
   numAirbases: 3,
   startingMoney: 5000,
   maxPlaneDesigns: 4,
