@@ -1,4 +1,4 @@
-const isLocalHost = false;
+const isLocalHost = true;
 
 const config = {
   isLocalHost,

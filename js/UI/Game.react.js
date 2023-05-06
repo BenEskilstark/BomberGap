@@ -12,28 +12,11 @@ const {dispatchToServer} = require('../clientToServer');
 import postVisit from '../postVisit';
 const {render} = require('../render');
 const {dist, subtract, add} = require('bens_utils').vectors;
+const LeftHandSideBar = require('./LeftHandSideBar.react');
+const RightHandSideBar = require('./RightHandSideBar.react');
+const {normalizePos, getCanvasSize} = require('../selectors/selectors');
+
 const {useState, useMemo, useEffect, useReducer} = React;
-
-const normalizePos = (pos, worldSize, canvasSize) => {
-  return {
-    x: pos.x * worldSize.width / canvasSize.width,
-    y: pos.y * worldSize.height / canvasSize.height,
-  };
-}
-
-const getCanvasSize = () => {
-  if (window.innerWidth > window.innerHeight) {
-    return {
-      width: window.innerHeight,
-      height: window.innerHeight,
-    };
-  } else {
-    return {
-      width: window.innerWidth,
-      height: window.innerWidth,
-    };
-  }
-}
 
 function Game(props) {
   const {state, dispatch, getState} = props;
@@ -118,77 +101,6 @@ function Game(props) {
     }
   }, []);
 
-
-  // selectionCard
-  let selectionCard = null;
-  const planeNames = Object.keys(game.planeDesigns[state.clientID]);
-  if (game.selectedIDs.length > 0) {
-    const selections = {
-      'AIRBASE': 0,
-    };
-    for (const name of planeNames) {
-      selections[name] = 0;
-    }
-    for (const entityID of game.selectedIDs) {
-      const entity = game.entities[entityID];
-      selections[entity.name] += 1;
-    }
-    const planesSelected = [];
-    for (const name in selections) {
-      if (selections[name] > 0) {
-        planesSelected.push(<div key={"plane_" + name}>
-          {name}: {selections[name]}
-        </div>)
-      }
-    }
-    let selectionContent = (<div>{planesSelected}</div>);
-    if (selections.AIRBASE > 0) {
-      const airbase = game.entities[game.selectedIDs[0]];
-      const airbasePlanes = [];
-      for (const name in airbase.planes) {
-        airbasePlanes.push(<div key={"airbase_plane_" + name}>
-          {name}: {airbase.planes[name]}
-        </div>);
-      }
-      selectionContent = (
-         <div>
-           Airbase
-           {state.game.clickMode == 'LAUNCH' ? (
-             <div>
-               <div>Launch Type: </div>
-               <RadioPicker
-                 options={planeNames}
-                 displayOptions={planeNames.map(name => {
-                   const planeType = game.planeDesigns[state.clientID][name].type;
-                   return `${name} (${planeType}): ${airbase.planes[name]}`;
-                 })}
-                 selected={state.game.launchName}
-                 onChange={(launchName) => dispatch({type: 'SET', launchName})}
-               />
-             </div>
-           ) : null}
-         </div>
-       );
-    }
-    selectionCard = (
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          border: '1px solid black',
-          padding: 8,
-          margin: 4,
-          minWidth: 150,
-          backgroundColor: 'white',
-        }}
-      >
-        {selectionContent}
-      </div>
-    );
-  }
-
-
   return (
     <div
       style={{
@@ -220,7 +132,8 @@ function Game(props) {
         width={getCanvasSize().width}
         height={getCanvasSize().height}
       />
-      {selectionCard}
+        <LeftHandSideBar state={state} dispatch={dispatch} />
+        <RightHandSideBar state={state} dispatch={dispatch} />
     </div>
   );
 }

@@ -83,6 +83,7 @@ const makePlane = (
     speed,
     productionTime,
     name,
+    ammo,
   } = parameters;
   return {
     clientID, id: nextID++,
@@ -96,6 +97,7 @@ const makePlane = (
     speed,
     productionTime,
     name,
+    ammo,
 
     position,
     targetPos,

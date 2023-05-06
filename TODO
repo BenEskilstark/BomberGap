@@ -1,11 +1,54 @@
 
   - play test
+    - select/launch from multiple airports at once
 
-  - Things to bring over from SAC:
-    - ammo (planeDesign, tick, render)
-    - styling (LeftHandSideBar)
-    - explosions (state, tick, render)
-      - tick to create them and to make sure they are visible
+  - Next:
+    - buying/producing planes from factories and assigning to airports
+    - cities w/taxes
+    - placing buildings (cities, factories, airports, labs)
+    - additional features:
+      - bombers defend themselves
+      - fighter/bombers
+      - drones that don't return to base
+      - carrier planes
+        - launch control from plane
+        - return to mothership
+        - buy them again at airport
+      - stealth
+    - tech tree/progression from labs
+      - gen1
+        - US
+          - B47
+          - F86
+        - USSR
+          - IL28
+          - MIG15
+          - Yak25
+      - gen2
+        - US
+          - B52 (+ XF86)
+          - F102
+          - U2
+        - USSR
+          - TU16 (defends itself)
+          - MIG21
+          - TU123 (drone recon)
+      - gen3
+        - US
+          - XB70
+          - F4 (fighter/bomber)
+          - SR71
+        - USSR
+          - kh101 (drone bomb)
+          - MIG25
+      - gen4
+        - US
+          - B2 (stealth)
+          - F117 (stealth fighter/bomber)
+        - USSR
+          - TU160 (+ kh101 drones)
+          - TU22M (+ kh22 drone fighter)
+
 
   - CPU opponent:
     - UI for selecting AI opponent
@@ -14,12 +57,7 @@
     - randomized AI daemon for launching planes
 
   - better randomized positioning of airports
-  - toggle to display plane stats next to them
-
-
-  - old bugs:
-    - menu of carrier can disappear?
-    - fix finished games not clearing sometimes
+    - throwing darts
 
 
   - additional features:
@@ -29,7 +67,3 @@
   - maybe features
     - planes have to refit before they can launch again
 
-
-  - update multiplayer template:
-    - something is broken about postVisit (not detecting unique)
-    - wrap server stuff in try/catch

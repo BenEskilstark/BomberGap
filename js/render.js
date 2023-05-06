@@ -92,6 +92,14 @@ const render = (state) => {
         ctx.closePath();
         ctx.stroke();
       }
+    }
+    if (entity.ammo == 0 && entity.type != 'RECON') {
+      ctx.strokeStyle = 'red';
+    }
+    if (
+      game.selectedIDs.includes(entityID) ||
+      (entity.ammo == 0 && entity.type != 'RECON' && entity.clientID == 1)
+    ) {
       // selection outline
       ctx.lineWidth = 2;
       ctx.strokeStyle = "gold";

@@ -86,29 +86,35 @@ const tick = (game, session, socketClients) => {
         }
         let didKill = false;
         if (targetEntity.type == 'AIRBASE') {
-          delete game.entities[targetEntity.id];
           game.stats[targetEntity.clientID].airbases_destroyed++;
-          if (getNumAirbases(game, targetEntity.clientID) == 0) {
-            doGameOver(session, socketClients, entity.clientID, entity.clientID);
-            return;
-          }
+          didKill = true;
         } else if (targetEntity.type == 'FIGHTER') {
-          delete game.entities[targetEntity.id];
           game.stats[targetEntity.clientID].fighters_shot_down++;
           didKill = true;
         } else if (targetEntity.type == 'BOMBER') {
-          delete game.entities[targetEntity.id];
           game.stats[targetEntity.clientID].bombers_shot_down++;
           didKill = true;
         } else if (targetEntity.type == 'RECON') { // update stats based on RECON
-          delete game.entities[targetEntity.id];
           game.stats[targetEntity.clientID].recons_shot_down++;
           didKill = true;
         }
-        if (didKill) { // compute aces
+
+        // kill target, compute aces, ammo
+        if (didKill) {
+          entity.ammo--;
           entity.kills++;
           if (entity.kills == 5) {
             game.stats[entity.clientID].fighter_aces++;
+          }
+          const explosion = makeExplosion(
+            targetEntity.position,
+            targetEntity.isBuilding ? 25 : 10,
+            1200 / state.config.msPerTick,
+          );
+          game.entities[explosion.id] = explosion;
+          delete game.entities[targetEntity.id];
+          if (getNumAirbases(game, targetEntity.clientID) == 0) {
+            return doGameOver(state, entity.clientID);
           }
         }
       } else {
@@ -142,27 +148,40 @@ const tick = (game, session, socketClients) => {
     const visibleEntities = {};
     for (const entityID in getEntitiesByPlayer(game, id)) {
       const entity = game.entities[entityID];
+      if (id == 1) visibleEntities[entityID] = entity;
       for (const otherID in getEntitiesByPlayer(game, otherClientID)) {
-        // if (visibleEntities[otherID]) continue;
+
         const other = game.entities[otherID];
         if (other.hasBeenDiscovered) {
-          visibleEntities[otherID] = other;
+          if (id == 1) visibleEntities[otherID] = other;
         }
         if (dist(entity.position, other.position) <= entity.vision) {
-          visibleEntities[otherID] = other;
+          if (id == 1) {
+            visibleEntities[otherID] = other;
+            if (other.isPlane) {
+              game.planeTypesSeen[other.name] = true;
+            }
+          }
           if (other.isBuilding) {
             other.hasBeenDiscovered = true;
           }
           // target:
-          if (entity.type == 'FIGHTER' && entity.targetEnemy == null && other.isPlane) {
+          if (
+            entity.type == 'FIGHTER' && entity.ammo > 0 &&
+            entity.targetEnemy == null && other.isPlane
+          ) {
             entity.targetEnemy = otherID;
           }
-          if (entity.type == 'BOMBER' && entity.targetEnemy == null && other.isBuilding) {
+          if (
+            entity.type == 'BOMBER' && entity.ammo > 0 &&
+            entity.targetEnemy == null && other.isBuilding
+          ) {
             entity.targetEnemy = otherID;
           }
         }
       }
     }
+
     const clientAction = {
       type: "SET_ENTITIES",
       entities: {...getEntitiesByPlayer(game, id), ...visibleEntities},
