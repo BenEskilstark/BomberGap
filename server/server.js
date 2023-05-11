@@ -4,7 +4,7 @@ const cors = require('cors');
 const {deepCopy} = require('bens_utils').helpers;
 const {initSocketServer} = require('./socket');
 const {gameReducer} = require('./game/gameReducer');
-const {initGameState} = require('./game/state');
+const {initGameState, } = require('./game/state');
 const {config} = require('../js/config');
 
 const port = process.env.PORT || 8000;
@@ -24,13 +24,13 @@ const newSession = (clientID) => {
     name: "Game #" + id,
     clients: [clientID],
     config: deepCopy(config),
-    dynamicConfig: {
-      [clientID]: {
-        money: config.startingMoney,
-        planes: {},
-        planeDesigns: {},
-      }
-    },
+    // dynamicConfig: {
+    //   [clientID]: {
+    //     money: config.startingMoney,
+    //     planes: {},
+    //     planeDesigns: {},
+    //   }
+    // },
     game: null,
   };
 }

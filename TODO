@@ -9,12 +9,15 @@
       - isDogfighter that can defend itself but doesn't seek out fighters
       - isDrone that doesn't return to base and dies on contact
     - isNuclear that can target cities
+    - track research gen per player
+    - removing dynamic config for now
 
 
   - potentially degenerate strategies:
     - using faster bombers to lead fighters until they're out of fuel
     - only make 1 B52 and tons of fighters for infinite fuel
     - defending with TU-16s which draw off fighters
+    - building tons of cities before opponent planes can even reach you
 
 
   - play test
@@ -23,7 +26,7 @@
   - Next:
     - buying/producing planes from factories and assigning to airports
     - cities w/taxes
-    - placing buildings (cities, factories, airports, labs)
+    - placing buildings at random (cities, factories, airports, labs)
     - additional features:
       - bombers defend themselves
       - fighter/bombers
