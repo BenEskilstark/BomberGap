@@ -2,15 +2,16 @@ const {
   leaveSession, emitToSession, emitToAllClients,
 } = require('../sessions');
 const {
-  initGameState, makeAirbase, makePlane,
+  initGameState, makeBuilding, makePlane,
 } = require('./state');
 const {
   makeVector, vectorTheta, subtract, add, dist, equals,
 } = require('bens_utils').vectors;
 const {
   getEntitiesByPlayer, getNearestAirbase, getOtherClientID,
-  getNumAirbases,
+  getPlaneDesignsUpToGen,
 } = require('./selectors');
+const {throwDart} = require('./utils');
 const {tick, doGameOver} = require('./tick');
 
 
@@ -22,34 +23,68 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
 
   const game = session.game;
   switch (action.type) {
-    case 'ADD_PLANE_DESIGN': {
-      const {clientID, plane} = action;
-      if (!session.dynamicConfig[clientID]) {
-        session.dynamicConfig[clientID] = {};
-      }
-      if (!session.dynamicConfig[clientID].planeDesigns) {
-        session.dynamicConfig[clientID].planeDesigns = {};
-      }
-      if (!session.dynamicConfig[clientID].planes) {
-        session.dynamicConfig[clientID].planes = {};
-      }
-      if (!session.dynamicConfig[clientID].planes[plane.name]) {
-        session.dynamicConfig[clientID].planes[plane.name] = 0;
-      }
-      session.dynamicConfig[clientID].planeDesigns[plane.name] = plane;
-      emitToSession(session, socketClients, action, clientID);
+    case 'BUILD_PLANE': {
+      const {name} = action;
+      const nationalityIndex = game.players[clientID].nationalityIndex;
+      game.players[clientID].productionQueue.push({
+        name,
+        cost: session.config.planeDesigns[nationalityIndex][name].cost,
+      });
       break;
     }
-    case 'BUY_PLANE': {
-      const {plane} = action;
-      if (plane.cost > session.dynamicConfig[clientID].money) return session;
-      session.dynamicConfig[clientID].money -= plane.cost;
-      if (!session.dynamicConfig[clientID].planes[plane.name]) {
-        session.dynamicConfig[clientID].planes[plane.name] = 0;
-      }
-      session.dynamicConfig[clientID].planes[plane.name]++;
+    case 'CANCEL_PLANE': {
+      // TODO:
+
       break;
     }
+    case 'BUY_BUILDING': {
+      const {buildingType} = action;
+      let cost = 0;
+      switch (buildingType) {
+        case 'AIRBASE':
+          cost = session.config.airbaseCost;
+          break;
+        case 'LAB':
+          cost = session.config.labCost;
+          break;
+        case 'FACTORY':
+          cost = session.config.factoryCost;
+          break;
+        case 'CITY':
+          const numCities = getEntitiesByType(game, 'CITY', clientID);
+          cost = session.config.cityCost * Math.pow(2, numCities);
+      }
+      if (cost > game.players[clientID].money) return;
+      game.players[clientID].money -= cost;
+
+      const {nationalityIndex, gen} = game.players[clientID];
+      const position = throwDart(nationalityIndex, game.worldSize);
+      let building = null;
+      if (buildingType == 'AIRBASE') {
+        const planes = {};
+        const planeDesigns = getPlaneDesignsUpToGen(nationalityIndex, gen);
+        for (const name in planeDesigns) {
+          planes[name] = 0;
+        }
+        building = makeBuilding(clientID, position, buildingType, planes);
+      } else {
+        building = makeBuilding(clientID, position, buildingType);
+      }
+      game.entities[building.id] = building;
+
+      break;
+    }
+    case 'START_RESEARCH': {
+      const {nationalityIndex, researchProgress} = game.players[clientID];
+      researchProgress.isStarted = true;
+      break;
+    }
+    case 'PAUSE_RESEARCH': {
+      const {nationalityIndex, researchProgress} = game.players[clientID];
+      researchProgress.isStarted = false;
+      break;
+    }
+
     case 'EDIT_SESSION_PARAMS': {
       delete action.type;
       for (const property in action) {
@@ -63,7 +98,7 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
     case 'START': {
       console.log("Start", session.id);
       session.game = {
-        ...initGameState(session.clients, session.config, session.dynamicConfig),
+        ...initGameState(session.clients, session.config),
         prevTickTime: new Date().getTime(),
         tickInterval: setInterval(
           // HACK: dispatch is only available via dispatch function above
@@ -76,7 +111,7 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
         const clientAction = {
           type: "START",
           entities: getEntitiesByPlayer(session.game, id),
-        }
+        };
         socketClients[id].emit('receiveAction', clientAction);
       }
       break;
@@ -85,6 +120,7 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
       doGameOver(session, socketClients, clientID, null, true);
       return state;
     }
+
     case 'LAUNCH_PLANE': {
       const {name, airbaseID, targetPos} = action;
       const airbase = game.entities[airbaseID];
@@ -93,28 +129,20 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
       if (!airbase || airbase.planes[name] <= 0) break;
       airbase.planes[name]--;
 
+      const nationalityIndex = game.players[clientID].nationalityIndex;
+
       const plane = makePlane(
         clientID, {...airbase.position},
-        game.planeDesigns[clientID][name].type,
-        targetPos,
-        {...game.planeDesigns[clientID][name]},
+        targetPos, {...session.config.planeDesigns[nationalityIndex][name]},
       );
       game.entities[plane.id] = plane;
 
-      // update sorties stat
-      if (plane.type === 'FIGHTER') {
-        game.stats[clientID].fighter_sorties++;
-      } else if (plane.type === 'BOMBER') {
-        game.stats[clientID].bomber_sorties++;
-      } else if (plane.type === 'RECON') {
-        game.stats[clientID].recon_sorties++;
-      }
+      // TODO: equip plane with drones and/or fighters
 
-      const clientAction = {
-        ...action,
-        plane,
-      };
+      // TODO: update sorties stat
 
+      // don't need to send since it'll get sent with the next tick
+      // const clientAction = {...action, plane};
       // emitToSession(session, socketClients, clientAction, clientID, true);
       break;
     }
@@ -140,7 +168,5 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
 
   return state;
 };
-
-
 
 module.exports = {gameReducer};

@@ -9,26 +9,52 @@ const {
 } = require('bens_utils').vectors;
 const {
   getEntitiesByPlayer, getNearestAirbase, getOtherClientID,
-  getNumAirbases, getEntitiesByType,
+  getNumBuilding, getEntitiesByType,
 } = require('./selectors');
 
 const tick = (game, session, socketClients) => {
   game.time += 1;
 
-  // update explosions
+  updateIncome(game);
+  updateResearch(session, game, socketClients);
+  updateProduction(session, game, socketClients);
+  updateExplosions(game);
+  moveAndFight(game);
+  computeVisionAndTargeting(session, game, socketClients);
+}
+
+
+const updateIncome = (game) => {
+
+};
+
+
+const updateResearch = (game) => {
+
+};
+
+
+const updateProduction = (game) => {
+
+};
+
+
+const updateExplosions = (game) => {
   for (const explosion of getEntitiesByType(game, 'EXPLOSION')) {
     explosion.age++;
     if (explosion.age > explosion.duration) {
       delete game.entities[explosion.id];
     }
   }
+}
 
-  // move and fight entities
+
+const moveAndFight = (game) => {
   for (const entityID in game.entities) {
     entity = game.entities[entityID];
     if (!entity.speed) continue;
 
-    // check for enemy already targetted
+    // check for enemy already targeted
     let targetPos = entity.targetPos;
     let isEnemy = false;
     if (entity.targetEnemy) {
@@ -85,6 +111,7 @@ const tick = (game, session, socketClients) => {
           continue;
         }
         let didKill = false;
+        // TODO: update stats
         if (targetEntity.type == 'AIRBASE') {
           game.stats[targetEntity.clientID].airbases_destroyed++;
           didKill = true;
@@ -140,9 +167,10 @@ const tick = (game, session, socketClients) => {
       game.stats[entity.clientID].planes_no_fuel++;
     }
   }
+}
 
 
-  // compute vision and targetting
+const computeVisionAndTargeting = (session, game, socketClients) => {
   for (const id of session.clients) {
     const otherClientID = getOtherClientID(session, id);
     const visibleEntities = {};
@@ -189,6 +217,7 @@ const tick = (game, session, socketClients) => {
     socketClients[id].emit("receiveAction", clientAction);
   }
 }
+
 
 const doGameOver = (session, socketClients, clientID, winner, disconnect) => {
   const game = session.game;

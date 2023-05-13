@@ -20,13 +20,13 @@ const config = {
   startingMoney: 5000,
 
 
-  cityCost: 2000,
+  cityCost: 1000,
   moneyRate: 50, // money made per second
   factoryCost: 4000,
   productionRate: 50, // money spent per second per factory
   labCost: 10000,
   researchRate: 50, // money spent per second per lab
-  genCost: [0, 10000, 40000, 80000], // cost per generation
+  genCost: [0, 0, 10000, 40000, 80000], // cost per generation
   airbaseCost: 10000,
 
   stealthVisionReduction: 0.5,
