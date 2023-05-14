@@ -24,11 +24,12 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
   const game = session.game;
   switch (action.type) {
     case 'BUILD_PLANE': {
-      const {name} = action;
+      const {name, airbaseID} = action;
       const nationalityIndex = game.players[clientID].nationalityIndex;
       game.players[clientID].productionQueue.push({
         name,
         cost: session.config.planeDesigns[nationalityIndex][name].cost,
+        airbaseID,
       });
       break;
     }

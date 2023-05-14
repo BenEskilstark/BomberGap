@@ -16,6 +16,11 @@ const gameReducer = (game, action) => {
       }
       return {...game};
     }
+    case 'SET_PLAYER_STATE': {
+      const {clientID, player} = action;
+      game[clientID] = player;
+      return {...game};
+    }
     case 'SET_ENTITIES': {
       const selectedIDs = []
       for (const id of game.selectedIDs) {

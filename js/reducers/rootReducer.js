@@ -77,28 +77,8 @@ const rootReducer = (state, action) => {
     case 'SET_MODAL':
     case 'DISMISS_MODAL':
       return modalReducer(state, action);
-    case 'BUY_PLANE': {
-      const {plane} = action;
-      if (plane.cost > state.clientConfig.money) return state;
-      if (!state.clientConfig.planes[plane.name]) {
-        state.clientConfig.planes[plane.name] = 0;
-      }
-      state.clientConfig.planes[plane.name]++;
-      state.clientConfig.money -= plane.cost;
-      return {...state};
-    }
-    case 'ADD_PLANE_DESIGN': {
-      const {clientID, plane} = action;
-      if (!state.clientConfig.planeDesigns[clientID]) {
-        state.clientConfig.planeDesigns[clientID] = {};
-      }
-      state.clientConfig.planeDesigns[clientID][plane.name] = plane;
-      if (clientID == state.clientID) {
-        state.clientConfig.planes[plane.name] = 0;
-      }
-      return {...state};
-    }
     case 'SET':
+    case 'SET_PLAYER_STATE':
     case 'SELECT_ENTITIES':
     case 'SET_ENTITIES': {
       if (!state.game) return state;

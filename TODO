@@ -1,49 +1,45 @@
 
-  - refactors:
-    - removed all plane designer constraints from config
-    - adding starting airbases, cities, factories, labs, to config
-    - type: fighter/bomber/recon -> plane with isFighter, isBomber types
-    - add planeCapacity property to denote things that are carriers, planeTypes to restrict which ones
-    - dogfightings
-      - add gen bonus for dogfights
-      - isDogfighter that can defend itself but doesn't seek out fighters
-      - isDrone that doesn't return to base and dies on contact
-    - isNuclear that can target cities
-    - track research gen per player
-    - removing dynamic config for now
+  - UI:
+    - Lefthand sidebar stack:
+      - planes/buildings selected
+      - carrier planes selected (launch vs move)
+      - airbases selected
+    - launch control UI for carrier planes
+    - select/launch from multiple airports at once
+    - building UI
+      - Buy button for planes in airbase
+      - factory UI showing production queue
+      - research UI showing status and start/pause
+      - city UI for showing income
+      - purchase
+    - render:
+      - factory, lab, city, drone?
+    - righthand sidebar should always be visible and be scrollable
+      - and based on player.planeTypesSeen
+
+
+  - Algorithms:
+    - intercept target for fighters
+    - better randomized positioning of buildings
+
+
+  - TODO:
+    - need local ticking for rendering explosions? (maybe not...)
 
 
   - potentially degenerate strategies:
+    - rush down cities --> different loss conditions?
     - using faster bombers to lead fighters until they're out of fuel
     - only make 1 B52 and tons of fighters for infinite fuel
     - defending with TU-16s which draw off fighters
     - building tons of cities before opponent planes can even reach you
 
 
-  - play test
-    - select/launch from multiple airports at once
-
-  - Next:
-    - buying/producing planes from factories and assigning to airports
-    - cities w/taxes
-    - additional features:
-      - bombers defend themselves
-      - fighter/bombers
-      - drones that don't return to base
-      - carrier planes
-        - launch control from plane
-        - return to mothership
-        - buy them again at airport
-      - stealth
-
   - CPU opponent:
     - UI for selecting AI opponent
     - server state for AI opponent
     - randomized AI plane designs and deployments
     - randomized AI daemon for launching planes
-
-  - better randomized positioning of airports
-    - throwing darts
 
 
   - additional features:

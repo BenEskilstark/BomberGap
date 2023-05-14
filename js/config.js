@@ -30,7 +30,7 @@ const config = {
   airbaseCost: 10000,
 
   stealthVisionReduction: 0.5,
-  genDogfightBonus: 0.1,
+  genDogfightBonus: 0.15,
 
   planeDesigns: [
     // USA
@@ -56,7 +56,7 @@ const config = {
       },
       'F-100': {
         name: 'F-100', nickname: 'Super Sabre', cost: 1200,
-        gen: 2, fuel: 800, vision: 45, speed: 1.4, ammo: 1,
+        gen: 2, fuel: 700, vision: 40, speed: 1.2, ammo: 1,
         isFighter: true, isBomber: true,
       },
       'U-2': {

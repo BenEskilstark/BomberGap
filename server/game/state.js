@@ -12,6 +12,7 @@ const initGameState = (
 ) => {
   const game = {
     time: 0,
+    config: {...game.config},
     worldSize: {...config.worldSize},
     tickInterval: null,
     entities: {},
@@ -26,8 +27,9 @@ const initGameState = (
       nationalityIndex,
       money: config.startingMoney,
       gen: 1,
-      productionQueue: [], // {name: string, cost: remaining cost}
+      productionQueue: [], // {name: string, cost: remaining cost, airbaseID}
       researchProgress: {gen: 2, cost: config.genCost[2], isStarted: false},
+      planeTypesSeen: {},
     };
 
     // place all the initial buildings
