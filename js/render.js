@@ -56,19 +56,26 @@ const render = (state) => {
 
     let width = 4;
     let height = 4;
-    let shape = 'square'; // default shape is square
+    let shape = 'circle'; // default shape is circle
     if (entity.type === 'AIRBASE') {
       width = 16;
       height = 8;
-    } else if (entity.type === 'BOMBER') {
-      height = 8;
-    } else if (entity.type === 'RECON') {
-      shape = 'circle'; // change shape to circle
-      width = 6;
-    } else if (entity.type === 'FIGHTER') {
-      shape = 'triangle'; // change shape to triangle
+      shape = 'square';
+    } else if (entity.type == 'FACTORY') {
+      width = 16;
+    } else if (entity.type == 'LAB') {
+
+    } else if (entity.type == 'CITY') {
+
+    } else if (entity.isFighter) {
       width = 8;
       height = 8;
+      shape = 'triangle';
+    } else if (entity.isBomber) {
+      height = 8;
+      shape = 'square';
+    } else if (entity.isPlane) {
+      width = 6;
     }
 
     // rotate
@@ -93,12 +100,12 @@ const render = (state) => {
         ctx.stroke();
       }
     }
-    if (entity.ammo == 0 && entity.type != 'RECON') {
+    if (entity.ammo == 0 && (entity.isFighter || entity.isBomber)) {
       ctx.strokeStyle = 'red';
     }
     if (
       game.selectedIDs.includes(entityID) ||
-      (entity.ammo == 0 && entity.type != 'RECON' && entity.clientID == 1)
+      (entity.ammo == 0 && (entity.isFighter || entity.isBomber))
     ) {
       // selection outline
       ctx.lineWidth = 2;
@@ -125,6 +132,7 @@ const render = (state) => {
       }
       ctx.stroke();
     }
+    // render shape
     if (shape === 'square') {
       ctx.fillRect(entity.position.x - width / 2, entity.position.y - height / 2, width, height);
     } else if (shape === 'circle') {

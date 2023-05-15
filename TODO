@@ -1,9 +1,11 @@
 
   - UI:
     - Lefthand sidebar stack:
-      - planes/buildings selected
-      - carrier planes selected (launch vs move)
+      - building info/purchasing, show your money
       - airbases selected
+      - planes/buildings selected
+        - (hover to get stats per plane)
+        - carrier planes selected (launch vs move)
     - launch control UI for carrier planes
     - select/launch from multiple airports at once
     - building UI
@@ -20,6 +22,7 @@
 
   - Algorithms:
     - intercept target for fighters
+    - one fighter per bomber (don't target things that are already targeted)
     - better randomized positioning of buildings
 
 
