@@ -57,6 +57,7 @@ const GameOverModal = (props) => {
 };
 
 const PlayerStats = (props) => {
+  return null;
   const {isYou, stats, otherID, clientID} = props;
   return (
     <div

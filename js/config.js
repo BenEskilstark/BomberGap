@@ -124,7 +124,7 @@ const config = {
       },
       'KH-50': {
         name: 'KH-50', nickname: 'Recon Cruise Missile', cost: 500,
-        gen: 2, fuel: 1000, vision: 75, speed: 1.5, ammo: 0
+        gen: 2, fuel: 1000, vision: 75, speed: 1.5, ammo: 0,
         isDrone: true,
       },
 

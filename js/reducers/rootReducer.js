@@ -4,6 +4,7 @@ const {sessionReducer} = require('./sessionReducer');
 const {modalReducer} = require('./modalReducer');
 const GameOverModal = require('../UI/GameOverModal.react');
 const {mouseReducer, hotKeyReducer} = require('bens_ui_components');
+const {getPlaneDesignsByGen} = require('../selectors/selectors');
 const {config} = require('../config');
 const {deepCopy} = require('bens_utils').helpers;
 
@@ -18,9 +19,9 @@ const rootReducer = (state, action) => {
     case 'EDIT_SESSION_PARAMS':
       return sessionReducer(state, action);
     case 'START': {
-      const {entities} = action;
+      const {entities, clientIDs} = action;
       const game = {
-        ...initGameState(state.config, state.clientID, state.clientConfig.planeDesigns),
+        ...initGameState(state.config, state.clientID, clientIDs),
         clientID: state.clientID,
         entities,
         // prevTickTime = new Date().getTime();
@@ -101,30 +102,45 @@ const initState = () => {
     modal: null,
     sessions: {},
     config: deepCopy(config),
-    clientConfig: {
-      money: config.startingMoney,
-      planes: {}, // {[name]: number}
-      planeDesigns: {}, // {[clientID]: {[name]: Plane}}
-    },
   };
 }
 
-const initGameState = (config, clientID, planeDesigns) => {
+const initGameState = (config, clientID, clientIDs) => {
+  const players = {};
+  let nationalityIndex = 0;
+  for (const id of clientIDs) {
+    players[id] = {
+      nationalityIndex,
+      money: config.startingMoney,
+      gen: 1,
+      productionQueue: [], // {name: string, cost: remaining cost, airbaseID}
+      researchProgress: {gen: 2, cost: config.genCost[2], isStarted: false},
+      planeTypesSeen: {},
+    }
+    nationalityIndex++;
+  }
+
+  console.log(players, clientID, clientIDs);
+
   const game = {
+    config: deepCopy(config),
     worldSize: {...config.worldSize},
     canvasSize: {
       width: Math.min(window.innerWidth * 0.9, window.innerHeight * 0.9),
-      height: window.innerHeight * 0.9},
+      height: window.innerHeight * 0.9,
+    },
     entities: {},
     fogLocations: [],
+
     selectedIDs: [],
     marquee: null,
-    clientID,
-    clickMode: 'LAUNCH',
-    launchName: Object.keys(planeDesigns[clientID])[0],
-    showStats: true,
 
-    planeDesigns,
+    clientID,
+    clientIDs,
+
+    clickMode: 'MOVE',
+    launchName: Object.keys(getPlaneDesignsByGen(players[clientID].nationalityIndex, 1))[0],
+    showStats: true,
 
     hotKeys: {
       onKeyDown: {},
@@ -132,6 +148,8 @@ const initGameState = (config, clientID, planeDesigns) => {
       onKeyUp: {},
       keysDown: {},
     },
+
+    players,
   };
 
   return game;

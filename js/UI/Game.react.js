@@ -14,7 +14,7 @@ const {render} = require('../render');
 const {dist, subtract, add} = require('bens_utils').vectors;
 const LeftHandSideBar = require('./LeftHandSideBar.react');
 const RightHandSideBar = require('./RightHandSideBar.react');
-const {normalizePos, getCanvasSize} = require('../selectors/selectors');
+const {normalizePos, getCanvasSize, getPlaneDesignsUnlocked} = require('../selectors/selectors');
 
 const {useState, useMemo, useEffect, useReducer} = React;
 
@@ -67,7 +67,7 @@ function Game(props) {
         const leadPlaneID = state.game.selectedIDs[0];
         for (const entityID of state.game.selectedIDs) {
           const entity = state.game.entities[entityID];
-          if (entity.type == 'AIRBASE' && state.game.clickMode == 'LAUNCH') {
+          if (entity.planes && state.game.clickMode == 'LAUNCH') {
             dispatchToServer({
               type: 'LAUNCH_PLANE', targetPos: pos, airbaseID: entityID,
               name: state.game.launchName, clientID: state.game.clientID,
@@ -89,7 +89,7 @@ function Game(props) {
   // hotKeys
   useHotKeyHandler({dispatch, getState: () => getState().game.hotKeys});
   useEffect(() => {
-    const planeNames = Object.keys(game.planeDesigns[state.clientID]);
+    const planeNames = Object.keys(getPlaneDesignsUnlocked(game, game.clientID));
     for (let i = 0; i < planeNames.length; i++) {
       const name = planeNames[i];
       dispatch({type: 'SET_HOTKEY', key: ""+(i+1), press: 'onKeyDown',
@@ -132,8 +132,8 @@ function Game(props) {
         width={getCanvasSize().width}
         height={getCanvasSize().height}
       />
-        <LeftHandSideBar state={state} dispatch={dispatch} />
-        <RightHandSideBar state={state} dispatch={dispatch} />
+      <LeftHandSideBar state={state} dispatch={dispatch} />
+      <RightHandSideBar state={state} dispatch={dispatch} />
     </div>
   );
 }

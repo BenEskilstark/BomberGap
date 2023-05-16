@@ -12,7 +12,7 @@ const initGameState = (
 ) => {
   const game = {
     time: 0,
-    config: {...game.config},
+    config: {...config},
     worldSize: {...config.worldSize},
     tickInterval: null,
     entities: {},
@@ -23,7 +23,7 @@ const initGameState = (
   let nationalityIndex = 0;
   for (const clientID of clientIDs) {
     // initialize player
-    players[clientID] = {
+    game.players[clientID] = {
       nationalityIndex,
       money: config.startingMoney,
       gen: 1,
@@ -83,14 +83,14 @@ const makeBuilding = (clientID, position, type, planes) => {
     type,
     name: type, // helps with selection
     isBuilding: true,
-    vision: 15,
+    vision: 30,
     position, speed: 0, targetPos: {...position}, targetEnemy: null,
   };
   if (type == 'AIRBASE') {
-    building.vision = 45;
+    building.vision = 50;
 
     building.planes = {...planes}; // {[name]: number}
-    build.planeCapacity = Infinity;
+    building.planeCapacity = Infinity;
   }
   return building;
 }

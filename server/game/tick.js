@@ -2,9 +2,6 @@ const {
   leaveSession, emitToSession, emitToAllClients,
 } = require('../sessions');
 const {
-  initGameState, makeAirbase, makePlane,
-} = require('./state');
-const {
   makeVector, vectorTheta, subtract, add, dist, equals,
 } = require('bens_utils').vectors;
 const {subtractWithDeficit} = require('bens_utils').math;
@@ -202,7 +199,7 @@ const moveAndFight = (game) => {
         const targetEntity = game.entities[entity.targetEnemy];
         // if enemy can dogfight, then flip a coin whether you die instead,
         // with boost based on who is higher generation
-        if (entity.isFighter && (targetEntity.isFighter || targetEntity.isDogFighter) &&
+        if (entity.isFighter && (targetEntity.isFighter || targetEntity.isDogFighter)
           && Math.random() < 0.5 + (genDogfightBonus * (targetEntity.gen - entity.gen))
         ) {
           delete game.entities[entityID];
@@ -296,7 +293,7 @@ const computeVisionAndTargeting = (session, game, socketClients) => {
           if (
             entity.isBomber && entity.ammo > 0 &&
             entity.targetEnemy == null && other.isBuilding &&
-            (entity.isNuclear || other.type != 'CITY)
+            (entity.isNuclear || other.type != 'CITY')
           ) {
             entity.targetEnemy = otherID;
           }

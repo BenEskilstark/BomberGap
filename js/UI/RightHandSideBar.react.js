@@ -1,22 +1,24 @@
 const React = require('react');
 const PlaneDesignDisplay = require('./PlaneDesignDisplay.react');
+const {getOtherClientID} = require('../selectors/selectors');
 const {useEffect, useState, useMemo} = React;
 
 const RightHandSideBar = (props) => {
   const {state, dispatch} = props;
   const {game} = state;
 
+  const otherPlayer = game.players[getOtherClientID(game, game.clientID)]
   const planeDetails = [];
-  for (const name in game.planeTypesSeen) {
+  for (const name in game.players[game.clientID].planeTypesSeen) {
     planeDetails.push(<PlaneDesignDisplay key={"planeSeen_" + name}
-      planeDesign={game.planeDesigns[2][name]}
+      planeDesign={game.config.planes[otherPlayer.nationalityIndex][name]}
     />);
   }
 
   return (
     <div
       style={{
-        visibility: game.selectedIDs.length > 0 ? 'visible' : 'hidden',
+        // visibility: game.selectedIDs.length > 0 ? 'visible' : 'hidden',
         position: 'absolute',
         display: 'flex',
         flexDirection: 'column',

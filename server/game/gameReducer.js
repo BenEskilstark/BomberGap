@@ -9,7 +9,7 @@ const {
 } = require('bens_utils').vectors;
 const {
   getEntitiesByPlayer, getNearestAirbase, getOtherClientID,
-  getPlaneDesignsUpToGen,
+  getPlaneDesignsUpToGen, getEntitiesByType, getNumBuilding,
 } = require('./selectors');
 const {throwDart} = require('./utils');
 const {tick, doGameOver} = require('./tick');
@@ -52,7 +52,7 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
           cost = session.config.factoryCost;
           break;
         case 'CITY':
-          const numCities = getEntitiesByType(game, 'CITY', clientID);
+          const numCities = getNumBuilding(game, clientID, 'CITY');
           cost = session.config.cityCost * Math.pow(2, numCities);
       }
       if (cost > game.players[clientID].money) return;
@@ -112,6 +112,7 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
         const clientAction = {
           type: "START",
           entities: getEntitiesByPlayer(session.game, id),
+          clientIDs: session.clients,
         };
         socketClients[id].emit('receiveAction', clientAction);
       }

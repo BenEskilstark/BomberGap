@@ -1,4 +1,5 @@
 const {dist} = require('bens_utils').vectors;
+const {config} = require('../../js/config');
 
 const getTotalPlanesAtBase = (base) => {
   let total = 0;

@@ -7,17 +7,19 @@
         - (hover to get stats per plane)
         - carrier planes selected (launch vs move)
     - launch control UI for carrier planes
-    - select/launch from multiple airports at once
     - building UI
+      - show cost of building each building
       - Buy button for planes in airbase
       - factory UI showing production queue
       - research UI showing status and start/pause
-      - city UI for showing income
-      - purchase
     - render:
-      - factory, lab, city, drone?
+      - factory, lab, city,
     - righthand sidebar should always be visible and be scrollable
       - and based on player.planeTypesSeen
+
+  - refactor:
+    - selectors are copypastad between server and client
+    - getPlaneDesignsByGen should take in game (on both server and client)
 
 
   - Algorithms:

@@ -7,7 +7,6 @@ const {
   Slider, Checkbox,
   CheckerBackground,
 } = require('bens_ui_components');
-const PlaneDesigner = require('./PlaneDesigner.react');
 const PlaneDesignDisplay = require('./PlaneDesignDisplay.react');
 const {dispatchToServer} = require('../clientToServer');
 const {isHost, getSession} = require('../selectors/sessions');
@@ -82,7 +81,6 @@ const SessionCard = (props) => {
     >
       <div style={{textAlign: 'center'}}><b>{name}</b></div>
       Players: {clients.length}
-      {joinedSessionID == id ? (<Settings state={state} dispatch={dispatch} />) : null}
       {joinedSessionID == id ? (
         <Button
           style={{
@@ -92,8 +90,7 @@ const SessionCard = (props) => {
           label={isHost(props.state) ? "Start" : "Ready"}
           disabled={
             (isHost(props.state) && !session.ready) ||
-            (!isHost(props.state) && session.ready) ||
-            Object.keys(state.clientConfig.planeDesigns[state.clientID] ?? {}).length == 0
+            (!isHost(props.state) && session.ready)
           }
           onClick={() => {
             if (isHost(props.state)) {

@@ -46,6 +46,7 @@ const render = (state) => {
       continue;
     }
 
+    ctx.save();
     ctx.fillStyle = "blue";
     if (
       (!isHost(state) && entity.clientID == state.clientID) ||
@@ -63,10 +64,15 @@ const render = (state) => {
       shape = 'square';
     } else if (entity.type == 'FACTORY') {
       width = 16;
+      shape = 'factory';
     } else if (entity.type == 'LAB') {
-
+      width = 16;
+      height = 24;
+      shape = 'lab';
     } else if (entity.type == 'CITY') {
-
+      width = 8;
+      height = 24;
+      shape = 'city';
     } else if (entity.isFighter) {
       width = 8;
       height = 8;
@@ -79,7 +85,6 @@ const render = (state) => {
     }
 
     // rotate
-    ctx.save();
     ctx.translate(entity.position.x, entity.position.y);
     if (entity.targetEnemy != null && game.entities[entity.targetEnemy]) {
       const target = game.entities[entity.targetEnemy];
@@ -100,58 +105,95 @@ const render = (state) => {
         ctx.stroke();
       }
     }
-    if (entity.ammo == 0 && (entity.isFighter || entity.isBomber)) {
+    const noAmmo = entity.ammo == 0 && (entity.isFighter || entity.isBomber);
+    const isSelected = game.selectedIDs.includes(entityID);
+
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'gold';
+    if (noAmmo)  {
       ctx.strokeStyle = 'red';
     }
-    if (
-      game.selectedIDs.includes(entityID) ||
-      (entity.ammo == 0 && (entity.isFighter || entity.isBomber))
-    ) {
-      // selection outline
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = "gold";
-      ctx.beginPath();
-      if (shape === 'square') {
-        ctx.rect(entity.position.x - width / 2, entity.position.y - height / 2, width, height);
-      } else if (shape === 'circle') {
+
+    switch (shape) {
+      case 'square':
+        ctx.fillRect(entity.position.x - width / 2, entity.position.y - height / 2, width, height);
+        if (noAmmo || isSelected) {
+          ctx.rect(entity.position.x - width / 2, entity.position.y - height / 2, width, height);
+          ctx.stroke();
+        }
+        break;
+      case 'circle':
+        ctx.beginPath();
         ctx.arc(entity.position.x, entity.position.y, width / 2, 0, 2*Math.PI);
-      } else if (shape === 'triangle') { // add triangle shape
+        ctx.closePath();
+
+        if (noAmmo || isSelected) {
+          ctx.stroke();
+        }
+        ctx.fill();
+        break;
+      case 'triangle':
         // rotate an additional 90 degrees
         ctx.translate(entity.position.x, entity.position.y);
         ctx.rotate(Math.PI / 2);
         ctx.translate(-1 * entity.position.x, -1 * entity.position.y);
 
+        ctx.beginPath();
         ctx.moveTo(entity.position.x, entity.position.y - height / 2);
         ctx.lineTo(entity.position.x + width / 2, entity.position.y + height / 2);
         ctx.lineTo(entity.position.x - width / 2, entity.position.y + height / 2);
         ctx.closePath();
+
         // unrotate
         ctx.translate(entity.position.x, entity.position.y);
         ctx.rotate(-Math.PI / 2);
         ctx.translate(-1 * entity.position.x, -1 * entity.position.y);
-      }
-      ctx.stroke();
-    }
-    // render shape
-    if (shape === 'square') {
-      ctx.fillRect(entity.position.x - width / 2, entity.position.y - height / 2, width, height);
-    } else if (shape === 'circle') {
-      ctx.beginPath();
-      ctx.arc(entity.position.x, entity.position.y, width / 2, 0, 2*Math.PI);
-      ctx.closePath();
-      ctx.fill();
-    } else if (shape === 'triangle') { // add triangle shape
-      // rotate an additional 90 degrees
-      ctx.translate(entity.position.x, entity.position.y);
-      ctx.rotate(Math.PI / 2);
-      ctx.translate(-1 * entity.position.x, -1 * entity.position.y);
 
-      ctx.beginPath();
-      ctx.moveTo(entity.position.x, entity.position.y - height / 2);
-      ctx.lineTo(entity.position.x + width / 2, entity.position.y + height / 2);
-      ctx.lineTo(entity.position.x - width / 2, entity.position.y + height / 2);
-      ctx.closePath();
-      ctx.fill();
+        if (noAmmo || isSelected) {
+          ctx.stroke();
+        }
+        ctx.fill();
+        break;
+      case 'factory':
+        ctx.translate(entity.position.x, entity.position.y);
+        ctx.beginPath();
+        ctx.moveTo(-width / 2, width / 2);
+        ctx.lineTo(-width / 2, -width / 2); // left wall
+        ctx.lineTo(-width / 4, -width / 4); // first diagonal
+        ctx.lineTo(-width / 4, -width / 2);
+        ctx.lineTo(0, -width / 4); // second diagonal
+        ctx.lineTo(0, -width / 2);
+        ctx.lineTo(width / 4, -width / 4); // third diagonal
+        ctx.lineTo(width / 4, -width / 2);
+        ctx.lineTo(width / 2, -width / 4); // fourth diagonal
+        ctx.lineTo(width / 2, width / 2); // right wall
+        ctx.closePath(); // bottom
+
+        if (isSelected) {
+          ctx.stroke();
+        }
+        ctx.fill();
+
+        break;
+      case 'city':
+        ctx.fillRect(entity.position.x - width / 2, entity.position.y - height / 2, width, height);
+        if (isSelected) {
+          ctx.rect(entity.position.x - width / 2, entity.position.y - height / 2, width, height);
+        }
+        break;
+      case 'lab':
+
+        ctx.beginPath();
+        ctx.moveTo(entity.position.x, entity.position.y - height / 2);
+        ctx.lineTo(entity.position.x + width / 2, entity.position.y + height / 2);
+        ctx.lineTo(entity.position.x - width / 2, entity.position.y + height / 2);
+        ctx.closePath();
+
+        if (isSelected) {
+          ctx.stroke();
+        }
+        ctx.fill();
+        break;
     }
 
 

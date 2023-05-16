@@ -18,7 +18,7 @@ const gameReducer = (game, action) => {
     }
     case 'SET_PLAYER_STATE': {
       const {clientID, player} = action;
-      game[clientID] = player;
+      game.players[clientID] = player;
       return {...game};
     }
     case 'SET_ENTITIES': {
@@ -62,7 +62,7 @@ const gameReducer = (game, action) => {
           entity.position.x >= square.x && entity.position.x <= square.x + square.width &&
           entity.position.y >= square.y && entity.position.y <= square.y + square.height
         ) {
-          if (entity.type == 'AIRBASE') {
+          if (entity.isBuilding) {
             selectedIDs = [entityID];
             break;
           }
