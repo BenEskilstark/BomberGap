@@ -11,6 +11,7 @@ const render = (state) => {
   ctx.fillRect(0, 0, game.worldSize.width, game.worldSize.height);
 
   // fog
+  ctx.save();
   for (const loc of game.fogLocations) {
     ctx.fillStyle = "steelblue";
     ctx.beginPath();
@@ -29,6 +30,7 @@ const render = (state) => {
     ctx.closePath();
     ctx.fill();
   }
+  ctx.restore();
 
   for (const entityID in game.entities) {
     const entity = game.entities[entityID];
@@ -179,6 +181,7 @@ const render = (state) => {
         ctx.fillRect(entity.position.x - width / 2, entity.position.y - height / 2, width, height);
         if (isSelected) {
           ctx.rect(entity.position.x - width / 2, entity.position.y - height / 2, width, height);
+          ctx.stroke();
         }
         break;
       case 'lab':

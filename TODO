@@ -1,4 +1,15 @@
 
+  - playtest:
+    - hover and click styling for buttons
+    - progress bar component
+    - radio picker for plane-carrying plane
+    - only show build button when you have plane selected
+    - get proper screen size and lefthand sidebar width
+    - fix NaN in airplane selection
+    - fix stroke on last element
+    - fix fuel color should be green and not gold for bombers? (related to above?)
+
+
   - UI:
     - Lefthand sidebar stack:
       - building info/purchasing, show your money

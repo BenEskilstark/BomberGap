@@ -11,7 +11,7 @@ const RightHandSideBar = (props) => {
   const planeDetails = [];
   for (const name in game.players[game.clientID].planeTypesSeen) {
     planeDetails.push(<PlaneDesignDisplay key={"planeSeen_" + name}
-      planeDesign={game.config.planes[otherPlayer.nationalityIndex][name]}
+      planeDesign={game.config.planeDesigns[otherPlayer.nationalityIndex][name]}
     />);
   }
 

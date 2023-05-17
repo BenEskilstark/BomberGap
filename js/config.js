@@ -43,7 +43,7 @@ const config = {
       },
       'F-86': {
         name: 'F-86', nickname: 'Sabre', cost: 500,
-        gen: 1, fuel: 600, vision: 40, speed: 0.9, ammo: 1,
+        gen: 1, fuel: 400, vision: 40, speed: 0.9, ammo: 1,
         isFighter: true,
       },
 
@@ -56,7 +56,7 @@ const config = {
       },
       'F-100': {
         name: 'F-100', nickname: 'Super Sabre', cost: 1200,
-        gen: 2, fuel: 700, vision: 40, speed: 1.2, ammo: 1,
+        gen: 2, fuel: 500, vision: 40, speed: 1.2, ammo: 1,
         isFighter: true, isBomber: true,
       },
       'U-2': {
@@ -103,7 +103,7 @@ const config = {
       },
       'MIG-15': {
         name: 'MIG-15', nickname: 'Mother', cost: 400,
-        gen: 1, fuel: 600, vision: 35, speed: 0.75, ammo: 1,
+        gen: 1, fuel: 400, vision: 35, speed: 0.75, ammo: 1,
         isFighter: true,
       },
       'YAK-25': {

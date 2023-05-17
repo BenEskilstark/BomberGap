@@ -64,15 +64,31 @@ button {
   font-family: "Courier New", sans-serif;
 }
 
-#PLAY_button {
-  background-color: #CD5C5C;
-}
-#PLAY_button:hover {
-  background-color: #568f56;
-  border: '3px solid red';
+input[type="radio"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: transparent;
+  border: 1px solid #6ce989;
+  padding: 3px;
+  padding-right: 8px;
 }
 
-.FactionPerson:first-child {
-  margin-top: 5px;
-  margin-bottom: 40px;
+input[type="radio"]:checked {
+  background-color: #6ce989;
 }
+
+input[type="radio"]:checked::before {
+  font-family: inherit;
+  font-size: 18px;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  color: #6ce989;
+}
+
+/* Change the color of the label text when the radio is selected */
+input[type="radio"]:checked + label {
+  color: #6ce989;
+}
+

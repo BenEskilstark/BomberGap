@@ -11,7 +11,7 @@ const {
   getNumBuilding, getEntitiesByType,
   getPlaneDesignsByGen,
 } = require('./selectors');
-const {makePlane} = require('./state');
+const {makePlane, makeExplosion} = require('./state');
 
 const tick = (game, session, socketClients) => {
   game.time += 1;
@@ -110,7 +110,7 @@ const updateProduction = (game) => {
         numProduced++;
       }
     }
-    player.productionQueue.slice(numProduced);
+    player.productionQueue = player.productionQueue.slice(numProduced);
   }
 };
 

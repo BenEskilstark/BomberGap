@@ -67,7 +67,7 @@ function Game(props) {
         const leadPlaneID = state.game.selectedIDs[0];
         for (const entityID of state.game.selectedIDs) {
           const entity = state.game.entities[entityID];
-          if (entity.planes && state.game.clickMode == 'LAUNCH') {
+          if (entity.planes && (state.game.clickMode == 'LAUNCH' || entity.type == 'AIRBASE')) {
             dispatchToServer({
               type: 'LAUNCH_PLANE', targetPos: pos, airbaseID: entityID,
               name: state.game.launchName, clientID: state.game.clientID,

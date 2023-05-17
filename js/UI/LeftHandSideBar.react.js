@@ -1,6 +1,6 @@
 const React = require('react');
 const {
-  Button, InfoCard, Divider,
+  InfoCard, Divider,
   Modal,
   useHotKeyHandler,
 } = require('bens_ui_components');
@@ -9,6 +9,8 @@ const {
   getPlaneDesignsUpToGen, getPlaneDesignByName,
   getNumBuilding,
 } = require('../selectors/selectors');
+const Button = require('./Components/Button.react');
+const RadioPicker = require('./Components/RadioPicker.react');
 const {dispatchToServer} = require('../clientToServer');
 const {useEffect, useState, useMemo} = React;
 
@@ -57,20 +59,21 @@ const BuildingInfo = (props) => {
       <div>Money: {player.money}</div>
 
       <div>
-        Cities: {numCities}
+        Cities: {numCities} (Income: {game.config.moneyRate * numCities})
         <Button
-          label="Build City"
+          label={`Build City (${game.config.cityCost * Math.pow(2, numCities)})`}
+          style={{display: 'block'}}
           disabled={game.money < game.config.cityCost * Math.pow(2, numCities)}
           onClick={() => {
             dispatchToServer({type: 'BUY_BUILDING', buildingType: "CITY"});
           }}
         />
       </div>
-      <div>Income: {game.config.moneyRate * numCities}</div>
       <div>
         Factories: {numFactories}
         <Button
-          label="Build Factory"
+          style={{display: 'block'}}
+          label={`Build Factory (${game.config.factoryCost})`}
           disabled={game.money < game.config.factoryCost}
           onClick={() => {
             dispatchToServer({type: 'BUY_BUILDING', buildingType: "FACTORY"});
@@ -82,7 +85,8 @@ const BuildingInfo = (props) => {
       <div>
         Research Labs: {numLabs}
         <Button
-          label="Build Lab"
+          style={{display: 'block'}}
+          label={`Build Lab (${game.config.labCost})`}
           disabled={game.money < game.config.labCost}
           onClick={() => {
             dispatchToServer({type: 'BUY_BUILDING', buildingType: "LAB"});
@@ -93,7 +97,8 @@ const BuildingInfo = (props) => {
       <div>
         Airbases: {numAirbases}
         <Button
-          label="Build Airbase"
+          label={`Build Airbase (${game.config.airbaseCost})`}
+          style={{display: 'block'}}
           disabled={game.money < game.config.airbaseCost}
           onClick={() => {
             dispatchToServer({type: 'BUY_BUILDING', buildingType: "AIRBASE"});
@@ -153,7 +158,17 @@ const BuildingsSelected = (props) => {
                 } else if (design.isBomber) {
                   planeType = 'BOMBER';
                 }
-                return `${name} (${planeType}): ${airbase.planes[name]}`;
+                return (
+                  <div>
+                    {name} ({planeType}): {airbase.planes[name]}
+                    <Button
+                      label={`Build (${design.cost})`}
+                      onClick={() => {
+                        dispatchToServer({type: 'BUILD_PLANE', name, airbaseID: id});
+                      }}
+                    />
+                  </div>
+                );
               })}
               selected={state.game.launchName}
               onChange={(launchName) => dispatch({type: 'SET', launchName})}
@@ -228,44 +243,6 @@ const PlaneDetail = (props) => {
 };
 
 
-const RadioPicker = (props) => {
-  const {options, displayOptions, selected, onChange} = props;
-  const optionToggles = [];
-  for (let i = 0; i < options.length; i++) {
-    const option = options[i];
-    const displayOption =
-      displayOptions && displayOptions[i]
-        ? displayOptions[i]
-        : option;
-    optionToggles.push(
-      <div
-        key={'radioOption_' + option}
-        style={{
-          display: 'flex',
-          width: '100%',
-          justifyContent: 'space-between',
-        }}
-      >
-        {displayOption}
-        <input type="radio"
-          className="radioCheckbox"
-          value={displayOption}
-          checked={option === selected}
-          onChange={() => onChange(option)}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div
-      style={{
-      }}
-    >
-      {optionToggles}
-    </div>
-  );
-};
 
 
 
