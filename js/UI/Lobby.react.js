@@ -1,12 +1,12 @@
 const React = require('react');
 const {
-  Button, InfoCard, Divider,
-  Plot, plotReducer,
-  Modal, Indicator,
-  Board, SpriteSheet, TextField,
+  InfoCard, Divider,
+  Modal,
+  TextField,
   Slider, Checkbox,
   CheckerBackground,
 } = require('bens_ui_components');
+const Button = require('./Components/Button.react');
 const PlaneDesignDisplay = require('./PlaneDesignDisplay.react');
 const {dispatchToServer} = require('../clientToServer');
 const {isHost, getSession} = require('../selectors/sessions');
@@ -31,6 +31,7 @@ const Lobby = (props) => {
         width: 600,
         margin: 'auto',
         marginTop: 100,
+        backgroundColor: 'rgb(35,36,38)',
       }}
     >
       <CreateGameCard />

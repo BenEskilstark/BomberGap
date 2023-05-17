@@ -8,9 +8,13 @@ const PlaneDesignDisplay = require('./PlaneDesignDisplay.react');
 const {
   getPlaneDesignsUpToGen, getPlaneDesignByName,
   getNumBuilding,
+  getNumPlaneInProductionAtBase,
+  getPlaneInProductionAtBase,
+  getPlanesBeingWorkedOn,
 } = require('../selectors/selectors');
 const Button = require('./Components/Button.react');
 const RadioPicker = require('./Components/RadioPicker.react');
+const ProgressBar = require('./Components/ProgressBar.react');
 const {dispatchToServer} = require('../clientToServer');
 const {useEffect, useState, useMemo} = React;
 
@@ -50,44 +54,75 @@ const BuildingInfo = (props) => {
   const numFactories = getNumBuilding(game, game.clientID, "FACTORY");
   const numLabs = getNumBuilding(game, game.clientID, "LAB");
   const numAirbases = getNumBuilding(game, game.clientID, "AIRBASE");
+  const isResearching = player.researchProgress?.isStarted;
   return (
     <div
       style={{
-
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '2px',
       }}
     >
-      <div>Money: {player.money}</div>
-
+      <div>Money: {player.money} (Income: {game.config.moneyRate * numCities})</div>
       <div>
-        Cities: {numCities} (Income: {game.config.moneyRate * numCities})
+        Research Generation: {player.gen}
         <Button
-          label={`Build City (${game.config.cityCost * Math.pow(2, numCities)})`}
-          style={{display: 'block'}}
-          disabled={game.money < game.config.cityCost * Math.pow(2, numCities)}
+          label={isResearching ? 'Pause' : 'Start'}
+          disabled={player.researchProgress == null}
+          style={{float: 'right'}}
+          onClick={() => {
+            if (isResearching) {
+              dispatchToServer({type: 'PAUSE_RESEARCH'});
+            } else {
+              dispatchToServer({type: 'START_RESEARCH'});
+            }
+          }}
+        />
+
+      </div>
+      <div
+        style={{
+          marginBottom: '8px',
+        }}
+      >
+        {player.researchProgress ? (
+          <ProgressBar
+            id="research_progress"
+            progress={1 -
+              player.researchProgress.cost / game.config.genCost[player.researchProgress.gen]
+            }
+          />
+        ) : null}
+      </div>
+      <div>
+        Cities: {numCities}&nbsp;
+        <Button
+          label={`Build ($${Math.floor(game.config.cityCost * Math.pow(2, numCities) / 1000)}k)`}
+          style={{float: 'right'}}
+          disabled={player.money < game.config.cityCost * Math.pow(2, numCities)}
           onClick={() => {
             dispatchToServer({type: 'BUY_BUILDING', buildingType: "CITY"});
           }}
         />
       </div>
       <div>
-        Factories: {numFactories}
+        Factories: {numFactories}&nbsp;
         <Button
-          style={{display: 'block'}}
-          label={`Build Factory (${game.config.factoryCost})`}
-          disabled={game.money < game.config.factoryCost}
+          label={`Build ($${Math.floor(game.config.factoryCost / 1000)}k)`}
+          style={{float: 'right'}}
+          disabled={player.money < game.config.factoryCost}
           onClick={() => {
             dispatchToServer({type: 'BUY_BUILDING', buildingType: "FACTORY"});
           }}
         />
       </div>
 
-      <div>Research Generation: {player.gen}</div>
       <div>
-        Research Labs: {numLabs}
+        Research Labs: {numLabs}&nbsp;
         <Button
-          style={{display: 'block'}}
-          label={`Build Lab (${game.config.labCost})`}
-          disabled={game.money < game.config.labCost}
+          label={`Build ($${Math.floor(game.config.labCost / 1000)}k)`}
+          style={{float: 'right'}}
+          disabled={player.money < game.config.labCost}
           onClick={() => {
             dispatchToServer({type: 'BUY_BUILDING', buildingType: "LAB"});
           }}
@@ -95,11 +130,11 @@ const BuildingInfo = (props) => {
       </div>
 
       <div>
-        Airbases: {numAirbases}
+        Airbases: {numAirbases}&nbsp;
         <Button
-          label={`Build Airbase (${game.config.airbaseCost})`}
-          style={{display: 'block'}}
-          disabled={game.money < game.config.airbaseCost}
+          label={`Build ($${Math.floor(game.config.airbaseCost / 1000)}k)`}
+          style={{float: 'right'}}
+          disabled={player.money < game.config.airbaseCost}
           onClick={() => {
             dispatchToServer({type: 'BUY_BUILDING', buildingType: "AIRBASE"});
           }}
@@ -114,6 +149,7 @@ const BuildingInfo = (props) => {
 const BuildingsSelected = (props) => {
   const {state, dispatch} = props;
   const {game} = state;
+  const player = game.players[game.clientID];
 
   let anyBuildingsSelected = false;
   for (const id of game.selectedIDs) {
@@ -158,15 +194,23 @@ const BuildingsSelected = (props) => {
                 } else if (design.isBomber) {
                   planeType = 'BOMBER';
                 }
+                const numQueued = getNumPlaneInProductionAtBase(game, id, name);
+                const allQueued = getPlanesBeingWorkedOn(game, id, name);
                 return (
                   <div>
-                    {name} ({planeType}): {airbase.planes[name]}
-                    <Button
-                      label={`Build (${design.cost})`}
-                      onClick={() => {
-                        dispatchToServer({type: 'BUILD_PLANE', name, airbaseID: id});
-                      }}
-                    />
+                    <div>{name} ({planeType}): {airbase.planes[name]}</div>
+                    {allQueued.length > 0 ? (
+                      allQueued.map((nextQueued, i) => {
+                        return (
+                          <ProgressBar
+                            key={id + "_" + name + "_" + i + "_progress"}
+                            id={id + "_" + name + "_" + i + "_progress"}
+                            progress={1 - nextQueued.cost / design.cost}
+                            enqueued={i == allQueued.length - 1 ? numQueued : null}
+                          />
+                        );
+                      })
+                    ) : null}
                   </div>
                 );
               })}
@@ -174,6 +218,10 @@ const BuildingsSelected = (props) => {
               onChange={(launchName) => dispatch({type: 'SET', launchName})}
             />
           </div>
+          <PlaneDetail
+            planeDesign={getPlaneDesignByName(game, state.game.launchName)}
+            money={player.money} airbaseID={id}
+          />
         </div>
       );
     }
@@ -204,6 +252,7 @@ const PlanesSelected = (props) => {
   for (const entityID of game.selectedIDs) {
     const entity = game.entities[entityID];
     if (entity) {
+      if (!selections[entity.name]) selections[entity.name] = 0;
       selections[entity.name] += 1;
     }
   }
@@ -228,8 +277,8 @@ const PlanesSelected = (props) => {
 
 
 const PlaneDetail = (props) => {
-  const {name, planeDesigns} = props;
-  if (!name) return null;
+  const {planeDesign, money, airbaseID} = props;
+  const {name, cost} = planeDesign;
 
   return (
     <div
@@ -237,7 +286,14 @@ const PlaneDetail = (props) => {
         padding: 8,
     }}
     >
-      <PlaneDesignDisplay planeDesign={planeDesigns[name]} />
+      <PlaneDesignDisplay planeDesign={planeDesign} />
+      <Button
+        style={{display: 'block'}}
+        label={`Build (${planeDesign.cost})`}
+        onClick={() => {
+          dispatchToServer({type: 'BUILD_PLANE', name, airbaseID});
+        }}
+      />
     </div>
   );
 };

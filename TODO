@@ -1,13 +1,11 @@
 
   - playtest:
-    - hover and click styling for buttons
-    - progress bar component
-    - radio picker for plane-carrying plane
-    - only show build button when you have plane selected
-    - get proper screen size and lefthand sidebar width
-    - fix NaN in airplane selection
-    - fix stroke on last element
-    - fix fuel color should be green and not gold for bombers? (related to above?)
+    - explosions not rendering
+    - allow starting at higher generation
+    - B52
+      - radio picker for plane-carrying plane
+      - B52s are becoming U2s
+    - start/stop research
 
 
   - UI:
@@ -19,14 +17,8 @@
         - carrier planes selected (launch vs move)
     - launch control UI for carrier planes
     - building UI
-      - show cost of building each building
-      - Buy button for planes in airbase
       - factory UI showing production queue
       - research UI showing status and start/pause
-    - render:
-      - factory, lab, city,
-    - righthand sidebar should always be visible and be scrollable
-      - and based on player.planeTypesSeen
 
   - refactor:
     - selectors are copypastad between server and client

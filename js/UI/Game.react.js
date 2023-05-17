@@ -72,7 +72,7 @@ function Game(props) {
               type: 'LAUNCH_PLANE', targetPos: pos, airbaseID: entityID,
               name: state.game.launchName, clientID: state.game.clientID,
             });
-          } else {
+          } else if (entity.isPlane) {
             const leadPlane = state.game.entities[leadPlaneID];
             let adjustedPos = pos;
             if (dist(entity.position, leadPlane.position) < state.config.formationRadius) {

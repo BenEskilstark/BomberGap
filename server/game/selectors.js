@@ -18,7 +18,7 @@ const getNearestAirbase = (game, plane) => {
     const entity = game.entities[entityID];
     if (
       entity.planes && entity.clientID == plane.clientID && // airbase or plane-carrying plane
-      (!entity.planeTypes || entity.planesTypes.includes(plane.name)) && // can carry this type
+      (!entity.planeTypes || entity.planeTypes.includes(plane.name)) && // can carry this type
       (getTotalPlanesAtBase(entity) < entity.planeCapacity) &&
       dist(entity.position, plane.position) < nearestDist
     ) {

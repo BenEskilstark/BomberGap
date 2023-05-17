@@ -26,28 +26,14 @@ body {
   overflow: hidden;
   overflow-y: scroll;
   position: relative;
+  background-color: rgb(35, 36, 38);
   margin: auto;
   font-family: "Courier New", sans-serif;
   font-weight: 300;
   touch-action: none;
 }
 
-h1 {
-  font-size: 7em;
-  color: #CD5C5C;
-  margin-bottom: 0;
-  margin-top: 18px;
-}
 
-h2 {
-  font-size: 5em;
-  color: #CD5C5C;
-}
-
-h3 {
-  margin-top: 0;
-  color: #CD5C5C;
-}
 
 
 .displayChildOnHover:hover {
@@ -60,14 +46,35 @@ h3 {
   display: none;
 }
 
+
+
+
 button {
-  font-family: "Courier New", sans-serif;
+  font: inherit;
+  font-size: 16px;
+  color: #6ce989;
+  background-color: inherit;
 }
+
+button:hover {
+  background-color: black;
+}
+
+button:disabled: {
+  color: gray;
+}
+
+button:active {
+  color: white;
+}
+
+
 
 input[type="radio"] {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
+  max-height: 16px;
   background-color: transparent;
   border: 1px solid #6ce989;
   padding: 3px;

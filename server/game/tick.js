@@ -72,8 +72,10 @@ const updateResearch = (game) => {
       // update all airbases with new available planes
       const planeDesigns = getPlaneDesignsByGen(player.nationalityIndex, player.gen);
       const airbases = getEntitiesByType(game, 'AIRBASE', clientID);
-      for (const name in planeDesigns) {
-        airbases.planes[name] = 0;
+      for (const airbase of airbases) {
+        for (const name in planeDesigns) {
+          airbase.planes[name] = 0;
+        }
       }
     }
   }
@@ -207,8 +209,9 @@ const moveAndFight = (game) => {
           const explosion = makeExplosion(
             entity.position,
             entity.isBuilding ? 25 : 10,
-            1200 / state.config.msPerTick,
+            1200 / game.config.msPerTick,
           );
+          game.entities[explosion.id] = explosion;
           // TODO: stats for fighter kills
           continue;
         }
@@ -223,7 +226,7 @@ const moveAndFight = (game) => {
         const explosion = makeExplosion(
           targetEntity.position,
           targetEntity.isBuilding ? 25 : 10,
-          1200 / state.config.msPerTick,
+          1200 / game.config.msPerTick,
         );
         game.entities[explosion.id] = explosion;
         delete game.entities[targetEntity.id];

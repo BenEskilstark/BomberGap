@@ -1,6 +1,6 @@
 const React = require('react');
 const {Modal} = require('bens_ui_components');
-const {dispatchToServer} = require('../clientToServer');
+const {dispatchToServer} = require('../../clientToServer');
 const {useEffect, useState, useMemo} = React;
 
 const GameOverModal = (props) => {

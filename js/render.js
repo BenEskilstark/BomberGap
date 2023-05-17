@@ -50,10 +50,12 @@ const render = (state) => {
 
     ctx.save();
     ctx.fillStyle = "blue";
+    let isBluePlayer = true;
     if (
       (!isHost(state) && entity.clientID == state.clientID) ||
       (isHost(state) && entity.clientID != state.clientID)
     ) {
+      isBluePlayer = false;
       ctx.fillStyle = "red";
     }
 
@@ -69,15 +71,15 @@ const render = (state) => {
       shape = 'factory';
     } else if (entity.type == 'LAB') {
       width = 16;
-      height = 24;
+      height = 16;
       shape = 'lab';
     } else if (entity.type == 'CITY') {
       width = 8;
-      height = 24;
+      height = 16;
       shape = 'city';
     } else if (entity.isFighter) {
-      width = 8;
-      height = 8;
+      width = 7;
+      height = 7;
       shape = 'triangle';
     } else if (entity.isBomber) {
       height = 8;
@@ -112,15 +114,20 @@ const render = (state) => {
 
     ctx.lineWidth = 2;
     ctx.strokeStyle = 'gold';
-    if (noAmmo)  {
+    if (noAmmo && isBluePlayer)  {
       ctx.strokeStyle = 'red';
+    }
+    if (noAmmo && !isBluePlayer) {
+      ctx.strokeStyle = 'black';
     }
 
     switch (shape) {
       case 'square':
         ctx.fillRect(entity.position.x - width / 2, entity.position.y - height / 2, width, height);
         if (noAmmo || isSelected) {
+          ctx.beginPath();
           ctx.rect(entity.position.x - width / 2, entity.position.y - height / 2, width, height);
+          ctx.closePath();
           ctx.stroke();
         }
         break;
@@ -180,7 +187,9 @@ const render = (state) => {
       case 'city':
         ctx.fillRect(entity.position.x - width / 2, entity.position.y - height / 2, width, height);
         if (isSelected) {
+          ctx.beginPath();
           ctx.rect(entity.position.x - width / 2, entity.position.y - height / 2, width, height);
+          ctx.closePath();
           ctx.stroke();
         }
         break;

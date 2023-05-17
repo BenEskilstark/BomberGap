@@ -1,6 +1,10 @@
 const {dist} = require('bens_utils').vectors;
 const {config} = require('../config');
 
+// --------------------------------------------------------------------
+//  Airbases
+// --------------------------------------------------------------------
+
 const getTotalPlanesAtBase = (base) => {
   let total = 0;
   for (const name in base.planes) {
@@ -18,7 +22,7 @@ const getNearestAirbase = (game, plane) => {
     const entity = game.entities[entityID];
     if (
       entity.planes && entity.clientID == plane.clientID && // airbase or plane-carrying plane
-      (!entity.planeTypes || entity.planesTypes.includes(plane.name)) && // can carry this type
+      (!entity.planeTypes || entity.planeTypes.includes(plane.name)) && // can carry this type
       (getTotalPlanesAtBase(entity) < entity.planeCapacity) &&
       dist(entity.position, plane.position) < nearestDist
     ) {
@@ -28,6 +32,11 @@ const getNearestAirbase = (game, plane) => {
   }
   return nearestAirbase;
 };
+
+
+// --------------------------------------------------------------------
+// Plane Designs
+// --------------------------------------------------------------------
 
 const getPlaneDesignsByGen = (nationalityIndex, gen) => {
   const allDesigns = config.planeDesigns[nationalityIndex];
@@ -61,6 +70,61 @@ const getPlaneDesignsUnlocked = (game, clientID) => {
   return getPlaneDesignsUpToGen(player.nationalityIndex, player.gen);
 }
 
+
+// --------------------------------------------------------------------
+// Production
+// --------------------------------------------------------------------
+
+const getNumPlaneInProductionAtBase = (game, airbaseID, planeName) => {
+  const airbase = game.entities[airbaseID];
+  const player = game.players[airbase.clientID];
+  let total = 0;
+
+  for (const plane of player.productionQueue) {
+    if (plane.airbaseID != airbaseID) continue;
+    if (!planeName || plane.name == planeName) {
+      total += 1;
+    }
+  }
+
+  return total;
+}
+
+const getPlaneInProductionAtBase = (game, airbaseID, planeName) => {
+  const airbase = game.entities[airbaseID];
+  const player = game.players[airbase.clientID];
+
+  for (const plane of player.productionQueue) {
+    if (plane.airbaseID != airbaseID) continue;
+    if (!planeName || plane.name == planeName) return plane;
+  }
+
+  return null;
+}
+
+const getPlanesBeingWorkedOn = (game, airbaseID, planeName) => {
+  const airbase = game.entities[airbaseID];
+  const player = game.players[airbase.clientID];
+
+  const planesBeingWorkedOn = [];
+  for (const plane of player.productionQueue) {
+    if (plane.airbaseID != airbaseID) continue;
+    if (
+      plane.cost < getPlaneDesignByName(game, planeName).cost &&
+      (!planeName || planeName == plane.name)
+    ) {
+      planesBeingWorkedOn.push(plane);
+    }
+  }
+
+  return planesBeingWorkedOn;
+}
+
+
+// --------------------------------------------------------------------
+// General Entities
+// --------------------------------------------------------------------
+
 const getNumBuilding = (game, clientID, buildingType) => {
   let numBuilding = 0;
   for (const entityID in game.entities) {
@@ -83,6 +147,22 @@ const getEntitiesByPlayer = (game, clientID) => {
   return entities;
 }
 
+const getEntitiesByType = (game, type, clientID) => {
+  const entities = [];
+  for (const entityID in game.entities) {
+    const entity = game.entities[entityID];
+    if ((entity.clientID == clientID || !clientID) && entity.type == type) {
+      entities.push(entity);
+    }
+  }
+  return entities;
+}
+
+
+// --------------------------------------------------------------------
+// Session
+// --------------------------------------------------------------------
+
 const getOtherClientID = (game, clientID) => {
   for (const id of game.clientIDs) {
     if (id != clientID) {
@@ -95,16 +175,10 @@ const isHost = (game) => {
   return game.clientIDs[0] == game.clientID;
 }
 
-const getEntitiesByType = (game, type, clientID) => {
-  const entities = [];
-  for (const entityID in game.entities) {
-    const entity = game.entities[entityID];
-    if ((entity.clientID == clientID || !clientID) && entity.type == type) {
-      entities.push(entity);
-    }
-  }
-  return entities;
-}
+
+// --------------------------------------------------------------------
+// Canvas/Mouse
+// --------------------------------------------------------------------
 
 const normalizePos = (pos, worldSize, canvasSize) => {
   return {
@@ -133,6 +207,9 @@ module.exports = {
   getPlaneDesignsByGen,
   getPlaneDesignsUpToGen,
   getPlaneDesignByName,
+  getNumPlaneInProductionAtBase,
+  getPlaneInProductionAtBase,
+  getPlanesBeingWorkedOn,
   getPlaneDesignsUnlocked,
   getNumBuilding,
   getEntitiesByPlayer,

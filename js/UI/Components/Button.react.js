@@ -4,12 +4,17 @@ const {useEffect, useState, useMemo} = React;
 
 const FancyButton = (props) => {
 
+  const style = {
+    border: "1px solid #6ce989",
+    fontSize: '15px',
+  };
+  if (props.disabled) {
+    style.color = 'gray';
+  }
   return (
     <Button
       style={{
-        color: '#6ce989',
-        backgroundColor: 'inherit',
-        border: "2px solid #6ce989",
+        ...style,
         ...props.style,
       }}
       disabled={props.disabled}
@@ -20,4 +25,3 @@ const FancyButton = (props) => {
 };
 
 module.exports = FancyButton;
-

@@ -38,7 +38,7 @@ const config = {
       // gen1
       'B-47': {
         name: 'B-47', nickname: 'Stratojet', cost: 700,
-        gen: 1, fuel: 1200, vision: 30, speed: 0.7, ammo: 1,
+        gen: 1, fuel: 1000, vision: 30, speed: 0.7, ammo: 1,
         isBomber: true, isNuclear: true,
       },
       'F-86': {
@@ -50,7 +50,7 @@ const config = {
       // gen2
       'B-52': {
         name: 'B-52', nickname: 'Stratofortress', cost: 2500,
-        gen: 2, fuel: 2000, vision: 40, speed: 0.8, ammo: 2,
+        gen: 2, fuel: 2000, vision: 40, speed: 0.85, ammo: 2,
         planeCapacity: 1, planeTypes: ['F-86', 'F-100'],
         isBomber: true, isNuclear: true,
       },
@@ -103,12 +103,12 @@ const config = {
       },
       'MIG-15': {
         name: 'MIG-15', nickname: 'Mother', cost: 400,
-        gen: 1, fuel: 400, vision: 35, speed: 0.75, ammo: 1,
+        gen: 1, fuel: 400, vision: 35, speed: 0.8, ammo: 1,
         isFighter: true,
       },
       'YAK-25': {
         name: 'YAK-25', nickname: 'Yellow', cost: 400,
-        gen: 1, fuel: 1000, vision: 60, speed: 0.8, ammo: 0,
+        gen: 1, fuel: 800, vision: 60, speed: 0.8, ammo: 0,
       },
 
       // gen2
