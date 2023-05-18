@@ -1,11 +1,11 @@
 
   - playtest:
-    - explosions not rendering
-    - allow starting at higher generation
+    - if two different planes finish at the same time it can make both of one type
+    - defensive bombers maybe not working?
+    - need plane stats for selections
+    - more expensive planes just take longer to make...
     - B52
       - radio picker for plane-carrying plane
-      - B52s are becoming U2s
-    - start/stop research
 
 
   - UI:
@@ -29,10 +29,6 @@
     - intercept target for fighters
     - one fighter per bomber (don't target things that are already targeted)
     - better randomized positioning of buildings
-
-
-  - TODO:
-    - need local ticking for rendering explosions? (maybe not...)
 
 
   - potentially degenerate strategies:

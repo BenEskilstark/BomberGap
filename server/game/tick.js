@@ -41,7 +41,7 @@ const updateIncome = (game) => {
 const updateResearch = (game) => {
   for (const clientID in game.players) {
     const player = game.players[clientID];
-    if (!player.researchProgress.isStarted) continue;
+    if (!player.researchProgress?.isStarted) continue;
 
     const numLabs = getNumBuilding(game, clientID, 'LAB');
     const totalResearchCost = Math.round(
@@ -201,7 +201,7 @@ const moveAndFight = (game) => {
         const targetEntity = game.entities[entity.targetEnemy];
         // if enemy can dogfight, then flip a coin whether you die instead,
         // with boost based on who is higher generation
-        if (entity.isFighter && (targetEntity.isFighter || targetEntity.isDogFighter)
+        if (entity.isFighter && (targetEntity.isFighter || targetEntity.isDogfighter)
           && Math.random() < 0.5 + (genDogfightBonus * (targetEntity.gen - entity.gen))
         ) {
           delete game.entities[entityID];
@@ -210,6 +210,7 @@ const moveAndFight = (game) => {
             entity.position,
             entity.isBuilding ? 25 : 10,
             1200 / game.config.msPerTick,
+            entity.clientID,
           );
           game.entities[explosion.id] = explosion;
           // TODO: stats for fighter kills
@@ -227,6 +228,7 @@ const moveAndFight = (game) => {
           targetEntity.position,
           targetEntity.isBuilding ? 25 : 10,
           1200 / game.config.msPerTick,
+          entity.clientID,
         );
         game.entities[explosion.id] = explosion;
         delete game.entities[targetEntity.id];

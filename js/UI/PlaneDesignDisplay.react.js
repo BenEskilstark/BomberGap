@@ -3,11 +3,11 @@ const {Button, Divider} = require('bens_ui_components');
 const {useEffect, useState, useMemo} = React;
 
 const keyToProp = {
-  isNuclear: 'nukes',
-  isStealth: 'stealth',
-  isDogfighter: 'tailgun',
-  isDrone: 'drone',
-  planes: 'mothership',
+  isNuclear: 'nukes ',
+  isStealth: 'stealth ',
+  isDogfighter: 'tailgun ',
+  isDrone: 'drone ',
+  planeCapacity: 'mothership ',
 }
 
 const PlaneDesignDisplay = (props) => {

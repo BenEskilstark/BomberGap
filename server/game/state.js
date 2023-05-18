@@ -1,6 +1,6 @@
 const {randomIn, normalIn} = require('bens_utils').stochastic;
 const {throwDart} = require('./utils');
-const {getPlaneDesignsByGen} = require('./selectors');
+const {getPlaneDesignsUpToGen} = require('./selectors');
 
 const initGameState = (
   clientIDs, config,
@@ -26,16 +26,18 @@ const initGameState = (
     game.players[clientID] = {
       nationalityIndex,
       money: config.startingMoney,
-      gen: 1,
+      gen: config.gen,
       productionQueue: [], // {name: string, cost: remaining cost, airbaseID}
-      researchProgress: {gen: 2, cost: config.genCost[2], isStarted: false},
+      researchProgress: config.gen < 4
+        ? {gen: config.gen + 1, cost: config.genCost[config.gen + 1], isStarted: false}
+        : null,
       planeTypesSeen: {},
     };
 
     // place all the initial buildings
     for (let j = 0; j < config.numAirbases; j++) {
       const planes = {};
-      const designs = getPlaneDesignsByGen(nationalityIndex, 1);
+      const designs = getPlaneDesignsUpToGen(nationalityIndex, config.gen);
       for (const name in designs) {
         planes[name] = 0;
       }

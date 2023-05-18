@@ -1005,11 +1005,11 @@ const {
   useMemo
 } = React;
 const keyToProp = {
-  isNuclear: 'nukes',
-  isStealth: 'stealth',
-  isDogfighter: 'tailgun',
-  isDrone: 'drone',
-  planes: 'mothership'
+  isNuclear: 'nukes ',
+  isStealth: 'stealth ',
+  isDogfighter: 'tailgun ',
+  isDrone: 'drone ',
+  planeCapacity: 'mothership '
 };
 const PlaneDesignDisplay = props => {
   const {
@@ -1127,6 +1127,7 @@ const config = {
   },
   formationRadius: 50,
   // starting configuration
+  gen: 4,
   numAirbases: 1,
   numCities: 2,
   numFactories: 1,
@@ -1249,7 +1250,7 @@ const config = {
     'F-117': {
       name: 'F-117',
       nickname: 'Nighthawk',
-      cost: 10000,
+      cost: 6000,
       gen: 4,
       fuel: 1800,
       vision: 65,
@@ -1262,7 +1263,7 @@ const config = {
     'B-2': {
       name: 'B-2',
       nickname: 'Spirit',
-      cost: 20000,
+      cost: 8000,
       gen: 4,
       fuel: 3000,
       vision: 70,
@@ -1515,7 +1516,7 @@ const gameReducer = (game, action) => {
             positions.push(loc);
           }
         }
-        game.fogLocations = positions;
+        game.fogLocations = [...game.fogLocations, ...positions];
         return {
           ...game,
           selectedIDs,
@@ -1889,7 +1890,6 @@ const render = state => {
   ctx.fillRect(0, 0, game.worldSize.width, game.worldSize.height);
 
   // fog
-  ctx.save();
   for (const loc of game.fogLocations) {
     ctx.fillStyle = "steelblue";
     ctx.beginPath();
@@ -1908,7 +1908,6 @@ const render = state => {
     ctx.closePath();
     ctx.fill();
   }
-  ctx.restore();
   for (const entityID in game.entities) {
     const entity = game.entities[entityID];
     if (entity.type == 'EXPLOSION') {

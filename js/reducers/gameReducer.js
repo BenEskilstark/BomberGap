@@ -43,7 +43,7 @@ const gameReducer = (game, action) => {
           positions.push(loc);
         }
       }
-      game.fogLocations = positions;
+      game.fogLocations = [...game.fogLocations, ...positions];
 
       return {
         ...game,

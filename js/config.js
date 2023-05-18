@@ -13,6 +13,7 @@ const config = {
   formationRadius: 50,
 
   // starting configuration
+  gen: 4,
   numAirbases: 1,
   numCities: 2,
   numFactories: 1,
@@ -82,12 +83,12 @@ const config = {
 
       // gen4
       'F-117': {
-        name: 'F-117', nickname: 'Nighthawk', cost: 10000,
+        name: 'F-117', nickname: 'Nighthawk', cost: 6000,
         gen: 4, fuel: 1800, vision: 65, speed: 0.95, ammo: 3,
         isFighter: true, isBomber: true, isStealth: true,
       },
       'B-2': {
-        name: 'B-2', nickname: 'Spirit', cost: 20000,
+        name: 'B-2', nickname: 'Spirit', cost: 8000,
         gen: 4, fuel: 3000, vision: 70, speed: 0.9, ammo: 3,
         isBomber: true, isStealth: true, isNuclear: true,
       },
