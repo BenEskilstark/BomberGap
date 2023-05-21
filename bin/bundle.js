@@ -1212,7 +1212,7 @@ const config = {
   },
   formationRadius: 50,
   // starting configuration
-  gen: 4,
+  gen: 1,
   numAirbases: 1,
   numCities: 2,
   numFactories: 1,
