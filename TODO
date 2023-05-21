@@ -1,34 +1,25 @@
 
+
   - playtest:
-    - if two different planes finish at the same time it can make both of one type
-    - defensive bombers maybe not working?
-    - need plane stats for selections
-    - more expensive planes just take longer to make...
-    - B52
-      - radio picker for plane-carrying plane
+
+
+  - Algorithms:
+    - intercept target for fighters
+    - one fighter per bomber (don't target things that are already targeted)
 
 
   - UI:
-    - Lefthand sidebar stack:
-      - building info/purchasing, show your money
-      - airbases selected
-      - planes/buildings selected
-        - (hover to get stats per plane)
-        - carrier planes selected (launch vs move)
-    - launch control UI for carrier planes
-    - building UI
-      - factory UI showing production queue
-      - research UI showing status and start/pause
+    - factory UI showing production queue
+    - research UI showing status and start/pause
+
 
   - refactor:
     - selectors are copypastad between server and client
     - getPlaneDesignsByGen should take in game (on both server and client)
 
 
-  - Algorithms:
-    - intercept target for fighters
-    - one fighter per bomber (don't target things that are already targeted)
-    - better randomized positioning of buildings
+  - balance
+    - more expensive planes just take longer to make...
 
 
   - potentially degenerate strategies:

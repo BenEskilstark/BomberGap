@@ -245,6 +245,7 @@ function Game(props) {
     getState
   } = props;
   const game = state.game;
+  const player = game.players[game.clientID];
 
   // initializations
   useEffect(() => {
@@ -348,7 +349,7 @@ function Game(props) {
       const name = planeNames[i];
       dispatch({
         type: 'SET_HOTKEY',
-        key: "" + (i + 1),
+        key: "" + (i + 1) % 10,
         press: 'onKeyDown',
         fn: () => {
           dispatch({
@@ -362,7 +363,7 @@ function Game(props) {
         }
       });
     }
-  }, []);
+  }, [player.gen]);
   return /*#__PURE__*/React.createElement("div", {
     style: {
       width: '100%',
@@ -455,7 +456,7 @@ const LeftHandSideBar = props => {
       minWidth: 150,
       color: '#6ce989'
     }
-  }, /*#__PURE__*/React.createElement(BuildingInfo, props), /*#__PURE__*/React.createElement(BuildingsSelected, props), /*#__PURE__*/React.createElement(PlanesSelected, props));
+  }, /*#__PURE__*/React.createElement(BuildingInfo, props), /*#__PURE__*/React.createElement(PlanesSelected, props), /*#__PURE__*/React.createElement(BuildingsSelected, props));
 };
 const BuildingInfo = props => {
   var _player$researchProgr;
@@ -584,11 +585,15 @@ const BuildingsSelected = props => {
       selectedBuildings.push( /*#__PURE__*/React.createElement("div", {
         key: "selected_building_" + id,
         style: {}
-      }, /*#__PURE__*/React.createElement("div", {
+      }, /*#__PURE__*/React.createElement(PlaneDetail, {
+        canBuy: true,
+        planeDesign: getPlaneDesignByName(game, state.game.launchName),
+        airbaseID: id
+      }), /*#__PURE__*/React.createElement("div", {
         style: {
           textAlign: 'center'
         }
-      }, /*#__PURE__*/React.createElement("b", null, "Airbase")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, "Launch Type: "), /*#__PURE__*/React.createElement(RadioPicker, {
+      }, /*#__PURE__*/React.createElement("b", null, "Airbase")), /*#__PURE__*/React.createElement("div", null, "Launch Type: "), /*#__PURE__*/React.createElement(RadioPicker, {
         options: planeNames,
         displayOptions: planeNames.map(name => {
           const design = getPlaneDesignByName(game, name);
@@ -616,10 +621,6 @@ const BuildingsSelected = props => {
           type: 'SET',
           launchName
         })
-      })), /*#__PURE__*/React.createElement(PlaneDetail, {
-        planeDesign: getPlaneDesignByName(game, state.game.launchName),
-        money: player.money,
-        airbaseID: id
       })));
     }
   }
@@ -642,18 +643,37 @@ const PlanesSelected = props => {
   }
   if (!anyPlanesSelected) return null;
   const selections = {};
+  const planes = {}; // for motherships
   for (const entityID of game.selectedIDs) {
     const entity = game.entities[entityID];
     if (entity) {
       if (!selections[entity.name]) selections[entity.name] = 0;
       selections[entity.name] += 1;
+      if (entity.planes) {
+        for (const planeName in entity.planes) {
+          if (!planes[planeName]) planes[planeName] = 0;
+          planes[planeName] += entity.planes[planeName];
+        }
+      }
     }
   }
   const planesSelected = [];
   for (const name in selections) {
+    const planeDesign = getPlaneDesignByName(game, name);
     planesSelected.push( /*#__PURE__*/React.createElement("div", {
+      className: "displayChildOnHover",
       key: "plane_" + name
-    }, name, ": ", selections[name]));
+    }, name, ": ", selections[name], /*#__PURE__*/React.createElement("div", {
+      className: "hidden",
+      style: {
+        display: planeDesign.planeCapacity ? 'block' : 'noop'
+      }
+    }, /*#__PURE__*/React.createElement(PlaneDetail, {
+      game: game,
+      planeDesign: planeDesign,
+      clickMode: game.clickMode,
+      planesCarried: planeDesign.planeCapacity ? planes : null
+    }))));
   }
   return /*#__PURE__*/React.createElement("div", {
     style: {}
@@ -666,22 +686,67 @@ const PlanesSelected = props => {
 const PlaneDetail = props => {
   const {
     planeDesign,
-    money,
-    airbaseID
+    airbaseID,
+    canBuy,
+    planesCarried,
+    clickMode,
+    game
   } = props;
   const {
     name,
     cost
   } = planeDesign;
+  const [launchIndex, setLaunchIndex] = useState(0);
+  let carrier = null;
+  if (planesCarried) {
+    const planeNames = Object.keys(planesCarried);
+    if (game.launchName != planeNames[launchIndex]) {
+      dispatch({
+        type: 'SET',
+        launchName: planeNames[launchIndex]
+      });
+    }
+    carrier = /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Button, {
+      label: clickMode == 'MOVE' ? "Switch to Launch Mode" : "Switch to Target Mode",
+      onClick: () => {
+        dispatch({
+          type: 'SET',
+          clickMode: clickMode == 'MOVE' ? 'LAUNCH' : 'MOVE'
+        });
+      }
+    }), /*#__PURE__*/React.createElement(RadioPicker, {
+      options: planeNames,
+      displayOptions: planeNames.map(name => {
+        const design = getPlaneDesignByName(game, name);
+        let planeType = 'RECON';
+        if (design.isFighter && design.isBomber) {
+          planeType = 'FIGHTER/BOMBER';
+        } else if (design.isFighter) {
+          planeType = 'FIGHTER';
+        } else if (design.isBomber) {
+          planeType = 'BOMBER';
+        }
+        return /*#__PURE__*/React.createElement("div", null, name, " (", planeType, "): ", planesCarried[name]);
+      }),
+      selected: planeNames[launchIndex],
+      onChange: launchName => {
+        setLaunchIndex(planeNames.indexOf(launchName));
+        dispatch({
+          type: 'SET',
+          launchName
+        });
+      }
+    }));
+  }
   return /*#__PURE__*/React.createElement("div", {
     style: {
       padding: 8
     }
   }, /*#__PURE__*/React.createElement(PlaneDesignDisplay, {
     planeDesign: planeDesign
-  }), /*#__PURE__*/React.createElement(Button, {
+  }), carrier, /*#__PURE__*/React.createElement(Button, {
     style: {
-      display: 'block'
+      display: canBuy ? 'block' : 'none'
     },
     label: `Build (${planeDesign.cost})`,
     onClick: () => {
@@ -1028,12 +1093,32 @@ const PlaneDesignDisplay = props => {
     style: {
       textAlign: 'center'
     }
-  }, /*#__PURE__*/React.createElement("b", null, planeDesign.name, " ", planeDesign.type)), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("b", null, planeDesign.name)), /*#__PURE__*/React.createElement("div", {
     style: {
       width: '100%',
       padding: 5
     }
-  }, /*#__PURE__*/React.createElement("div", null, "Generation: ", planeDesign.gen), /*#__PURE__*/React.createElement("div", null, "Cost: ", planeDesign.cost), /*#__PURE__*/React.createElement("div", null, "Speed: ", planeDesign.speed), /*#__PURE__*/React.createElement("div", null, "Fuel: ", planeDesign.fuel), /*#__PURE__*/React.createElement("div", null, "Vision: ", planeDesign.vision), /*#__PURE__*/React.createElement("div", null, "Ammo: ", planeDesign.ammo), /*#__PURE__*/React.createElement("div", null, properties)));
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between'
+    }
+  }, /*#__PURE__*/React.createElement("div", null, "Generation: ", planeDesign.gen), /*#__PURE__*/React.createElement("div", null, "Cost: ", planeDesign.cost)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between'
+    }
+  }, /*#__PURE__*/React.createElement("div", null, "Speed: ", planeDesign.speed, /*#__PURE__*/React.createElement("div", null), "Fuel: ", planeDesign.fuel)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between'
+    }
+  }, /*#__PURE__*/React.createElement("div", null, "Vision: ", planeDesign.vision, /*#__PURE__*/React.createElement("div", null), "Ammo: ", planeDesign.ammo)), planeDesign.planeCapacity ? /*#__PURE__*/React.createElement("div", null, "Plane Capacity: ", planeDesign.planeCapacity) : null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between'
+    }
+  }, properties)));
 };
 module.exports = PlaneDesignDisplay;
 },{"bens_ui_components":88,"react":105}],10:[function(require,module,exports){
@@ -1071,9 +1156,9 @@ const RightHandSideBar = props => {
       flexDirection: 'column',
       gap: 20,
       top: 0,
-      left: window.innerWidth - 205,
+      left: window.innerWidth - 255,
       margin: 4,
-      minWidth: 200,
+      minWidth: 250,
       color: '#6ce989'
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -1517,6 +1602,9 @@ const gameReducer = (game, action) => {
           }
         }
         game.fogLocations = [...game.fogLocations, ...positions];
+        if (game.fogLocations.length > 10000) {
+          game.fogLocations = game.fogLocations.slice(game.fogLocations.length - 10000);
+        }
         return {
           ...game,
           selectedIDs,

@@ -24,9 +24,9 @@ const RightHandSideBar = (props) => {
         flexDirection: 'column',
         gap: 20,
         top: 0,
-        left: window.innerWidth - 205,
+        left: window.innerWidth - 255,
         margin: 4,
-        minWidth: 200,
+        minWidth: 250,
         color: '#6ce989',
       }}
     >

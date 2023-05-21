@@ -22,6 +22,8 @@ function Game(props) {
   const {state, dispatch, getState} = props;
   const game = state.game;
 
+  const player = game.players[game.clientID];
+
   // initializations
   useEffect(() => {
     postVisit('/game', 'GET');
@@ -92,14 +94,14 @@ function Game(props) {
     const planeNames = Object.keys(getPlaneDesignsUnlocked(game, game.clientID));
     for (let i = 0; i < planeNames.length; i++) {
       const name = planeNames[i];
-      dispatch({type: 'SET_HOTKEY', key: ""+(i+1), press: 'onKeyDown',
+      dispatch({type: 'SET_HOTKEY', key: ""+((i+1)%10) , press: 'onKeyDown',
         fn: () => {
           dispatch({type: 'SET', launchName: name});
           dispatch({type: 'SET', clickMode: 'LAUNCH'});
         }
       });
     }
-  }, []);
+  }, [player.gen]);
 
   return (
     <div

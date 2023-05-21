@@ -89,6 +89,7 @@ const updateProduction = (game) => {
 
     // work on one plane per factory
     let numProduced = 0;
+    let nextProductionQueue = [];
     for (let i = 0; i < player.productionQueue.length && i < numFactories; i++) {
       const production = player.productionQueue[i];
       const cost = Math.round(game.config.productionRate * game.config.msPerTick / 1000);
@@ -106,13 +107,18 @@ const updateProduction = (game) => {
         if (!airbase) { // pick random airbase if previous got destroyed
           allAirbases = oneOf(getEntitiesByType(game, clientID, 'AIRBASE'));
         }
-        if (!airbase) continue; // if no airbases at all just continue
+        if (!airbase) {
+          nextProductionQueue.push(production);
+          continue; // if no airbases at all just continue
+        }
 
         airbase.planes[production.name] += 1;
         numProduced++;
+      } else {
+        nextProductionQueue.push(production);
       }
     }
-    player.productionQueue = player.productionQueue.slice(numProduced);
+    player.productionQueue = [...nextProductionQueue, ...player.productionQueue.slice(numFactories)];
   }
 };
 

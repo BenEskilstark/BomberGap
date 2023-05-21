@@ -33,7 +33,7 @@ const PlaneDesignDisplay = (props) => {
           textAlign: 'center',
         }}
       >
-        <b>{planeDesign.name} {planeDesign.type}</b>
+        <b>{planeDesign.name}</b>
       </div>
       <div
         style={{
@@ -41,13 +41,19 @@ const PlaneDesignDisplay = (props) => {
           padding: 5,
         }}
       >
-        <div>Generation: {planeDesign.gen}</div>
-        <div>Cost: {planeDesign.cost}</div>
-        <div>Speed: {planeDesign.speed}</div>
-        <div>Fuel: {planeDesign.fuel}</div>
-        <div>Vision: {planeDesign.vision}</div>
-        <div>Ammo: {planeDesign.ammo}</div>
-        <div>{properties}</div>
+        <div style={{display: 'flex', justifyContent: 'space-between'}}>
+            <div>Generation: {planeDesign.gen}</div><div>Cost: {planeDesign.cost}</div>
+        </div>
+        <div style={{display: 'flex', justifyContent: 'space-between'}}>
+          <div>Speed: {planeDesign.speed}<div></div>Fuel: {planeDesign.fuel}</div>
+        </div>
+        <div style={{display: 'flex', justifyContent: 'space-between'}}>
+          <div>Vision: {planeDesign.vision}<div></div>Ammo: {planeDesign.ammo}</div>
+        </div>
+        {planeDesign.planeCapacity ? <div>Plane Capacity: {planeDesign.planeCapacity}</div> : null}
+        <div style={{display: 'flex', justifyContent: 'space-between'}}>
+            {properties}
+        </div>
       </div>
     </div>
   );

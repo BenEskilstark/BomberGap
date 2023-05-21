@@ -38,8 +38,8 @@ const LeftHandSideBar = (props) => {
       }}
     >
       <BuildingInfo {...props} />
-      <BuildingsSelected {...props} />
       <PlanesSelected {...props} />
+      <BuildingsSelected {...props} />
     </div>
   );
 };
@@ -179,48 +179,47 @@ const BuildingsSelected = (props) => {
 
           }}
         >
-          <div style={{textAlign: 'center'}}><b>Airbase</b></div>
-          <div>
-            <div>Launch Type: </div>
-            <RadioPicker
-              options={planeNames}
-              displayOptions={planeNames.map(name => {
-                const design = getPlaneDesignByName(game, name);
-                let planeType = 'RECON';
-                if (design.isFighter && design.isBomber) {
-                  planeType = 'FIGHTER/BOMBER';
-                } else if (design.isFighter) {
-                  planeType = 'FIGHTER';
-                } else if (design.isBomber) {
-                  planeType = 'BOMBER';
-                }
-                const numQueued = getNumPlaneInProductionAtBase(game, id, name);
-                const allQueued = getPlanesBeingWorkedOn(game, id, name);
-                return (
-                  <div>
-                    <div>{name} ({planeType}): {airbase.planes[name]}</div>
-                    {allQueued.length > 0 ? (
-                      allQueued.map((nextQueued, i) => {
-                        return (
-                          <ProgressBar
-                            key={id + "_" + name + "_" + i + "_progress"}
-                            id={id + "_" + name + "_" + i + "_progress"}
-                            progress={1 - nextQueued.cost / design.cost}
-                            enqueued={i == allQueued.length - 1 ? numQueued : null}
-                          />
-                        );
-                      })
-                    ) : null}
-                  </div>
-                );
-              })}
-              selected={state.game.launchName}
-              onChange={(launchName) => dispatch({type: 'SET', launchName})}
-            />
-          </div>
           <PlaneDetail
+            canBuy={true}
             planeDesign={getPlaneDesignByName(game, state.game.launchName)}
-            money={player.money} airbaseID={id}
+            airbaseID={id}
+          />
+          <div style={{textAlign: 'center'}}><b>Airbase</b></div>
+          <div>Launch Type: </div>
+          <RadioPicker
+            options={planeNames}
+            displayOptions={planeNames.map(name => {
+              const design = getPlaneDesignByName(game, name);
+              let planeType = 'RECON';
+              if (design.isFighter && design.isBomber) {
+                planeType = 'FIGHTER/BOMBER';
+              } else if (design.isFighter) {
+                planeType = 'FIGHTER';
+              } else if (design.isBomber) {
+                planeType = 'BOMBER';
+              }
+              const numQueued = getNumPlaneInProductionAtBase(game, id, name);
+              const allQueued = getPlanesBeingWorkedOn(game, id, name);
+              return (
+                <div>
+                  <div>{name} ({planeType}): {airbase.planes[name]}</div>
+                  {allQueued.length > 0 ? (
+                    allQueued.map((nextQueued, i) => {
+                      return (
+                        <ProgressBar
+                          key={id + "_" + name + "_" + i + "_progress"}
+                          id={id + "_" + name + "_" + i + "_progress"}
+                          progress={1 - nextQueued.cost / design.cost}
+                          enqueued={i == allQueued.length - 1 ? numQueued : null}
+                        />
+                      );
+                    })
+                  ) : null}
+                </div>
+              );
+            })}
+            selected={state.game.launchName}
+            onChange={(launchName) => dispatch({type: 'SET', launchName})}
           />
         </div>
       );
@@ -249,18 +248,35 @@ const PlanesSelected = (props) => {
   if (!anyPlanesSelected) return null;
 
   const selections = {};
+  const planes = {}; // for motherships
   for (const entityID of game.selectedIDs) {
     const entity = game.entities[entityID];
     if (entity) {
       if (!selections[entity.name]) selections[entity.name] = 0;
       selections[entity.name] += 1;
+      if (entity.planes) {
+        for (const planeName in entity.planes) {
+          if (!planes[planeName]) planes[planeName] = 0;
+          planes[planeName] += entity.planes[planeName];
+        }
+      }
     }
   }
   const planesSelected = [];
   for (const name in selections) {
-    planesSelected.push(<div key={"plane_" + name}>
-      {name}: {selections[name]}
-    </div>)
+    const planeDesign = getPlaneDesignByName(game, name);
+    planesSelected.push(
+      <div className="displayChildOnHover" key={"plane_" + name}>
+        {name}: {selections[name]}
+        <div className="hidden" style={{display: planeDesign.planeCapacity ? 'block' : 'noop'}}>
+          <PlaneDetail
+            game={game}
+            planeDesign={planeDesign} clickMode={game.clickMode}
+            planesCarried={planeDesign.planeCapacity ? planes : null}
+          />
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -277,8 +293,50 @@ const PlanesSelected = (props) => {
 
 
 const PlaneDetail = (props) => {
-  const {planeDesign, money, airbaseID} = props;
+  const {planeDesign, airbaseID, canBuy, planesCarried, clickMode, game} = props;
   const {name, cost} = planeDesign;
+
+  const [launchIndex, setLaunchIndex] = useState(0);
+
+  let carrier = null;
+  if (planesCarried) {
+    const planeNames = Object.keys(planesCarried);
+    if (game.launchName != planeNames[launchIndex]) {
+      dispatch({type: 'SET', launchName: planeNames[launchIndex]});
+    }
+    carrier = (
+      <div>
+        <Button
+          label={clickMode == 'MOVE' ? "Switch to Launch Mode" : "Switch to Target Mode"}
+          onClick={() => {
+            dispatch({type: 'SET', clickMode: clickMode == 'MOVE' ? 'LAUNCH' : 'MOVE'});
+          }}
+        />
+        <RadioPicker
+          options={planeNames}
+          displayOptions={planeNames.map(name => {
+            const design = getPlaneDesignByName(game, name);
+            let planeType = 'RECON';
+            if (design.isFighter && design.isBomber) {
+              planeType = 'FIGHTER/BOMBER';
+            } else if (design.isFighter) {
+              planeType = 'FIGHTER';
+            } else if (design.isBomber) {
+              planeType = 'BOMBER';
+            }
+            return (
+                <div>{name} ({planeType}): {planesCarried[name]}</div>
+            );
+          })}
+          selected={planeNames[launchIndex]}
+          onChange={(launchName) => {
+            setLaunchIndex(planeNames.indexOf(launchName));
+            dispatch({type: 'SET', launchName});
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -287,8 +345,9 @@ const PlaneDetail = (props) => {
     }}
     >
       <PlaneDesignDisplay planeDesign={planeDesign} />
+      {carrier}
       <Button
-        style={{display: 'block'}}
+        style={{display: canBuy ? 'block' : 'none'}}
         label={`Build (${planeDesign.cost})`}
         onClick={() => {
           dispatchToServer({type: 'BUILD_PLANE', name, airbaseID});

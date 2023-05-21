@@ -44,6 +44,9 @@ const gameReducer = (game, action) => {
         }
       }
       game.fogLocations = [...game.fogLocations, ...positions];
+      if (game.fogLocations.length > 10000) {
+        game.fogLocations = game.fogLocations.slice(game.fogLocations.length - 10000);
+      }
 
       return {
         ...game,

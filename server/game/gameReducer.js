@@ -59,7 +59,7 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
       game.players[clientID].money -= cost;
 
       const {nationalityIndex, gen} = game.players[clientID];
-      const position = throwDart(nationalityIndex, game.worldSize);
+      const position = throwDart(game, nationalityIndex, game.worldSize);
       let building = null;
       if (buildingType == 'AIRBASE') {
         const planes = {};
@@ -128,7 +128,7 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
       const airbase = game.entities[airbaseID];
 
       // check that this plane is launchable
-      if (!airbase || airbase.planes[name] <= 0) break;
+      if (!airbase || airbase.planes[name] == null || airbase.planes[name] <= 0) break;
       airbase.planes[name]--;
 
       const nationalityIndex = game.players[clientID].nationalityIndex;
@@ -139,7 +139,17 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
       );
       game.entities[plane.id] = plane;
 
-      // TODO: equip plane with drones and/or fighters
+      // equip plane with drones and/or fighters
+      if (plane.planeCapacity) {
+        let planesAssigned = 0;
+        for (const planeName of plane.planeTypes) {
+          while (airbase.planes[planeName] > 0 && planesAssigned < plane.planeCapacity) {
+            plane.planes[planeName]++;
+            airbase.planes[planeName]--;
+            planesAssigned++;
+          }
+        }
+      }
 
       // TODO: update sorties stat
 

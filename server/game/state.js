@@ -42,22 +42,22 @@ const initGameState = (
         planes[name] = 0;
       }
       const airbase = makeBuilding(
-        clientID, throwDart(nationalityIndex, game.worldSize), 'AIRBASE', planes,
+        clientID, throwDart(game, nationalityIndex, game.worldSize), 'AIRBASE', planes,
       );
       game.entities[airbase.id] = airbase;
     }
     for (let j = 0; j < config.numCities; j++) {
-      const city = makeBuilding(clientID, throwDart(nationalityIndex, game.worldSize), 'CITY');
+      const city = makeBuilding(clientID, throwDart(game, nationalityIndex, game.worldSize), 'CITY');
       game.entities[city.id] = city;
     }
     for (let j = 0; j < config.numFactories; j++) {
       const factory = makeBuilding(
-        clientID, throwDart(nationalityIndex, game.worldSize), 'FACTORY',
+        clientID, throwDart(game, nationalityIndex, game.worldSize), 'FACTORY',
       );
       game.entities[factory.id] = factory;
     }
     for (let j = 0; j < config.numLabs; j++) {
-      const lab = makeBuilding(clientID, throwDart(nationalityIndex, game.worldSize), 'LAB');
+      const lab = makeBuilding(clientID, throwDart(game, nationalityIndex, game.worldSize), 'LAB');
       game.entities[lab.id] = lab;
     }
 
@@ -92,7 +92,7 @@ const makeBuilding = (clientID, position, type, planes) => {
     building.vision = 50;
 
     building.planes = {...planes}; // {[name]: number}
-    building.planeCapacity = Infinity;
+    building.planeCapacity = 1000000; // very large, non-infinite number to JSON serialization
   }
   return building;
 }
