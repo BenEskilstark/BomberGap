@@ -27,6 +27,7 @@ body {
   overflow-y: scroll;
   position: relative;
   background-color: rgb(35, 36, 38);
+  color: #6ce989;
   margin: auto;
   font-family: "Courier New", sans-serif;
   font-weight: 300;

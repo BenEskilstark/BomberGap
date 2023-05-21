@@ -1,6 +1,8 @@
 
 
   - playtest:
+    - no indicator that planes are queued that aren't producing yet
+    - having your last airbase destroyed kills all your planes returning to base
 
 
   - Algorithms:

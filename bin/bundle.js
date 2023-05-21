@@ -762,7 +762,6 @@ module.exports = LeftHandSideBar;
 },{"../clientToServer":11,"../selectors/selectors":20,"./Components/Button.react":1,"./Components/ProgressBar.react":3,"./Components/RadioPicker.react":4,"./PlaneDesignDisplay.react":9,"bens_ui_components":88,"react":105}],7:[function(require,module,exports){
 const React = require('react');
 const {
-  InfoCard,
   Divider,
   Modal,
   TextField,
@@ -812,7 +811,7 @@ const Lobby = props => {
 };
 const CreateGameCard = props => {
   const [name, setName] = useState('');
-  return /*#__PURE__*/React.createElement(InfoCard, {
+  return /*#__PURE__*/React.createElement("div", {
     style: {
       width: 300,
       marginLeft: '25%'
@@ -847,7 +846,7 @@ const SessionCard = props => {
     name,
     clients
   } = session;
-  return /*#__PURE__*/React.createElement(InfoCard, {
+  return /*#__PURE__*/React.createElement("div", {
     style: {
       width: 600,
       marginLeft: 0

@@ -6,7 +6,7 @@ const config = {
   URL: isLocalHost ? null : "https://benhub.io",
   path: isLocalHost ? null : "/bombergap/socket.io",
 
-  msPerTick: 333,
+  msPerTick: 250,
 
   worldSize: {width: 1000, height: 1000},
 
@@ -27,7 +27,7 @@ const config = {
   productionRate: 50, // money spent per second per factory
   labCost: 10000,
   researchRate: 50, // money spent per second per lab
-  genCost: [0, 0, 10000, 40000, 80000], // cost per generation
+  genCost: [0, 0, 15000, 50000, 100000], // cost per generation
   airbaseCost: 10000,
 
   stealthVisionReduction: 0.5,
@@ -51,7 +51,7 @@ const config = {
       // gen2
       'B-52': {
         name: 'B-52', nickname: 'Stratofortress', cost: 2500,
-        gen: 2, fuel: 2000, vision: 40, speed: 0.85, ammo: 2,
+        gen: 2, fuel: 2000, vision: 40, speed: 0.85, ammo: 1,
         planeCapacity: 1, planeTypes: ['F-86', 'F-100'],
         isBomber: true, isNuclear: true,
       },
@@ -115,7 +115,7 @@ const config = {
       // gen2
       'TU-16': {
         name: 'TU-16', nickname: 'Badger', cost: 1200,
-        gen: 2, fuel: 1800, vision: 40, speed: 0.8, ammo: 1,
+        gen: 2, fuel: 1800, vision: 40, speed: 0.8, ammo: 2,
         isBomber: true, isDogfighter: true, isNuclear: true,
       },
       'MIG-21': {
@@ -143,7 +143,7 @@ const config = {
 
       // gen4
       'TU-160': {
-        name: 'TU-160', nickname: 'White Swan', cost: 8000,
+        name: 'TU-160', nickname: 'White Swan', cost: 6000,
         gen: 4, fuel: 2000, vision: 60, speed: 2.8, ammo: 2,
         planeCapacity: 4, planeTypes: ['KH-55', 'KH-101'],
         isBomber: true, isNuclear: true,

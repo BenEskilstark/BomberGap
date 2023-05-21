@@ -1,6 +1,6 @@
 const React = require('react');
 const {
-  InfoCard, Divider,
+  Divider,
   Modal,
   TextField,
   Slider, Checkbox,
@@ -43,7 +43,7 @@ const Lobby = (props) => {
 const CreateGameCard = (props) => {
   const [name, setName] = useState('');
   return (
-    <InfoCard
+    <div
       style={{
         width: 300,
         marginLeft: '25%',
@@ -65,7 +65,7 @@ const CreateGameCard = (props) => {
           dispatchToServer({type: 'CREATE_SESSION', name: name != '' ? name : null});
         }}
       />
-    </InfoCard>
+    </div>
   );
 }
 
@@ -74,7 +74,7 @@ const SessionCard = (props) => {
   const {id, name, clients} = session;
 
   return (
-    <InfoCard
+    <div
       style={{
         width: 600,
         marginLeft: 0,
@@ -115,7 +115,7 @@ const SessionCard = (props) => {
         />
       )}
 
-    </InfoCard>
+    </div>
   );
 };
 

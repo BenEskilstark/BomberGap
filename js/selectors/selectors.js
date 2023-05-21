@@ -1,4 +1,7 @@
-const {dist} = require('bens_utils').vectors;
+const {
+  dist, magnitude, add, subtract, multiply,
+  scale, makeVector, vectorTheta, rotate,
+} = require('bens_utils').vectors;
 const {config} = require('../config');
 
 // --------------------------------------------------------------------
@@ -201,6 +204,27 @@ const getCanvasSize = () => {
   }
 }
 
+
+// --------------------------------------------------------------------
+// Intercept Course
+// --------------------------------------------------------------------
+
+const getInterceptPos = (game, entity, target) => {
+  if (target.isBuilding) return {...target.position};
+
+  let targetTargetPos = target.targetPos;
+  if (!targetTargetPos) {
+    targetTargetPos = getNearestAirbase(game, target)?.position;
+  }
+  if (!targetTargetPos) return {...target.position};
+
+  const targetVelocity = makeVector(
+    vectorTheta(subtract(targetTargetPos, target.position)), target.speed
+  );
+}
+
+
+
 module.exports = {
   getTotalPlanesAtBase,
   getNearestAirbase,
@@ -218,4 +242,5 @@ module.exports = {
   getEntitiesByType,
   normalizePos,
   getCanvasSize,
+  getInterceptPos,
 };

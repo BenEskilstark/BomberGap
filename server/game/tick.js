@@ -23,7 +23,7 @@ const tick = (game, session, socketClients) => {
   updateResearch(game);
 
   updateExplosions(game);
-  moveAndFight(game);
+  moveAndFight(session, game, socketClients);
   computeVisionAndTargeting(session, game, socketClients);
   sendPlayerUpdates(session, game, socketClients);
 }
@@ -145,7 +145,7 @@ const updateExplosions = (game) => {
 }
 
 
-const moveAndFight = (game) => {
+const moveAndFight = (session, game, socketClients) => {
   const genDogfightBonus = game.config.genDogfightBonus;
 
   for (const entityID in game.entities) {
@@ -239,7 +239,7 @@ const moveAndFight = (game) => {
         game.entities[explosion.id] = explosion;
         delete game.entities[targetEntity.id];
         if (getNumBuilding(game, targetEntity.clientID, 'CITY') == 0) {
-          return doGameOver(state, entity.clientID);
+          return doGameOver(session, socketClients, null, entity.clientID);
         }
       } else { // target wasn't an enemy
         entity.targetPos = null; // return to airbase on next tick
