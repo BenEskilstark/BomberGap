@@ -28,7 +28,7 @@ const config = {
   labCost: 5000,
   researchRate: 50, // money spent per second per lab
   genCost: [0, 0, 15000, 50000, 50000], // cost per generation
-  airbaseCost: 10000,
+  airbaseCost: 9000,
 
   stealthVisionReduction: 0.5,
   genDogfightBonus: 0.15,
