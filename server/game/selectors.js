@@ -1,4 +1,7 @@
-const {dist} = require('bens_utils').vectors;
+const {
+  dist, magnitude, add, subtract, multiply,
+  scale, makeVector, vectorTheta, rotate,
+} = require('bens_utils').vectors;
 const {config} = require('../../js/config');
 
 const getTotalPlanesAtBase = (base) => {
@@ -88,6 +91,67 @@ const getEntitiesByType = (game, type, clientID) => {
 }
 
 
+// --------------------------------------------------------------------
+// Intercept Course
+// --------------------------------------------------------------------
+
+const getInterceptPos = (game, entity, target) => {
+  if (target.isBuilding) return {...target.position};
+
+  let targetTargetPos = target.targetPos;
+  if (!targetTargetPos) {
+    targetTargetPos = getNearestAirbase(game, target)?.position;
+  }
+  if (!targetTargetPos) return {...target.position};
+  const targetToTargetVector = subtract(targetTargetPos, target.position);
+  const toTargetVector = subtract(target.position, entity.position);
+
+  const targetVelocity = makeVector(
+    vectorTheta(targetToTargetVector), target.speed
+  );
+  const entityVelocity = makeVector(vectorTheta(toTargetVector), entity.speed);
+
+  const relativeVelocity = {
+    x: targetVelocity.x - entityVelocity.x,
+    y: targetVelocity.y - entityVelocity.y
+  };
+  if (magnitude(relativeVelocity) == 0) {
+    return {...target.position};
+  }
+  const distance = dist(entity.position, target.position);
+  const timeToIntercept = distance / magnitude(relativeVelocity);
+
+  const timeToTarget = dist(target.position, target.targetPos) / target.speed;
+  if (timeToIntercept > timeToTarget) {
+    return {...target.position};
+  }
+
+  const targetPos = {
+    x: target.position.x + targetVelocity.x * timeToIntercept,
+    y: target.position.y + targetVelocity.y * timeToIntercept
+  };
+
+  return targetPos;
+
+
+  // const toTargetVector = subtract(target.position, entity.position);
+  // const thetaBetween = vectorTheta(subtract(targetToTargetVector, toTargetVector));
+  // const component = Math.cos(thetaBetween);
+  // if (component * target.speed >= entity.speed) {
+  //   return {...target.position};
+  // }
+  // if (component < 0) {
+  //   return {...target.position};
+  // }
+
+  // const distance = dist(entity.position, target.position);
+  // const numTicks = distance / Math.abs(component * target.speed - entity.speed);
+  // const targetInterceptPoint = add(scale(targetVelocity, numTicks), target.position);
+
+  // return targetInterceptPoint;
+}
+
+
 module.exports = {
   getTotalPlanesAtBase,
   getNearestAirbase,
@@ -97,4 +161,5 @@ module.exports = {
   getOtherClientID,
   getNumBuilding,
   getEntitiesByType,
+  getInterceptPos,
 };

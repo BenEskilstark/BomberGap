@@ -13,7 +13,7 @@ const config = {
   formationRadius: 50,
 
   // starting configuration
-  gen: 1,
+  gen: 4,
   numAirbases: 1,
   numCities: 2,
   numFactories: 1,
@@ -25,9 +25,9 @@ const config = {
   moneyRate: 50, // money made per second
   factoryCost: 4000,
   productionRate: 50, // money spent per second per factory
-  labCost: 10000,
+  labCost: 5000,
   researchRate: 50, // money spent per second per lab
-  genCost: [0, 0, 15000, 50000, 100000], // cost per generation
+  genCost: [0, 0, 15000, 50000, 50000], // cost per generation
   airbaseCost: 10000,
 
   stealthVisionReduction: 0.5,
@@ -67,13 +67,13 @@ const config = {
 
       // gen3
       'XB-70': {
-        name: 'XB-70', nickname: 'Valkyrie', cost: 6000,
+        name: 'XB-70', nickname: 'Valkyrie', cost: 60,
         gen: 3, fuel: 2400, vision: 50, speed: 3.1, ammo: 1,
         isBomber: true, isNuclear: true,
       },
       'F-4': {
-        name: 'F-4', nickname: 'Phantom', cost: 2500,
-        gen: 3, fuel: 1200, vision: 55, speed: 2.2, ammo: 2,
+        name: 'F-4', nickname: 'Phantom', cost: 250,
+        gen: 3, fuel: 12000, vision: 55, speed: 2.2, ammo: 2,
         isFighter: true, isBomber: true,
       },
       'SR-71': {
@@ -114,8 +114,8 @@ const config = {
 
       // gen2
       'TU-16': {
-        name: 'TU-16', nickname: 'Badger', cost: 1500,
-        gen: 2, fuel: 1800, vision: 40, speed: 0.8, ammo: 2,
+        name: 'TU-16', nickname: 'Badger', cost: 1600,
+        gen: 2, fuel: 1800, vision: 40, speed: 0.8, ammo: 1,
         isBomber: true, isDogfighter: true, isNuclear: true,
       },
       'MIG-21': {
@@ -136,14 +136,14 @@ const config = {
         isDrone: true, isFighter: true,
       },
       'MIG-25': {
-        name: 'MIG-25', nickname: 'Foxbat', cost: 2500,
+        name: 'MIG-25', nickname: 'Foxbat', cost: 25,
         gen: 3, fuel: 900, speed: 3.2, ammo: 3, vision: 50,
         isFighter: true,
       },
 
       // gen4
       'TU-160': {
-        name: 'TU-160', nickname: 'White Swan', cost: 6000,
+        name: 'TU-160', nickname: 'White Swan', cost: 60,
         gen: 4, fuel: 2000, vision: 60, speed: 2.8, ammo: 2,
         planeCapacity: 4, planeTypes: ['KH-55', 'KH-101'],
         isBomber: true, isNuclear: true,

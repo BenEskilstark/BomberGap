@@ -93,6 +93,8 @@ const makeBuilding = (clientID, position, type, planes) => {
 
     building.planes = {...planes}; // {[name]: number}
     building.planeCapacity = 1000000; // very large, non-infinite number to JSON serialization
+  } else if (type == 'LAB') {
+    building.vision = 55;
   }
   return building;
 }

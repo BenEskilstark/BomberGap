@@ -1215,7 +1215,7 @@ const config = {
   },
   formationRadius: 50,
   // starting configuration
-  gen: 1,
+  gen: 4,
   numAirbases: 1,
   numCities: 2,
   numFactories: 1,
@@ -1227,10 +1227,10 @@ const config = {
   factoryCost: 4000,
   productionRate: 50,
   // money spent per second per factory
-  labCost: 10000,
+  labCost: 5000,
   researchRate: 50,
   // money spent per second per lab
-  genCost: [0, 0, 15000, 50000, 100000],
+  genCost: [0, 0, 15000, 50000, 50000],
   // cost per generation
   airbaseCost: 10000,
   stealthVisionReduction: 0.5,
@@ -1303,7 +1303,7 @@ const config = {
     'XB-70': {
       name: 'XB-70',
       nickname: 'Valkyrie',
-      cost: 6000,
+      cost: 60,
       gen: 3,
       fuel: 2400,
       vision: 50,
@@ -1315,9 +1315,9 @@ const config = {
     'F-4': {
       name: 'F-4',
       nickname: 'Phantom',
-      cost: 2500,
+      cost: 250,
       gen: 3,
-      fuel: 1200,
+      fuel: 12000,
       vision: 55,
       speed: 2.2,
       ammo: 2,
@@ -1401,12 +1401,12 @@ const config = {
     'TU-16': {
       name: 'TU-16',
       nickname: 'Badger',
-      cost: 1500,
+      cost: 1600,
       gen: 2,
       fuel: 1800,
       vision: 40,
       speed: 0.8,
-      ammo: 2,
+      ammo: 1,
       isBomber: true,
       isDogfighter: true,
       isNuclear: true
@@ -1449,7 +1449,7 @@ const config = {
     'MIG-25': {
       name: 'MIG-25',
       nickname: 'Foxbat',
-      cost: 2500,
+      cost: 25,
       gen: 3,
       fuel: 900,
       speed: 3.2,
@@ -1461,7 +1461,7 @@ const config = {
     'TU-160': {
       name: 'TU-160',
       nickname: 'White Swan',
-      cost: 6000,
+      cost: 60,
       gen: 4,
       fuel: 2000,
       vision: 60,
@@ -2403,37 +2403,6 @@ const getCanvasSize = () => {
     };
   }
 };
-
-// --------------------------------------------------------------------
-// Intercept Course
-// --------------------------------------------------------------------
-
-const getInterceptPos = (game, entity, target) => {
-  if (target.isBuilding) return {
-    ...target.position
-  };
-  let targetTargetPos = target.targetPos;
-  if (!targetTargetPos) {
-    var _getNearestAirbase;
-    targetTargetPos = (_getNearestAirbase = getNearestAirbase(game, target)) === null || _getNearestAirbase === void 0 ? void 0 : _getNearestAirbase.position;
-  }
-  if (!targetTargetPos) return {
-    ...target.position
-  };
-  const targetVelocity = makeVector(vectorTheta(subtract(targetTargetPos, target.position)), target.speed);
-  const toTargetVector = subtract(target.position, entity.position);
-  const relativeTargetVelocity = subtract(add(target.position, targetVelocity), entity.position);
-  // TODO: is this magnitude not being negative ever gonna break this?
-  if (magnitude(relativeTargetVelocity) > entity.speed) {
-    return {
-      ...target.position
-    };
-  }
-  const distance = dist(entity.position, target.position);
-};
-
-// return the vector that is the amount of vectorB that is parallel to vectorA
-const componentVector = (vectorA, vectorB) => {};
 module.exports = {
   getTotalPlanesAtBase,
   getNearestAirbase,
@@ -2450,8 +2419,7 @@ module.exports = {
   isHost,
   getEntitiesByType,
   normalizePos,
-  getCanvasSize,
-  getInterceptPos
+  getCanvasSize
 };
 },{"../config":12,"bens_utils":95}],21:[function(require,module,exports){
 const getSession = state => {

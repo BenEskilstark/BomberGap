@@ -9,7 +9,7 @@ const {oneOf} = require('bens_utils').stochastic;
 const {
   getEntitiesByPlayer, getNearestAirbase, getOtherClientID,
   getNumBuilding, getEntitiesByType,
-  getPlaneDesignsByGen,
+  getPlaneDesignsByGen, getInterceptPos,
 } = require('./selectors');
 const {makePlane, makeExplosion} = require('./state');
 
@@ -165,8 +165,7 @@ const moveAndFight = (session, game, socketClients) => {
         entity.targetEnemy = null;
       } else {
         isEnemy = true;
-        // TODO: could do an intercept calculation here
-        targetPos = {...targetEntity.position};
+        targetPos = getInterceptPos(game, entity, targetEntity);
       }
     }
 

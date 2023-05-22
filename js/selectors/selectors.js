@@ -205,40 +205,6 @@ const getCanvasSize = () => {
 }
 
 
-// --------------------------------------------------------------------
-// Intercept Course
-// --------------------------------------------------------------------
-
-const getInterceptPos = (game, entity, target) => {
-  if (target.isBuilding) return {...target.position};
-
-  let targetTargetPos = target.targetPos;
-  if (!targetTargetPos) {
-    targetTargetPos = getNearestAirbase(game, target)?.position;
-  }
-  if (!targetTargetPos) return {...target.position};
-
-  const targetVelocity = makeVector(
-    vectorTheta(subtract(targetTargetPos, target.position)), target.speed
-  );
-  const toTargetVector = subtract(target.position, entity.position);
-  const relativeTargetVelocity = subtract(add(target.position, targetVelocity), entity.position);
-  // TODO: is this magnitude not being negative ever gonna break this?
-  if (magnitude(relativeTargetVelocity) > entity.speed) {
-    return {...target.position};
-  }
-
-
-
-  const distance = dist(entity.position, target.position);
-}
-
-// return the vector that is the amount of vectorB that is parallel to vectorA
-const componentVector = (vectorA, vectorB) => {
-
-}
-
-
 
 module.exports = {
   getTotalPlanesAtBase,
@@ -257,5 +223,4 @@ module.exports = {
   getEntitiesByType,
   normalizePos,
   getCanvasSize,
-  getInterceptPos,
 };
