@@ -1215,7 +1215,7 @@ const config = {
   },
   formationRadius: 50,
   // starting configuration
-  gen: 4,
+  gen: 1,
   numAirbases: 1,
   numCities: 2,
   numFactories: 1,
@@ -1303,7 +1303,7 @@ const config = {
     'XB-70': {
       name: 'XB-70',
       nickname: 'Valkyrie',
-      cost: 60,
+      cost: 6000,
       gen: 3,
       fuel: 2400,
       vision: 50,
@@ -1315,9 +1315,9 @@ const config = {
     'F-4': {
       name: 'F-4',
       nickname: 'Phantom',
-      cost: 250,
+      cost: 2500,
       gen: 3,
-      fuel: 12000,
+      fuel: 1200,
       vision: 55,
       speed: 2.2,
       ammo: 2,
@@ -1449,7 +1449,7 @@ const config = {
     'MIG-25': {
       name: 'MIG-25',
       nickname: 'Foxbat',
-      cost: 25,
+      cost: 2500,
       gen: 3,
       fuel: 900,
       speed: 3.2,
@@ -1461,7 +1461,7 @@ const config = {
     'TU-160': {
       name: 'TU-160',
       nickname: 'White Swan',
-      cost: 60,
+      cost: 6000,
       gen: 4,
       fuel: 2000,
       vision: 60,
