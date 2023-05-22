@@ -265,6 +265,10 @@ const PlanesSelected = (props) => {
   const planesSelected = [];
   for (const name in selections) {
     const planeDesign = getPlaneDesignByName(game, name);
+    if (!planeDesign) {
+      console.log("no plane design", planeDesign, name);
+      continue;
+    }
     planesSelected.push(
       <div className="displayChildOnHover" key={"plane_" + name}>
         {name}: {selections[name]}

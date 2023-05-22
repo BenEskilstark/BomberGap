@@ -50,13 +50,13 @@ const config = {
 
       // gen2
       'B-52': {
-        name: 'B-52', nickname: 'Stratofortress', cost: 2500,
+        name: 'B-52', nickname: 'Stratofortress', cost: 2400,
         gen: 2, fuel: 2000, vision: 40, speed: 0.85, ammo: 1,
         planeCapacity: 1, planeTypes: ['F-86', 'F-100'],
         isBomber: true, isNuclear: true,
       },
       'F-100': {
-        name: 'F-100', nickname: 'Super Sabre', cost: 1200,
+        name: 'F-100', nickname: 'Super Sabre', cost: 1000,
         gen: 2, fuel: 500, vision: 40, speed: 1.2, ammo: 1,
         isFighter: true, isBomber: true,
       },
@@ -114,7 +114,7 @@ const config = {
 
       // gen2
       'TU-16': {
-        name: 'TU-16', nickname: 'Badger', cost: 1200,
+        name: 'TU-16', nickname: 'Badger', cost: 1500,
         gen: 2, fuel: 1800, vision: 40, speed: 0.8, ammo: 2,
         isBomber: true, isDogfighter: true, isNuclear: true,
       },

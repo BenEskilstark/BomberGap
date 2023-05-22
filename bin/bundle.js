@@ -660,6 +660,10 @@ const PlanesSelected = props => {
   const planesSelected = [];
   for (const name in selections) {
     const planeDesign = getPlaneDesignByName(game, name);
+    if (!planeDesign) {
+      console.log("no plane design", planeDesign, name);
+      continue;
+    }
     planesSelected.push( /*#__PURE__*/React.createElement("div", {
       className: "displayChildOnHover",
       key: "plane_" + name
@@ -1204,7 +1208,7 @@ const config = {
   isLocalHost,
   URL: isLocalHost ? null : "https://benhub.io",
   path: isLocalHost ? null : "/bombergap/socket.io",
-  msPerTick: 333,
+  msPerTick: 250,
   worldSize: {
     width: 1000,
     height: 1000
@@ -1226,7 +1230,7 @@ const config = {
   labCost: 10000,
   researchRate: 50,
   // money spent per second per lab
-  genCost: [0, 0, 10000, 40000, 80000],
+  genCost: [0, 0, 15000, 50000, 100000],
   // cost per generation
   airbaseCost: 10000,
   stealthVisionReduction: 0.5,
@@ -1262,12 +1266,12 @@ const config = {
     'B-52': {
       name: 'B-52',
       nickname: 'Stratofortress',
-      cost: 2500,
+      cost: 2400,
       gen: 2,
       fuel: 2000,
       vision: 40,
       speed: 0.85,
-      ammo: 2,
+      ammo: 1,
       planeCapacity: 1,
       planeTypes: ['F-86', 'F-100'],
       isBomber: true,
@@ -1276,7 +1280,7 @@ const config = {
     'F-100': {
       name: 'F-100',
       nickname: 'Super Sabre',
-      cost: 1200,
+      cost: 1000,
       gen: 2,
       fuel: 500,
       vision: 40,
@@ -1397,12 +1401,12 @@ const config = {
     'TU-16': {
       name: 'TU-16',
       nickname: 'Badger',
-      cost: 1200,
+      cost: 1500,
       gen: 2,
       fuel: 1800,
       vision: 40,
       speed: 0.8,
-      ammo: 1,
+      ammo: 2,
       isBomber: true,
       isDogfighter: true,
       isNuclear: true
@@ -1457,7 +1461,7 @@ const config = {
     'TU-160': {
       name: 'TU-160',
       nickname: 'White Swan',
-      cost: 8000,
+      cost: 6000,
       gen: 4,
       fuel: 2000,
       vision: 60,
@@ -2207,7 +2211,15 @@ module.exports = {
 };
 },{"./selectors/sessions":21,"bens_utils":95}],20:[function(require,module,exports){
 const {
-  dist
+  dist,
+  magnitude,
+  add,
+  subtract,
+  multiply,
+  scale,
+  makeVector,
+  vectorTheta,
+  rotate
 } = require('bens_utils').vectors;
 const {
   config
@@ -2391,6 +2403,37 @@ const getCanvasSize = () => {
     };
   }
 };
+
+// --------------------------------------------------------------------
+// Intercept Course
+// --------------------------------------------------------------------
+
+const getInterceptPos = (game, entity, target) => {
+  if (target.isBuilding) return {
+    ...target.position
+  };
+  let targetTargetPos = target.targetPos;
+  if (!targetTargetPos) {
+    var _getNearestAirbase;
+    targetTargetPos = (_getNearestAirbase = getNearestAirbase(game, target)) === null || _getNearestAirbase === void 0 ? void 0 : _getNearestAirbase.position;
+  }
+  if (!targetTargetPos) return {
+    ...target.position
+  };
+  const targetVelocity = makeVector(vectorTheta(subtract(targetTargetPos, target.position)), target.speed);
+  const toTargetVector = subtract(target.position, entity.position);
+  const relativeTargetVelocity = subtract(add(target.position, targetVelocity), entity.position);
+  // TODO: is this magnitude not being negative ever gonna break this?
+  if (magnitude(relativeTargetVelocity) > entity.speed) {
+    return {
+      ...target.position
+    };
+  }
+  const distance = dist(entity.position, target.position);
+};
+
+// return the vector that is the amount of vectorB that is parallel to vectorA
+const componentVector = (vectorA, vectorB) => {};
 module.exports = {
   getTotalPlanesAtBase,
   getNearestAirbase,
@@ -2407,7 +2450,8 @@ module.exports = {
   isHost,
   getEntitiesByType,
   normalizePos,
-  getCanvasSize
+  getCanvasSize,
+  getInterceptPos
 };
 },{"../config":12,"bens_utils":95}],21:[function(require,module,exports){
 const getSession = state => {
