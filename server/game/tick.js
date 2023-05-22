@@ -105,10 +105,10 @@ const updateProduction = (game) => {
         // assign airbase
         let airbase = game.entities[production.airbaseID];
         if (!airbase) { // pick random airbase if previous got destroyed
-          airbase = oneOf(getEntitiesByType(game, clientID, 'AIRBASE'));
+          airbase = oneOf(getEntitiesByType(game, 'AIRBASE', clientID));
         }
         if (!airbase) {
-          nextProductionQueue.push(production);
+          // nextProductionQueue.push(production);
           continue; // if no airbases at all just continue
         }
 
