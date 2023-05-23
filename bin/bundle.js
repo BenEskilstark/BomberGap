@@ -230,7 +230,9 @@ const RightHandSideBar = require('./RightHandSideBar.react');
 const {
   normalizePos,
   getCanvasSize,
-  getPlaneDesignsUnlocked
+  getPlaneDesignsUnlocked,
+  isAirbaseSelected,
+  getEntitiesByType
 } = require('../selectors/selectors');
 const {
   useState,
@@ -352,14 +354,23 @@ function Game(props) {
         key: "" + (i + 1) % 10,
         press: 'onKeyDown',
         fn: () => {
-          dispatch({
-            type: 'SET',
-            launchName: name
-          });
-          dispatch({
-            type: 'SET',
-            clickMode: 'LAUNCH'
-          });
+          const game = getState().game;
+          const airbases = getEntitiesByType(game, 'AIRBASE', game.clientID);
+          if (isAirbaseSelected(game)) {
+            dispatch({
+              type: 'SET',
+              launchName: name
+            });
+            dispatch({
+              type: 'SET',
+              clickMode: 'LAUNCH'
+            });
+          } else if (i < airbases.length) {
+            dispatch({
+              type: 'SET',
+              selectedIDs: ['' + airbases[i].id]
+            });
+          }
         }
       });
     }
@@ -382,6 +393,26 @@ function Game(props) {
         type: 'SET',
         clickMode: 'LAUNCH'
       })
+    });
+    dispatch({
+      type: 'SET_HOTKEY',
+      key: 'B',
+      press: 'onKeyDown',
+      fn: () => {
+        const game = getState().game;
+        const airbases = getEntitiesByType(game, 'AIRBASE', game.clientID);
+        if (isAirbaseSelected(game)) {
+          let airbaseID = airbases.map(a => a.id).filter(id => game.selectedIDs.includes('' + id))[0];
+          console.log(airbaseID, game.launchName);
+          if (airbaseID) {
+            dispatchToServer({
+              type: 'BUILD_PLANE',
+              name: game.launchName,
+              airbaseID
+            });
+          }
+        }
+      }
     });
   }, []);
   return /*#__PURE__*/React.createElement("div", {
@@ -815,7 +846,7 @@ const PlaneDetail = props => {
     style: {
       display: canBuy ? 'block' : 'none'
     },
-    label: `Build (${planeDesign.cost})`,
+    label: `Build (${planeDesign.cost}) (B)`,
     onClick: () => {
       dispatchToServer({
         type: 'BUILD_PLANE',
@@ -1298,7 +1329,7 @@ const config = {
   // money spent per second per lab
   genCost: [0, 0, 15000, 50000, 50000],
   // cost per generation
-  airbaseCost: 9000,
+  airbaseCost: 8000,
   stealthVisionReduction: 0.5,
   genDogfightBonus: 0.15,
   planeDesigns: [
@@ -1339,7 +1370,7 @@ const config = {
       speed: 0.85,
       ammo: 1,
       planeCapacity: 3,
-      planeTypes: ['F-86', 'F-100'],
+      planeTypes: ['F-100', 'F-86'],
       isBomber: true,
       isNuclear: true
     },
@@ -1519,7 +1550,7 @@ const config = {
     'MIG-25': {
       name: 'MIG-25',
       nickname: 'Foxbat',
-      cost: 2500,
+      cost: 2200,
       gen: 3,
       fuel: 900,
       speed: 3.2,
@@ -2327,7 +2358,11 @@ const getNearestAirbase = (game, plane) => {
   return nearestAirbase;
 };
 const getAirbaseNumByID = (game, airbaseID) => {
-  const clientID = game.entities[airbaseID].clientID;
+  var _game$entities$airbas;
+  if (!game.entities[airbaseID]) {
+    return 0;
+  }
+  const clientID = (_game$entities$airbas = game.entities[airbaseID]) === null || _game$entities$airbas === void 0 ? void 0 : _game$entities$airbas.clientID;
   const airbases = getEntitiesByType(game, 'AIRBASE', clientID);
   for (let i = 0; i < airbases.length; i++) {
     if (airbases[i].id == airbaseID) {
@@ -2335,6 +2370,15 @@ const getAirbaseNumByID = (game, airbaseID) => {
     }
   }
   return 0;
+};
+const isAirbaseSelected = game => {
+  for (const entityID of game.selectedIDs) {
+    var _game$entities$entity;
+    if (((_game$entities$entity = game.entities[entityID]) === null || _game$entities$entity === void 0 ? void 0 : _game$entities$entity.type) == 'AIRBASE') {
+      return true;
+    }
+  }
+  return false;
 };
 
 // --------------------------------------------------------------------
@@ -2488,6 +2532,7 @@ module.exports = {
   getTotalPlanesAtBase,
   getNearestAirbase,
   getAirbaseNumByID,
+  isAirbaseSelected,
   getPlaneDesignsByGen,
   getPlaneDesignsUpToGen,
   getPlaneDesignByName,

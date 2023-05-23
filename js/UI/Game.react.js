@@ -14,7 +14,10 @@ const {render} = require('../render');
 const {dist, subtract, add} = require('bens_utils').vectors;
 const LeftHandSideBar = require('./LeftHandSideBar.react');
 const RightHandSideBar = require('./RightHandSideBar.react');
-const {normalizePos, getCanvasSize, getPlaneDesignsUnlocked} = require('../selectors/selectors');
+const {
+  normalizePos, getCanvasSize, getPlaneDesignsUnlocked,
+  isAirbaseSelected, getEntitiesByType,
+} = require('../selectors/selectors');
 
 const {useState, useMemo, useEffect, useReducer} = React;
 
@@ -96,8 +99,14 @@ function Game(props) {
       const name = planeNames[i];
       dispatch({type: 'SET_HOTKEY', key: ""+((i+1)%10) , press: 'onKeyDown',
         fn: () => {
-          dispatch({type: 'SET', launchName: name});
-          dispatch({type: 'SET', clickMode: 'LAUNCH'});
+          const game = getState().game;
+          const airbases = getEntitiesByType(game, 'AIRBASE', game.clientID);
+          if (isAirbaseSelected(game)) {
+            dispatch({type: 'SET', launchName: name});
+            dispatch({type: 'SET', clickMode: 'LAUNCH'});
+          } else if (i < airbases.length) {
+            dispatch({type: 'SET',  selectedIDs: ['' + airbases[i].id]});
+          }
         }
       });
     }
@@ -108,6 +117,18 @@ function Game(props) {
     });
     dispatch({type: 'SET_HOTKEY', key: 'L', press: 'onKeyDown',
       fn: () => dispatch({type: 'SET', clickMode: 'LAUNCH'}),
+    });
+    dispatch({type: 'SET_HOTKEY', key: 'B', press: 'onKeyDown',
+      fn: () => {
+        const game = getState().game;
+        const airbases = getEntitiesByType(game, 'AIRBASE', game.clientID);
+        if (isAirbaseSelected(game)) {
+          let airbaseID = airbases.map(a => a.id).filter(id => game.selectedIDs.includes(''+id))[0];
+          if (airbaseID) {
+            dispatchToServer({type: 'BUILD_PLANE', name: game.launchName, airbaseID});
+          }
+        }
+      }
     });
   }, []);
 

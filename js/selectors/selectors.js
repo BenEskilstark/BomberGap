@@ -37,7 +37,10 @@ const getNearestAirbase = (game, plane) => {
 };
 
 const getAirbaseNumByID = (game, airbaseID) => {
-  const clientID = game.entities[airbaseID].clientID;
+  if (!game.entities[airbaseID]) {
+    return 0;
+  }
+  const clientID = game.entities[airbaseID]?.clientID;
   const airbases = getEntitiesByType(game, 'AIRBASE', clientID);
   for (let i = 0; i < airbases.length; i++) {
     if (airbases[i].id == airbaseID) {
@@ -47,6 +50,14 @@ const getAirbaseNumByID = (game, airbaseID) => {
   return 0;
 };
 
+const isAirbaseSelected = (game) => {
+  for (const entityID of game.selectedIDs) {
+    if (game.entities[entityID]?.type == 'AIRBASE') {
+      return true;
+    }
+  }
+  return false;
+}
 
 // --------------------------------------------------------------------
 // Plane Designs
@@ -221,6 +232,7 @@ module.exports = {
   getTotalPlanesAtBase,
   getNearestAirbase,
   getAirbaseNumByID,
+  isAirbaseSelected,
   getPlaneDesignsByGen,
   getPlaneDesignsUpToGen,
   getPlaneDesignByName,

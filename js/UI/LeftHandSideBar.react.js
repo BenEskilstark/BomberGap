@@ -405,7 +405,7 @@ const PlaneDetail = (props) => {
       {carrier}
       <Button
         style={{display: canBuy ? 'block' : 'none'}}
-        label={`Build (${planeDesign.cost})`}
+        label={`Build (${planeDesign.cost}) (B)`}
         onClick={() => {
           dispatchToServer({type: 'BUILD_PLANE', name, airbaseID});
         }}

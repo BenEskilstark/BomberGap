@@ -28,7 +28,7 @@ const config = {
   labCost: 5000,
   researchRate: 50, // money spent per second per lab
   genCost: [0, 0, 15000, 50000, 50000], // cost per generation
-  airbaseCost: 9000,
+  airbaseCost: 8000,
 
   stealthVisionReduction: 0.5,
   genDogfightBonus: 0.15,
@@ -52,7 +52,7 @@ const config = {
       'B-52': {
         name: 'B-52', nickname: 'Stratofortress', cost: 2400,
         gen: 2, fuel: 2000, vision: 45, speed: 0.85, ammo: 1,
-        planeCapacity: 3, planeTypes: ['F-86', 'F-100'],
+        planeCapacity: 3, planeTypes: ['F-100', 'F-86'],
         isBomber: true, isNuclear: true,
       },
       'F-100': {
@@ -139,7 +139,7 @@ const config = {
         isDrone: true, isFighter: true,
       },
       'MIG-25': {
-        name: 'MIG-25', nickname: 'Foxbat', cost: 2500,
+        name: 'MIG-25', nickname: 'Foxbat', cost: 2200,
         gen: 3, fuel: 900, speed: 3.2, ammo: 1, vision: 45,
         isFighter: true,
       },
