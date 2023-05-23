@@ -11,6 +11,7 @@ const {
   getNumPlaneInProductionAtBase,
   getPlaneInProductionAtBase,
   getPlanesBeingWorkedOn,
+  getAirbaseNumByID,
 } = require('../selectors/selectors');
 const Button = require('./Components/Button.react');
 const RadioPicker = require('./Components/RadioPicker.react');
@@ -184,7 +185,7 @@ const BuildingsSelected = (props) => {
             planeDesign={getPlaneDesignByName(game, state.game.launchName)}
             airbaseID={id}
           />
-          <div style={{textAlign: 'center'}}><b>Airbase</b></div>
+          <div style={{textAlign: 'center'}}><b>Airbase #{getAirbaseNumByID(game, id)}</b></div>
           <div>Launch Type: </div>
           <RadioPicker
             options={planeNames}
@@ -214,13 +215,65 @@ const BuildingsSelected = (props) => {
                         />
                       );
                     })
-                  ) : null}
+                  ) : (allQueued.length == 0 && numQueued > 0 ?
+                    (
+                      <ProgressBar
+                        key={id + "_" + name + "_" + "_progress"}
+                        id={id + "_" + name + "_" + "_progress"}
+                        progress={0}
+                        enqueued={numQueued}
+                      />
+                    ) : null)
+                  }
                 </div>
               );
             })}
             selected={state.game.launchName}
             onChange={(launchName) => dispatch({type: 'SET', launchName})}
           />
+        </div>
+      );
+    } else if (building.type == 'FACTORY') {
+      const productionQueueUI = [];
+      const productionQueue = game.players[building.clientID].productionQueue;
+      for (let productionIndex = 0; productionIndex < productionQueue.length; productionIndex++) {
+        const production = productionQueue[productionIndex];
+        const {name, airbaseID, cost} = production;
+        const design = getPlaneDesignByName(game, name);
+        productionQueueUI.push(
+          <div>
+            <div>{name}, Airbase #{getAirbaseNumByID(game, airbaseID)}</div>
+            <div
+              style={{
+                display: 'flex',
+                gap: '5px',
+              }}
+            >
+              <ProgressBar
+                key={id + "_" + name + "_" + productionIndex + "_progress"}
+                id={id + "_" + name + "_" + productionIndex + "_progress"}
+                progress={1 - cost / design.cost}
+              />
+              <Button
+                label="Cancel"
+                onClick={() => {
+                  dispatchToServer({type: 'CANCEL_PLANE', productionIndex});
+                }}
+              />
+            </div>
+          </div>
+        );
+      }
+      selectedBuildings.push(
+        <div
+          key={"selected_building_" + id}
+          style={{
+            overflowY: 'scroll',
+            maxHeight: 300,
+          }}
+        >
+          Factory:
+          {productionQueueUI}
         </div>
       );
     }
@@ -311,7 +364,7 @@ const PlaneDetail = (props) => {
     carrier = (
       <div>
         <Button
-          label={clickMode == 'MOVE' ? "Switch to Launch Mode" : "Switch to Target Mode"}
+          label={clickMode == 'MOVE' ? "Switch to Launch Mode (L)" : "Switch to Target Mode (M)"}
           onClick={() => {
             dispatch({type: 'SET', clickMode: clickMode == 'MOVE' ? 'LAUNCH' : 'MOVE'});
           }}

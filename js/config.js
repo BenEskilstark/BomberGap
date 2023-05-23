@@ -44,30 +44,31 @@ const config = {
       },
       'F-86': {
         name: 'F-86', nickname: 'Sabre', cost: 500,
-        gen: 1, fuel: 400, vision: 40, speed: 0.9, ammo: 1,
+        gen: 1, fuel: 500, vision: 40, speed: 0.9, ammo: 1,
         isFighter: true,
       },
 
       // gen2
       'B-52': {
         name: 'B-52', nickname: 'Stratofortress', cost: 2400,
-        gen: 2, fuel: 2000, vision: 40, speed: 0.85, ammo: 1,
-        planeCapacity: 1, planeTypes: ['F-86', 'F-100'],
+        gen: 2, fuel: 2000, vision: 45, speed: 0.85, ammo: 1,
+        planeCapacity: 3, planeTypes: ['F-86', 'F-100'],
         isBomber: true, isNuclear: true,
       },
       'F-100': {
         name: 'F-100', nickname: 'Super Sabre', cost: 1000,
-        gen: 2, fuel: 500, vision: 40, speed: 1.2, ammo: 1,
+        gen: 2, fuel: 600, vision: 40, speed: 1.2, ammo: 1,
         isFighter: true, isBomber: true,
       },
       'U-2': {
         name: 'U-2', nickname: 'Dragon', cost: 600,
         gen: 2, fuel: 2400, vision: 80, speed: 0.75, ammo: 0,
+        isRecon: true,
       },
 
       // gen3
       'XB-70': {
-        name: 'XB-70', nickname: 'Valkyrie', cost: 6000,
+        name: 'XB-70', nickname: 'Valkyrie', cost: 4500,
         gen: 3, fuel: 2400, vision: 50, speed: 3.1, ammo: 1,
         isBomber: true, isNuclear: true,
       },
@@ -79,6 +80,7 @@ const config = {
       'SR-71': {
         name: 'SR-71', nickname: 'Blackbird', cost: 3000,
         gen: 3, fuel: 2500, vision: 120, speed: 3.3, ammo: 0,
+        isRecon: true,
       },
 
       // gen4
@@ -110,23 +112,24 @@ const config = {
       'YAK-25': {
         name: 'YAK-25', nickname: 'Yellow', cost: 400,
         gen: 1, fuel: 800, vision: 60, speed: 0.8, ammo: 0,
+        isRecon: true,
       },
 
       // gen2
       'TU-16': {
-        name: 'TU-16', nickname: 'Badger', cost: 1600,
+        name: 'TU-16', nickname: 'Badger', cost: 2000,
         gen: 2, fuel: 1800, vision: 40, speed: 0.8, ammo: 1,
         isBomber: true, isDogfighter: true, isNuclear: true,
       },
       'MIG-21': {
-        name: 'MIG-21', nickname: 'Fishbed', cost: 750,
+        name: 'MIG-21', nickname: 'Fishbed', cost: 900,
         gen: 2, fuel: 600, speed: 1.5, ammo: 1, vision: 45,
         isFighter: true,
       },
       'KH-50': {
         name: 'KH-50', nickname: 'Recon Cruise Missile', cost: 500,
         gen: 2, fuel: 1000, vision: 75, speed: 1.5, ammo: 0,
-        isDrone: true,
+        isDrone: true, isRecon: true,
       },
 
       // gen3
@@ -137,7 +140,7 @@ const config = {
       },
       'MIG-25': {
         name: 'MIG-25', nickname: 'Foxbat', cost: 2500,
-        gen: 3, fuel: 900, speed: 3.2, ammo: 3, vision: 50,
+        gen: 3, fuel: 900, speed: 3.2, ammo: 1, vision: 45,
         isFighter: true,
       },
 

@@ -10,6 +10,7 @@ const {
   getEntitiesByPlayer, getNearestAirbase, getOtherClientID,
   getNumBuilding, getEntitiesByType,
   getPlaneDesignsByGen, getInterceptPos,
+  numTimesTargeted,
 } = require('./selectors');
 const {makePlane, makeExplosion} = require('./state');
 
@@ -176,7 +177,7 @@ const moveAndFight = (session, game, socketClients) => {
     let returningToBase = false;
     if (entity.isPlane && targetPos == null) {
       if (!entity.isDrone && nearestAirbase) {
-        targetPos = nearestAirbase.position;
+        targetPos = getInterceptPos(game, entity, nearestAirbase);
         returningToBase = true;
       } else if (entity.isDrone || !nearestAirbase) {
         delete game.entities[entityID];
@@ -296,14 +297,16 @@ const computeVisionAndTargeting = (session, game, socketClients) => {
           // target:
           if (
             entity.isFighter && entity.ammo > 0 &&
-            entity.targetEnemy == null && other.isPlane
+            entity.targetEnemy == null && other.isPlane &&
+            numTimesTargeted(game, otherID) == 0
           ) {
             entity.targetEnemy = otherID;
           }
           if (
             entity.isBomber && entity.ammo > 0 &&
             entity.targetEnemy == null && other.isBuilding &&
-            (entity.isNuclear || other.type != 'CITY')
+            (entity.isNuclear || other.type != 'CITY') &&
+            numTimesTargeted(game, otherID) == 0
           ) {
             entity.targetEnemy = otherID;
           }

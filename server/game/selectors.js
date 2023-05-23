@@ -90,6 +90,15 @@ const getEntitiesByType = (game, type, clientID) => {
   return entities;
 }
 
+const numTimesTargeted = (game, targetID) => {
+  let num = 0;
+  for (const entityID in game.entities) {
+    const entity = game.entities[entityID];
+    if (entity.targetEnemy == targetID) num++;
+  }
+  return num;
+}
+
 
 // --------------------------------------------------------------------
 // Intercept Course
@@ -162,4 +171,5 @@ module.exports = {
   getNumBuilding,
   getEntitiesByType,
   getInterceptPos,
+  numTimesTargeted,
 };

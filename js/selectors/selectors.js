@@ -36,6 +36,17 @@ const getNearestAirbase = (game, plane) => {
   return nearestAirbase;
 };
 
+const getAirbaseNumByID = (game, airbaseID) => {
+  const clientID = game.entities[airbaseID].clientID;
+  const airbases = getEntitiesByType(game, 'AIRBASE', clientID);
+  for (let i = 0; i < airbases.length; i++) {
+    if (airbases[i].id == airbaseID) {
+      return i + 1;
+    }
+  }
+  return 0;
+};
+
 
 // --------------------------------------------------------------------
 // Plane Designs
@@ -209,6 +220,7 @@ const getCanvasSize = () => {
 module.exports = {
   getTotalPlanesAtBase,
   getNearestAirbase,
+  getAirbaseNumByID,
   getPlaneDesignsByGen,
   getPlaneDesignsUpToGen,
   getPlaneDesignByName,

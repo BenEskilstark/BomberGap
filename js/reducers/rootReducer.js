@@ -138,7 +138,7 @@ const initGameState = (config, clientID, clientIDs) => {
     clientID,
     clientIDs,
 
-    clickMode: 'MOVE',
+    clickMode: 'MOVE', // | 'LAUNCH'
     launchName: Object.keys(getPlaneDesignsByGen(players[clientID].nationalityIndex, 1))[0],
     showStats: true,
 

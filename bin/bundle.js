@@ -364,6 +364,26 @@ function Game(props) {
       });
     }
   }, [player.gen]);
+  useEffect(() => {
+    dispatch({
+      type: 'SET_HOTKEY',
+      key: 'M',
+      press: 'onKeyDown',
+      fn: () => dispatch({
+        type: 'SET',
+        clickMode: 'MOVE'
+      })
+    });
+    dispatch({
+      type: 'SET_HOTKEY',
+      key: 'L',
+      press: 'onKeyDown',
+      fn: () => dispatch({
+        type: 'SET',
+        clickMode: 'LAUNCH'
+      })
+    });
+  }, []);
   return /*#__PURE__*/React.createElement("div", {
     style: {
       width: '100%',
@@ -422,7 +442,8 @@ const {
   getNumBuilding,
   getNumPlaneInProductionAtBase,
   getPlaneInProductionAtBase,
-  getPlanesBeingWorkedOn
+  getPlanesBeingWorkedOn,
+  getAirbaseNumByID
 } = require('../selectors/selectors');
 const Button = require('./Components/Button.react');
 const RadioPicker = require('./Components/RadioPicker.react');
@@ -593,7 +614,7 @@ const BuildingsSelected = props => {
         style: {
           textAlign: 'center'
         }
-      }, /*#__PURE__*/React.createElement("b", null, "Airbase")), /*#__PURE__*/React.createElement("div", null, "Launch Type: "), /*#__PURE__*/React.createElement(RadioPicker, {
+      }, /*#__PURE__*/React.createElement("b", null, "Airbase #", getAirbaseNumByID(game, id))), /*#__PURE__*/React.createElement("div", null, "Launch Type: "), /*#__PURE__*/React.createElement(RadioPicker, {
         options: planeNames,
         displayOptions: planeNames.map(name => {
           const design = getPlaneDesignByName(game, name);
@@ -614,6 +635,11 @@ const BuildingsSelected = props => {
               progress: 1 - nextQueued.cost / design.cost,
               enqueued: i == allQueued.length - 1 ? numQueued : null
             });
+          }) : allQueued.length == 0 && numQueued > 0 ? /*#__PURE__*/React.createElement(ProgressBar, {
+            key: id + "_" + name + "_" + "_progress",
+            id: id + "_" + name + "_" + "_progress",
+            progress: 0,
+            enqueued: numQueued
           }) : null);
         }),
         selected: state.game.launchName,
@@ -622,6 +648,43 @@ const BuildingsSelected = props => {
           launchName
         })
       })));
+    } else if (building.type == 'FACTORY') {
+      const productionQueueUI = [];
+      const productionQueue = game.players[building.clientID].productionQueue;
+      for (let productionIndex = 0; productionIndex < productionQueue.length; productionIndex++) {
+        const production = productionQueue[productionIndex];
+        const {
+          name,
+          airbaseID,
+          cost
+        } = production;
+        const design = getPlaneDesignByName(game, name);
+        productionQueueUI.push( /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, name, ", Airbase #", getAirbaseNumByID(game, airbaseID)), /*#__PURE__*/React.createElement("div", {
+          style: {
+            display: 'flex',
+            gap: '5px'
+          }
+        }, /*#__PURE__*/React.createElement(ProgressBar, {
+          key: id + "_" + name + "_" + productionIndex + "_progress",
+          id: id + "_" + name + "_" + productionIndex + "_progress",
+          progress: 1 - cost / design.cost
+        }), /*#__PURE__*/React.createElement(Button, {
+          label: "Cancel",
+          onClick: () => {
+            dispatchToServer({
+              type: 'CANCEL_PLANE',
+              productionIndex
+            });
+          }
+        }))));
+      }
+      selectedBuildings.push( /*#__PURE__*/React.createElement("div", {
+        key: "selected_building_" + id,
+        style: {
+          overflowY: 'scroll',
+          maxHeight: 300
+        }
+      }, "Factory:", productionQueueUI));
     }
   }
   return /*#__PURE__*/React.createElement("span", null, selectedBuildings);
@@ -711,7 +774,7 @@ const PlaneDetail = props => {
       });
     }
     carrier = /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Button, {
-      label: clickMode == 'MOVE' ? "Switch to Launch Mode" : "Switch to Target Mode",
+      label: clickMode == 'MOVE' ? "Switch to Launch Mode (L)" : "Switch to Target Mode (M)",
       onClick: () => {
         dispatch({
           type: 'SET',
@@ -1073,6 +1136,9 @@ const {
   useMemo
 } = React;
 const keyToProp = {
+  isFighter: 'fighter ',
+  isBomber: 'bomber ',
+  isRecon: 'recon ',
   isNuclear: 'nukes ',
   isStealth: 'stealth ',
   isDogfighter: 'tailgun ',
@@ -1111,12 +1177,12 @@ const PlaneDesignDisplay = props => {
       display: 'flex',
       justifyContent: 'space-between'
     }
-  }, /*#__PURE__*/React.createElement("div", null, "Speed: ", planeDesign.speed, /*#__PURE__*/React.createElement("div", null), "Fuel: ", planeDesign.fuel)), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", null, "Speed: ", planeDesign.speed), /*#__PURE__*/React.createElement("div", null, "Fuel: ", planeDesign.fuel)), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       justifyContent: 'space-between'
     }
-  }, /*#__PURE__*/React.createElement("div", null, "Vision: ", planeDesign.vision, /*#__PURE__*/React.createElement("div", null), "Ammo: ", planeDesign.ammo)), planeDesign.planeCapacity ? /*#__PURE__*/React.createElement("div", null, "Plane Capacity: ", planeDesign.planeCapacity) : null, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", null, "Vision: ", planeDesign.vision), /*#__PURE__*/React.createElement("div", null, "Ammo: ", planeDesign.ammo)), planeDesign.planeCapacity ? /*#__PURE__*/React.createElement("div", null, "Plane Capacity: ", planeDesign.planeCapacity) : null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       justifyContent: 'space-between'
@@ -1256,7 +1322,7 @@ const config = {
       nickname: 'Sabre',
       cost: 500,
       gen: 1,
-      fuel: 400,
+      fuel: 500,
       vision: 40,
       speed: 0.9,
       ammo: 1,
@@ -1269,10 +1335,10 @@ const config = {
       cost: 2400,
       gen: 2,
       fuel: 2000,
-      vision: 40,
+      vision: 45,
       speed: 0.85,
       ammo: 1,
-      planeCapacity: 1,
+      planeCapacity: 3,
       planeTypes: ['F-86', 'F-100'],
       isBomber: true,
       isNuclear: true
@@ -1282,7 +1348,7 @@ const config = {
       nickname: 'Super Sabre',
       cost: 1000,
       gen: 2,
-      fuel: 500,
+      fuel: 600,
       vision: 40,
       speed: 1.2,
       ammo: 1,
@@ -1297,13 +1363,14 @@ const config = {
       fuel: 2400,
       vision: 80,
       speed: 0.75,
-      ammo: 0
+      ammo: 0,
+      isRecon: true
     },
     // gen3
     'XB-70': {
       name: 'XB-70',
       nickname: 'Valkyrie',
-      cost: 6000,
+      cost: 4500,
       gen: 3,
       fuel: 2400,
       vision: 50,
@@ -1332,7 +1399,8 @@ const config = {
       fuel: 2500,
       vision: 120,
       speed: 3.3,
-      ammo: 0
+      ammo: 0,
+      isRecon: true
     },
     // gen4
     'F-117': {
@@ -1395,13 +1463,14 @@ const config = {
       fuel: 800,
       vision: 60,
       speed: 0.8,
-      ammo: 0
+      ammo: 0,
+      isRecon: true
     },
     // gen2
     'TU-16': {
       name: 'TU-16',
       nickname: 'Badger',
-      cost: 1600,
+      cost: 2000,
       gen: 2,
       fuel: 1800,
       vision: 40,
@@ -1414,7 +1483,7 @@ const config = {
     'MIG-21': {
       name: 'MIG-21',
       nickname: 'Fishbed',
-      cost: 750,
+      cost: 900,
       gen: 2,
       fuel: 600,
       speed: 1.5,
@@ -1431,7 +1500,8 @@ const config = {
       vision: 75,
       speed: 1.5,
       ammo: 0,
-      isDrone: true
+      isDrone: true,
+      isRecon: true
     },
     // gen3
     'KH-55': {
@@ -1453,8 +1523,8 @@ const config = {
       gen: 3,
       fuel: 900,
       speed: 3.2,
-      ammo: 3,
-      vision: 50,
+      ammo: 1,
+      vision: 45,
       isFighter: true
     },
     // gen4
@@ -1840,6 +1910,7 @@ const initGameState = (config, clientID, clientIDs) => {
     clientID,
     clientIDs,
     clickMode: 'MOVE',
+    // | 'LAUNCH'
     launchName: Object.keys(getPlaneDesignsByGen(players[clientID].nationalityIndex, 1))[0],
     showStats: true,
     hotKeys: {
@@ -2255,6 +2326,16 @@ const getNearestAirbase = (game, plane) => {
   }
   return nearestAirbase;
 };
+const getAirbaseNumByID = (game, airbaseID) => {
+  const clientID = game.entities[airbaseID].clientID;
+  const airbases = getEntitiesByType(game, 'AIRBASE', clientID);
+  for (let i = 0; i < airbases.length; i++) {
+    if (airbases[i].id == airbaseID) {
+      return i + 1;
+    }
+  }
+  return 0;
+};
 
 // --------------------------------------------------------------------
 // Plane Designs
@@ -2406,6 +2487,7 @@ const getCanvasSize = () => {
 module.exports = {
   getTotalPlanesAtBase,
   getNearestAirbase,
+  getAirbaseNumByID,
   getPlaneDesignsByGen,
   getPlaneDesignsUpToGen,
   getPlaneDesignByName,

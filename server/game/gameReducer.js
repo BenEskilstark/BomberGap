@@ -34,8 +34,15 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
       break;
     }
     case 'CANCEL_PLANE': {
-      // TODO:
-
+      const {productionIndex} = action;
+      const productionQueue = game.players[clientID].productionQueue;
+      const nextQueue = [];
+      for (let i = 0; i < productionQueue.length; i++) {
+        if (i != productionIndex) {
+          nextQueue.push(productionQueue[i]);
+        }
+      }
+      game.players[clientID].productionQueue = nextQueue;
       break;
     }
     case 'BUY_BUILDING': {

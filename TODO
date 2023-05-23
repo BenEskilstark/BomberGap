@@ -1,17 +1,10 @@
 
 
   - playtest:
-    - no indicator that planes are queued that aren't producing yet
     - having your last airbase destroyed kills all your planes returning to base
 
 
-  - Algorithms:
-    - intercept target for fighters
-    - one fighter per bomber (don't target things that are already targeted)
-
-
   - UI:
-    - factory UI showing production queue
     - research UI showing status and start/pause
 
 
@@ -20,16 +13,6 @@
     - getPlaneDesignsByGen should take in game (on both server and client)
 
 
-  - balance
-    - more expensive planes just take longer to make...
-
-
-  - potentially degenerate strategies:
-    - rush down cities --> different loss conditions?
-    - using faster bombers to lead fighters until they're out of fuel
-    - only make 1 B52 and tons of fighters for infinite fuel
-    - defending with TU-16s which draw off fighters
-    - building tons of cities before opponent planes can even reach you
 
 
   - CPU opponent:

@@ -3,6 +3,9 @@ const {Button, Divider} = require('bens_ui_components');
 const {useEffect, useState, useMemo} = React;
 
 const keyToProp = {
+  isFighter: 'fighter ',
+  isBomber: 'bomber ',
+  isRecon: 'recon ',
   isNuclear: 'nukes ',
   isStealth: 'stealth ',
   isDogfighter: 'tailgun ',
@@ -45,10 +48,10 @@ const PlaneDesignDisplay = (props) => {
             <div>Generation: {planeDesign.gen}</div><div>Cost: {planeDesign.cost}</div>
         </div>
         <div style={{display: 'flex', justifyContent: 'space-between'}}>
-          <div>Speed: {planeDesign.speed}<div></div>Fuel: {planeDesign.fuel}</div>
+          <div>Speed: {planeDesign.speed}</div><div>Fuel: {planeDesign.fuel}</div>
         </div>
         <div style={{display: 'flex', justifyContent: 'space-between'}}>
-          <div>Vision: {planeDesign.vision}<div></div>Ammo: {planeDesign.ammo}</div>
+          <div>Vision: {planeDesign.vision}</div><div>Ammo: {planeDesign.ammo}</div>
         </div>
         {planeDesign.planeCapacity ? <div>Plane Capacity: {planeDesign.planeCapacity}</div> : null}
         <div style={{display: 'flex', justifyContent: 'space-between'}}>

@@ -102,6 +102,14 @@ function Game(props) {
       });
     }
   }, [player.gen]);
+  useEffect(() => {
+    dispatch({type: 'SET_HOTKEY', key: 'M', press: 'onKeyDown',
+      fn: () => dispatch({type: 'SET', clickMode: 'MOVE'}),
+    });
+    dispatch({type: 'SET_HOTKEY', key: 'L', press: 'onKeyDown',
+      fn: () => dispatch({type: 'SET', clickMode: 'LAUNCH'}),
+    });
+  }, []);
 
   return (
     <div
