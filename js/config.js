@@ -30,7 +30,8 @@ const config = {
   genCost: [0, 0, 15000, 50000, 50000], // cost per generation
   airbaseCost: 8000,
 
-  stealthVisionReduction: 0.5,
+  stealthVisionReduction: 0.3,
+  stealthVisionRadius: 25,
   genDogfightBonus: 0.15,
 
   planeDesigns: [
@@ -69,7 +70,7 @@ const config = {
       // gen3
       'XB-70': {
         name: 'XB-70', nickname: 'Valkyrie', cost: 4500,
-        gen: 3, fuel: 2400, vision: 50, speed: 3.1, ammo: 1,
+        gen: 3, fuel: 1700, vision: 45, speed: 3.1, ammo: 1,
         isBomber: true, isNuclear: true,
       },
       'F-4': {
@@ -106,7 +107,7 @@ const config = {
       },
       'MIG-15': {
         name: 'MIG-15', nickname: 'Mother', cost: 400,
-        gen: 1, fuel: 400, vision: 35, speed: 0.8, ammo: 1,
+        gen: 1, fuel: 450, vision: 35, speed: 0.8, ammo: 1,
         isFighter: true,
       },
       'YAK-25': {
@@ -117,7 +118,7 @@ const config = {
 
       // gen2
       'TU-16': {
-        name: 'TU-16', nickname: 'Badger', cost: 2000,
+        name: 'TU-16', nickname: 'Badger', cost: 1800,
         gen: 2, fuel: 1800, vision: 40, speed: 0.8, ammo: 1,
         isBomber: true, isDogfighter: true, isNuclear: true,
       },
@@ -133,10 +134,15 @@ const config = {
       },
 
       // gen3
-      'KH-55': {
-        name: 'KH-55', nickname: 'AA Cruise Missile', cost: 1000,
-        gen: 3, fuel: 500, vision: 40, speed: 2, ammo: 1,
-        isDrone: true, isFighter: true,
+      // 'KH-55': {
+      //   name: 'KH-55', nickname: 'AA Cruise Missile', cost: 1000,
+      //   gen: 3, fuel: 500, vision: 40, speed: 2, ammo: 1,
+      //   isDrone: true, isFighter: true,
+      // },
+      'TU-22M': {
+        name: 'TU-22M', nickname: 'Backfire', cost: 3000,
+        gen: 3, fuel: 1800, speed: 1.8, ammo: 2, vision: 45,
+        isBomber: true, isDogfighter: true, // isNuclear: true,
       },
       'MIG-25': {
         name: 'MIG-25', nickname: 'Foxbat', cost: 2200,
@@ -147,13 +153,13 @@ const config = {
       // gen4
       'TU-160': {
         name: 'TU-160', nickname: 'White Swan', cost: 6000,
-        gen: 4, fuel: 2000, vision: 60, speed: 2.8, ammo: 2,
-        planeCapacity: 4, planeTypes: ['KH-55', 'KH-101'],
+        gen: 4, fuel: 2000, vision: 60, speed: 2, ammo: 2,
+        planeCapacity: 4, planeTypes: ['KH-101'],
         isBomber: true, isNuclear: true,
       },
       'KH-101': {
         name: 'KH-101', nickname: 'Nuclear Cruise Missile', cost: 3000,
-        gen: 4, fuel: 500, vision: 40, speed: 1.5, ammo: 1,
+        gen: 4, fuel: 500, vision: 40, speed: 2.8, ammo: 1,
         isDrone: true, isNuclear: true, isBomber: true,
       },
 

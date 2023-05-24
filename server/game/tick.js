@@ -282,7 +282,8 @@ const computeVisionAndTargeting = (session, game, socketClients) => {
         // stealth
         let vision = entity.vision;
         if (other.isStealth) {
-          vision = vision * game.config.stealthVisionReduction;
+          // vision = vision * game.config.stealthVisionReduction;
+          vision = game.config.stealthVisionRadius;
         }
 
         // check if visible
