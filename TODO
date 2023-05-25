@@ -2,7 +2,6 @@
 
   - playtest:
     - default selection for B52 (and hotkey)
-    - having your last airbase destroyed kills all your planes returning to base
 
 
   - refactor:

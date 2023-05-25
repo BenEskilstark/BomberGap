@@ -25,7 +25,7 @@ const isPosGood = (entities, pos) => {
   for (const entityID in entities) {
     const entity = entities[entityID];
     if (!entity.isBuilding) continue;
-    if (dist(entity.position, pos) < entity.vision + entity.vision / 2) return false;
+    if (dist(entity.position, pos) < entity.vision * 1.5) return false;
   }
   return true;
 }

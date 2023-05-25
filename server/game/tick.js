@@ -238,7 +238,10 @@ const moveAndFight = (session, game, socketClients) => {
         );
         game.entities[explosion.id] = explosion;
         delete game.entities[targetEntity.id];
-        if (getNumBuilding(game, targetEntity.clientID, 'CITY') == 0) {
+        if (
+          getNumBuilding(game, targetEntity.clientID, 'CITY') == 0 ||
+          getNumBuilding(game, targetEntity.clientID, 'AIRBASE') == 0
+        ) {
           return doGameOver(session, socketClients, null, entity.clientID);
         }
       } else { // target wasn't an enemy
