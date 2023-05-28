@@ -33,6 +33,7 @@ const RightHandSideBar = (props) => {
       <div
         style={{
           padding: 8,
+          overflowY: 'auto',
         }}
       >
         {planeDetails}

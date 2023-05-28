@@ -268,7 +268,7 @@ const BuildingsSelected = (props) => {
         <div
           key={"selected_building_" + id}
           style={{
-            overflowY: 'scroll',
+            overflowY: 'auto',
             maxHeight: 300,
           }}
         >

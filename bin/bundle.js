@@ -711,7 +711,7 @@ const BuildingsSelected = props => {
       selectedBuildings.push( /*#__PURE__*/React.createElement("div", {
         key: "selected_building_" + id,
         style: {
-          overflowY: 'scroll',
+          overflowY: 'auto',
           maxHeight: 300
         }
       }, "Factory:", productionQueueUI));
@@ -1262,7 +1262,8 @@ const RightHandSideBar = props => {
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: 8
+      padding: 8,
+      overflowY: 'auto'
     }
   }, planeDetails));
 };
