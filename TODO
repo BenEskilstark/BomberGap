@@ -1,6 +1,9 @@
 
 
   - playtest:
+    - fighters aren't hitting easily enough
+      - should allow multiple targetting too
+      - defending should use ammo
     - default selection for B52 (and hotkey)
     - bring back stats
     - allow resignation
@@ -15,7 +18,6 @@
   - refactor:
     - selectors are copypastad between server and client
     - getPlaneDesignsByGen should take in game (on both server and client)
-
 
 
 

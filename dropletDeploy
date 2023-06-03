@@ -1,0 +1,10 @@
+#!/bin/zsh
+
+
+ssh root@161.35.14.17 "cd bombergap && \
+    git restore bin/bundle.js && \
+    git stash && \
+    git pull && \
+    git stash pop && \
+    npm run build && \
+    docker-compose up --build -d --force-recreate bombergap"

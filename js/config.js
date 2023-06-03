@@ -146,7 +146,7 @@ const config = {
       },
       'MIG-25': {
         name: 'MIG-25', nickname: 'Foxbat', cost: 2200,
-        gen: 3, fuel: 900, speed: 3.2, ammo: 1, vision: 45,
+        gen: 3, fuel: 900, speed: 3.2, ammo: 2, vision: 45,
         isFighter: true,
       },
 
