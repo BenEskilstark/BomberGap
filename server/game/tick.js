@@ -209,9 +209,11 @@ const moveAndFight = (session, game, socketClients) => {
         // with boost based on who is higher generation
         if (entity.isFighter && (targetEntity.isFighter || targetEntity.isDogfighter)
           && Math.random() < 0.5 + (genDogfightBonus * (targetEntity.gen - entity.gen))
+          && targetEntity.ammo > 0
         ) {
           delete game.entities[entityID];
           targetEntity.kills++;
+          targetEntity.ammo--;
           const explosion = makeExplosion(
             entity.position,
             entity.isBuilding ? 25 : 10,
@@ -219,6 +221,10 @@ const moveAndFight = (session, game, socketClients) => {
             entity.clientID,
           );
           game.entities[explosion.id] = explosion;
+          if (targetEntity.ammo == 0) { // return to base
+            targetEntity.targetPos = null;
+            targetEntity.targetEnemy = null;
+          }
           // TODO: stats for fighter kills
           continue;
         }
@@ -229,6 +235,10 @@ const moveAndFight = (session, game, socketClients) => {
         entity.kills++;
         if (entity.kills == 5) {
           game.stats[entity.clientID].fighter_aces++;
+        }
+        if (entity.ammo == 0) { // return to base
+          entity.targetPos = null;
+          entity.targetEnemy = null;
         }
         const explosion = makeExplosion(
           targetEntity.position,
