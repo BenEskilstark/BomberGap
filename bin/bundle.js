@@ -913,10 +913,22 @@ const CreateGameCard = props => {
       width: 300,
       marginLeft: '25%'
     }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex'
+    }
   }, "Game Name:\xA0", /*#__PURE__*/React.createElement(TextField, {
+    style: {
+      backgroundColor: 'black',
+      border: 'none',
+      borderBottom: '1px solid #6ce989',
+      color: '#6ce989',
+      height: 20,
+      flexGrow: 1
+    },
     value: name,
     onChange: setName
-  }), /*#__PURE__*/React.createElement(Button, {
+  })), /*#__PURE__*/React.createElement(Button, {
     label: "Create Game",
     style: {
       width: '100%',
@@ -929,7 +941,7 @@ const CreateGameCard = props => {
         name: name != '' ? name : null
       });
     }
-  }));
+  }), /*#__PURE__*/React.createElement("div", null, "Number of Players in Lobby: ", getState().numClients));
 };
 const SessionCard = props => {
   const {
@@ -1561,7 +1573,7 @@ const config = {
       gen: 3,
       fuel: 900,
       speed: 3.2,
-      ammo: 1,
+      ammo: 2,
       vision: 45,
       isFighter: true
     },

@@ -1,8 +1,6 @@
 
 
   - playtest:
-    - fighters aren't hitting easily enough
-      - should allow multiple targetting too
     - default selection for B52 (and hotkey)
     - bring back stats
     - allow resignation
@@ -10,8 +8,7 @@
 
   - lobby
     - editing config from lobby for game speed, starting resources, buildings, gen
-    - show number of players in the lobby
-    - lobby text field should be in style
+    - don't allow creating another game unless you leave your current
 
 
   - refactor:

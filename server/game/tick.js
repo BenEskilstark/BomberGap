@@ -312,7 +312,7 @@ const computeVisionAndTargeting = (session, game, socketClients) => {
           if (
             entity.isFighter && entity.ammo > 0 &&
             entity.targetEnemy == null && other.isPlane &&
-            numTimesTargeted(game, otherID) == 0
+            numTimesTargeted(game, otherID) < 2
           ) {
             entity.targetEnemy = otherID;
           }
@@ -320,7 +320,7 @@ const computeVisionAndTargeting = (session, game, socketClients) => {
             entity.isBomber && entity.ammo > 0 &&
             entity.targetEnemy == null && other.isBuilding &&
             (entity.isNuclear || other.type != 'CITY') &&
-            numTimesTargeted(game, otherID) == 0
+            numTimesTargeted(game, otherID) < 2
           ) {
             entity.targetEnemy = otherID;
           }

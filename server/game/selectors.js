@@ -128,6 +128,10 @@ const getInterceptPos = (game, entity, target) => {
     return {...target.position};
   }
   const distance = dist(entity.position, target.position);
+  if (distance < entity.speed + target.speed + 1) {
+    return target.position;
+  }
+
   const timeToIntercept = distance / magnitude(relativeVelocity);
 
   const timeToTarget = dist(target.position, targetTargetPos) / target.speed;

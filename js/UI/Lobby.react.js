@@ -49,11 +49,25 @@ const CreateGameCard = (props) => {
         marginLeft: '25%',
       }}
     >
-      Game Name:&nbsp;
-      <TextField
-        value={name}
-        onChange={setName}
-      />
+      <div
+        style={{
+          display: 'flex',
+        }}
+      >
+        Game Name:&nbsp;
+        <TextField
+          style={{
+            backgroundColor: 'black',
+            border: 'none',
+            borderBottom: '1px solid #6ce989',
+            color: '#6ce989',
+            height: 20,
+            flexGrow: 1,
+          }}
+          value={name}
+          onChange={setName}
+        />
+      </div>
       <Button
         label="Create Game"
         style={{
@@ -65,6 +79,7 @@ const CreateGameCard = (props) => {
           dispatchToServer({type: 'CREATE_SESSION', name: name != '' ? name : null});
         }}
       />
+      <div>Number of Players in Lobby: {getState().numClients}</div>
     </div>
   );
 }

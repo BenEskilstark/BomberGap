@@ -59,6 +59,8 @@ const initIO = (io, newSession, gameReducer) => {
       }
     }
     socket.emit('receiveAction', {sessions: sessionsToSend});
+    const numClients = Object.keys(state.socketClients).length;
+    emitToAllClients(socketClients, {numClients}, clientID, true);
 
     // needed for ticking
     function dispatch(action) {
@@ -88,6 +90,9 @@ const initIO = (io, newSession, gameReducer) => {
     socket.on('disconnect', () => {
       console.log(`client ${clientID} disconnected`);
       dispatch({type: 'STOP'});
+      delete state.socketClients[clientID];
+      const numClients = Object.keys(state.socketClients).length;
+      emitToAllClients(socketClients, {numClients}, clientID, true);
       leaveSession(state, clientID);
     });
   });
