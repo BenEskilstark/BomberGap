@@ -118,7 +118,7 @@ const config = {
 
       // gen2
       'TU-16': {
-        name: 'TU-16', nickname: 'Badger', cost: 1800,
+        name: 'TU-16', nickname: 'Badger', cost: 1700,
         gen: 2, fuel: 1800, vision: 40, speed: 0.8, ammo: 1,
         isBomber: true, isDogfighter: true, isNuclear: true,
       },
@@ -135,14 +135,14 @@ const config = {
 
       // gen3
       'TU-160': {
-        name: 'TU-160', nickname: 'White Swan', cost: 5000,
-        gen: 4, fuel: 2000, vision: 60, speed: 1.8, ammo: 2,
+        name: 'TU-160', nickname: 'White Swan', cost: 4500,
+        gen: 4, fuel: 2000, vision: 55, speed: 2, ammo: 1,
         planeCapacity: 4, planeTypes: ['KH-101', 'KH-55', 'KH-50'],
         isBomber: true, isNuclear: true,
       },
       'KH-55': {
         name: 'KH-55', nickname: 'AA Cruise Missile', cost: 1000,
-        gen: 3, fuel: 500, vision: 40, speed: 2.5, ammo: 1,
+        gen: 3, fuel: 500, vision: 40, speed: 3.2, ammo: 1,
         isDrone: true, isFighter: true,
       },
       // 'TU-22M': {
@@ -159,7 +159,7 @@ const config = {
       // gen4
       'MIG-31': {
         name: 'MIG-25', nickname: 'Foxbat', cost: 2400,
-        gen: 3, fuel: 1200, speed: 3.2, ammo: 3, vision: 45,
+        gen: 3, fuel: 1200, speed: 2.8, ammo: 3, vision: 45,
         isFighter: true,
       },
       'KH-101': {

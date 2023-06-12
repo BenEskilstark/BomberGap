@@ -1514,7 +1514,7 @@ const config = {
     'TU-16': {
       name: 'TU-16',
       nickname: 'Badger',
-      cost: 1800,
+      cost: 1700,
       gen: 2,
       fuel: 1800,
       vision: 40,
@@ -1551,12 +1551,12 @@ const config = {
     'TU-160': {
       name: 'TU-160',
       nickname: 'White Swan',
-      cost: 5000,
+      cost: 4500,
       gen: 4,
       fuel: 2000,
-      vision: 60,
-      speed: 1.8,
-      ammo: 2,
+      vision: 55,
+      speed: 2,
+      ammo: 1,
       planeCapacity: 4,
       planeTypes: ['KH-101', 'KH-55', 'KH-50'],
       isBomber: true,
@@ -1569,7 +1569,7 @@ const config = {
       gen: 3,
       fuel: 500,
       vision: 40,
-      speed: 2.5,
+      speed: 3.2,
       ammo: 1,
       isDrone: true,
       isFighter: true
@@ -1592,7 +1592,7 @@ const config = {
       cost: 2400,
       gen: 3,
       fuel: 1200,
-      speed: 3.2,
+      speed: 2.8,
       ammo: 3,
       vision: 45,
       isFighter: true
