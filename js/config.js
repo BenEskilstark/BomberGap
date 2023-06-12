@@ -70,7 +70,7 @@ const config = {
       // gen3
       'XB-70': {
         name: 'XB-70', nickname: 'Valkyrie', cost: 4500,
-        gen: 3, fuel: 1700, vision: 40, speed: 3.1, ammo: 1,
+        gen: 3, fuel: 1600, vision: 40, speed: 3.1, ammo: 1,
         isBomber: true, isNuclear: true,
       },
       'F-4': {
@@ -87,12 +87,12 @@ const config = {
       // gen4
       'F-117': {
         name: 'F-117', nickname: 'Nighthawk', cost: 2500,
-        gen: 4, fuel: 1800, vision: 55, speed: 1, ammo: 3,
+        gen: 4, fuel: 1800, vision: 55, speed: 1.5, ammo: 3,
         isFighter: true, isBomber: true, isStealth: true,
       },
       'B-2': {
         name: 'B-2', nickname: 'Spirit', cost: 4500,
-        gen: 4, fuel: 3000, vision: 70, speed: 1, ammo: 3,
+        gen: 4, fuel: 3000, vision: 70, speed: 1.8, ammo: 3,
         isBomber: true, isStealth: true, isNuclear: true,
       },
     },
@@ -134,32 +134,37 @@ const config = {
       },
 
       // gen3
-      // 'KH-55': {
-      //   name: 'KH-55', nickname: 'AA Cruise Missile', cost: 1000,
-      //   gen: 3, fuel: 500, vision: 40, speed: 2, ammo: 1,
-      //   isDrone: true, isFighter: true,
-      // },
-      'TU-22M': {
-        name: 'TU-22M', nickname: 'Backfire', cost: 3000,
-        gen: 3, fuel: 1800, speed: 1.8, ammo: 2, vision: 45,
-        isBomber: true, isDogfighter: true, // isNuclear: true,
-      },
-      'MIG-25': {
-        name: 'MIG-25', nickname: 'Foxbat', cost: 2200,
-        gen: 3, fuel: 900, speed: 3.2, ammo: 2, vision: 45,
-        isFighter: true,
-      },
-
-      // gen4
       'TU-160': {
         name: 'TU-160', nickname: 'White Swan', cost: 5000,
-        gen: 4, fuel: 2000, vision: 60, speed: 2, ammo: 2,
-        planeCapacity: 4, planeTypes: ['KH-101'],
+        gen: 4, fuel: 2000, vision: 60, speed: 1.8, ammo: 2,
+        planeCapacity: 4, planeTypes: ['KH-101', 'KH-55', 'KH-50'],
         isBomber: true, isNuclear: true,
+      },
+      'KH-55': {
+        name: 'KH-55', nickname: 'AA Cruise Missile', cost: 1000,
+        gen: 3, fuel: 500, vision: 40, speed: 2.5, ammo: 1,
+        isDrone: true, isFighter: true,
+      },
+      // 'TU-22M': {
+      //   name: 'TU-22M', nickname: 'Backfire', cost: 3000,
+      //   gen: 3, fuel: 1800, speed: 1.8, ammo: 2, vision: 45,
+      //   isBomber: true, isDogfighter: true, // isNuclear: true,
+      // },
+      // 'MIG-25': {
+      //   name: 'MIG-25', nickname: 'Foxbat', cost: 2200,
+      //   gen: 3, fuel: 900, speed: 3.2, ammo: 2, vision: 45,
+      //   isFighter: true,
+      // },
+
+      // gen4
+      'MIG-31': {
+        name: 'MIG-25', nickname: 'Foxbat', cost: 2400,
+        gen: 3, fuel: 1200, speed: 3.2, ammo: 3, vision: 45,
+        isFighter: true,
       },
       'KH-101': {
         name: 'KH-101', nickname: 'Nuclear Cruise Missile', cost: 2500,
-        gen: 4, fuel: 500, vision: 40, speed: 2.8, ammo: 1,
+        gen: 4, fuel: 500, vision: 40, speed: 2.3, ammo: 1,
         isDrone: true, isNuclear: true, isBomber: true,
       },
 
