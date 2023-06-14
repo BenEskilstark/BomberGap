@@ -137,7 +137,7 @@ const config = {
       'TU-160': {
         name: 'TU-160', nickname: 'White Swan', cost: 4500,
         gen: 4, fuel: 2000, vision: 55, speed: 2, ammo: 1,
-        planeCapacity: 4, planeTypes: ['KH-101', 'KH-55', 'KH-50'],
+        planeCapacity: 4, planeTypes: ['KH-55', 'KH-101', 'KH-50'],
         isBomber: true, isNuclear: true,
       },
       'KH-55': {
@@ -158,7 +158,7 @@ const config = {
 
       // gen4
       'MIG-31': {
-        name: 'MIG-25', nickname: 'Foxbat', cost: 2400,
+        name: 'MIG-31', nickname: 'Foxbat', cost: 2400,
         gen: 3, fuel: 1200, speed: 2.8, ammo: 3, vision: 45,
         isFighter: true,
       },

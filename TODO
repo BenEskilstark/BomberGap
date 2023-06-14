@@ -6,6 +6,11 @@
     - allow resignation
 
 
+  - additional features:
+    - mega cities/factories/labs
+    - defensive cities/factories/labs
+
+
   - lobby
     - editing config from lobby for game speed, starting resources, buildings, gen
     - don't allow creating another game unless you leave your current
@@ -24,10 +29,7 @@
     - randomized AI daemon for launching planes
 
 
-  - additional features:
-    - try out rollback netcode
-
-
   - maybe features
     - planes have to refit before they can launch again
+    - try out rollback netcode
 
