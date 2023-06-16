@@ -107,16 +107,20 @@ const render = (state) => {
         ctx.stroke();
       }
     }
-    const noAmmo = entity.ammo == 0 && (entity.isFighter || entity.isBomber);
+    const noAmmo = (entity.ammo == 0 && (entity.isFighter || entity.isBomber));
     const isSelected = game.selectedIDs.includes(entityID);
 
     ctx.lineWidth = 2;
     ctx.strokeStyle = 'gold';
     if (noAmmo && isBluePlayer)  {
       ctx.strokeStyle = 'red';
+    } else if (isBluePlayer && entity.isBuilding && !isSelected) {
+      ctx.strokeStyle = 'blue';
     }
     if (noAmmo && !isBluePlayer) {
       ctx.strokeStyle = 'black';
+    } else if (!isBluePlayer && entity.isBuilding && !isSelected) {
+      ctx.strokeStyle = 'red';
     }
 
     switch (shape) {
@@ -175,6 +179,7 @@ const render = (state) => {
         ctx.lineTo(width / 2, -width / 4); // fourth diagonal
         ctx.lineTo(width / 2, width / 2); // right wall
         ctx.closePath(); // bottom
+        ctx.translate(-1 * entity.position.x, -1 * entity.position.y);
 
         if (isSelected) {
           ctx.stroke();
@@ -204,6 +209,26 @@ const render = (state) => {
         }
         ctx.fill();
         break;
+    }
+
+    // upgraded buildings:
+    if (entity.type == 'FACTORY') height *= 4;
+    if (entity.type == 'CITY') {
+      height *= 1.2;
+      width *= 2;
+    }
+    if (entity.isHardened) {
+      ctx.beginPath();
+      ctx.arc(entity.position.x, entity.position.y, width, Math.PI - 0.1, 0.1);
+      ctx.stroke();
+    }
+    if (entity.isMega) {
+      ctx.beginPath();
+      ctx.moveTo(entity.position.x - width, entity.position.y);
+      ctx.lineTo(entity.position.x - width, entity.position.y + height / 2);
+      ctx.lineTo(entity.position.x + width, entity.position.y + height / 2);
+      ctx.lineTo(entity.position.x + width, entity.position.y);
+      ctx.stroke();
     }
 
 

@@ -20,7 +20,6 @@ const config = {
   numLabs: 1,
   startingMoney: 5000,
 
-
   cityCost: 1000,
   moneyRate: 50, // money made per second
   factoryCost: 4000,
@@ -29,6 +28,11 @@ const config = {
   researchRate: 50, // money spent per second per lab
   genCost: [0, 0, 15000, 50000, 50000], // cost per generation
   airbaseCost: 8000,
+
+  megaCost: 8000,
+  megaMultiplier: 2, // NOTE: this doesn't affect city income or lab research
+  hardenedCost: 4000,
+  hardenedGen: 3,
 
   // stealthVisionReduction: 0.3,
   stealthVisionRadius: 25,
@@ -136,7 +140,7 @@ const config = {
       // gen3
       'TU-160': {
         name: 'TU-160', nickname: 'White Swan', cost: 4500,
-        gen: 4, fuel: 2000, vision: 55, speed: 2, ammo: 1,
+        gen: 3, fuel: 2000, vision: 55, speed: 2, ammo: 1,
         planeCapacity: 4, planeTypes: ['KH-55', 'KH-101', 'KH-50'],
         isBomber: true, isNuclear: true,
       },
@@ -159,7 +163,7 @@ const config = {
       // gen4
       'MIG-31': {
         name: 'MIG-31', nickname: 'Foxbat', cost: 2400,
-        gen: 3, fuel: 1200, speed: 2.8, ammo: 3, vision: 45,
+        gen: 4, fuel: 1200, speed: 2.8, ammo: 3, vision: 45,
         isFighter: true,
       },
       'KH-101': {

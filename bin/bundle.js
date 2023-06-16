@@ -520,17 +520,21 @@ const BuildingInfo = props => {
   } = state;
   const player = game.players[game.clientID];
   const numCities = getNumBuilding(game, game.clientID, 'CITY');
+  const numMegaCities = getNumBuilding(game, game.clientID, 'CITY', 'isMega');
   const numFactories = getNumBuilding(game, game.clientID, "FACTORY");
   const numLabs = getNumBuilding(game, game.clientID, "LAB");
   const numAirbases = getNumBuilding(game, game.clientID, "AIRBASE");
   const isResearching = (_player$researchProgr = player.researchProgress) === null || _player$researchProgr === void 0 ? void 0 : _player$researchProgr.isStarted;
+  const {
+    moneyRate
+  } = game.config;
   return /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       flexDirection: 'column',
       gap: '2px'
     }
-  }, /*#__PURE__*/React.createElement("div", null, "Money: ", player.money, " (Income: ", game.config.moneyRate * numCities, ")"), /*#__PURE__*/React.createElement("div", null, "Research Generation: ", player.gen, /*#__PURE__*/React.createElement(Button, {
+  }, /*#__PURE__*/React.createElement("div", null, "Money: ", player.money, " (Income: ", moneyRate * (numCities + numMegaCities), ")"), /*#__PURE__*/React.createElement("div", null, "Research Generation: ", player.gen, /*#__PURE__*/React.createElement(Button, {
     label: isResearching ? 'Pause' : 'Start',
     disabled: player.researchProgress == null,
     style: {
@@ -714,7 +718,16 @@ const BuildingsSelected = props => {
           overflowY: 'auto',
           maxHeight: 300
         }
-      }, "Factory:", productionQueueUI));
+      }, /*#__PURE__*/React.createElement(BuildingUpgrade, {
+        game: game,
+        building: building
+      }), productionQueueUI));
+    } else {
+      selectedBuildings.push( /*#__PURE__*/React.createElement(BuildingUpgrade, {
+        key: "selected_building_" + id,
+        game: game,
+        building: building
+      }));
     }
   }
   return /*#__PURE__*/React.createElement("span", null, selectedBuildings);
@@ -851,6 +864,46 @@ const PlaneDetail = props => {
         type: 'BUILD_PLANE',
         name,
         airbaseID
+      });
+    }
+  }));
+};
+const BuildingUpgrade = props => {
+  const {
+    game,
+    building
+  } = props;
+  const player = game.players[game.clientID];
+  const isUpgraded = building.isMega || building.isHardened;
+  let upgradeLabel = building.type;
+  if (building.isMega) upgradeLabel = "MEGA-" + building.type;
+  if (building.isHardened) upgradeLabel = "ANTI-AIR-" + building.type;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {}
+  }, /*#__PURE__*/React.createElement("div", null, upgradeLabel), /*#__PURE__*/React.createElement(Button, {
+    style: {
+      display: 'block'
+    },
+    label: `Mega Upgrade ($${game.config.megaCost}k)`,
+    disabled: isUpgraded || game.config.megaCost > player.money,
+    onClick: () => {
+      dispatchToServer({
+        type: 'UPGRADE_BUILDING',
+        buildingID: building.id,
+        upgradeType: 'isMega'
+      });
+    }
+  }), /*#__PURE__*/React.createElement(Button, {
+    style: {
+      display: 'block'
+    },
+    label: `Anti-Air Upgrade ($${game.config.hardenedCost}k)`,
+    disabled: isUpgraded || game.config.hardenedCost > player.money,
+    onClick: () => {
+      dispatchToServer({
+        type: 'UPGRADE_BUILDING',
+        buildingID: building.id,
+        upgradeType: 'isHardened'
       });
     }
   }));
@@ -1324,12 +1377,12 @@ const config = {
   },
   formationRadius: 50,
   // starting configuration
-  gen: 1,
+  gen: 3,
   numAirbases: 1,
   numCities: 2,
   numFactories: 1,
   numLabs: 1,
-  startingMoney: 5000,
+  startingMoney: 50000,
   cityCost: 1000,
   moneyRate: 50,
   // money made per second
@@ -1342,6 +1395,10 @@ const config = {
   genCost: [0, 0, 15000, 50000, 50000],
   // cost per generation
   airbaseCost: 8000,
+  megaCost: 8000,
+  megaMultiplier: 2,
+  hardenedCost: 4000,
+  hardenedGen: 3,
   // stealthVisionReduction: 0.3,
   stealthVisionRadius: 25,
   genDogfightBonus: 0.15,
@@ -1552,13 +1609,13 @@ const config = {
       name: 'TU-160',
       nickname: 'White Swan',
       cost: 4500,
-      gen: 4,
+      gen: 3,
       fuel: 2000,
       vision: 55,
       speed: 2,
       ammo: 1,
       planeCapacity: 4,
-      planeTypes: ['KH-101', 'KH-55', 'KH-50'],
+      planeTypes: ['KH-55', 'KH-101', 'KH-50'],
       isBomber: true,
       isNuclear: true
     },
@@ -1587,10 +1644,10 @@ const config = {
 
     // gen4
     'MIG-31': {
-      name: 'MIG-25',
+      name: 'MIG-31',
       nickname: 'Foxbat',
       cost: 2400,
-      gen: 3,
+      gen: 4,
       fuel: 1200,
       speed: 2.8,
       ammo: 3,
@@ -2197,9 +2254,13 @@ const render = state => {
     ctx.strokeStyle = 'gold';
     if (noAmmo && isBluePlayer) {
       ctx.strokeStyle = 'red';
+    } else if (isBluePlayer && entity.isBuilding && !isSelected) {
+      ctx.strokeStyle = 'blue';
     }
     if (noAmmo && !isBluePlayer) {
       ctx.strokeStyle = 'black';
+    } else if (!isBluePlayer && entity.isBuilding && !isSelected) {
+      ctx.strokeStyle = 'red';
     }
     switch (shape) {
       case 'square':
@@ -2254,7 +2315,7 @@ const render = state => {
         ctx.lineTo(width / 2, -width / 4); // fourth diagonal
         ctx.lineTo(width / 2, width / 2); // right wall
         ctx.closePath(); // bottom
-
+        ctx.translate(-1 * entity.position.x, -1 * entity.position.y);
         if (isSelected) {
           ctx.stroke();
         }
@@ -2280,6 +2341,26 @@ const render = state => {
         }
         ctx.fill();
         break;
+    }
+
+    // upgraded buildings:
+    if (entity.type == 'FACTORY') height *= 4;
+    if (entity.type == 'CITY') {
+      height *= 1.2;
+      width *= 2;
+    }
+    if (entity.isHardened) {
+      ctx.beginPath();
+      ctx.arc(entity.position.x, entity.position.y, width, Math.PI - 0.1, 0.1);
+      ctx.stroke();
+    }
+    if (entity.isMega) {
+      ctx.beginPath();
+      ctx.moveTo(entity.position.x - width, entity.position.y);
+      ctx.lineTo(entity.position.x - width, entity.position.y + height / 2);
+      ctx.lineTo(entity.position.x + width, entity.position.y + height / 2);
+      ctx.lineTo(entity.position.x + width, entity.position.y);
+      ctx.stroke();
     }
     ctx.restore(); // unrotate
 
@@ -2483,12 +2564,14 @@ const getPlanesBeingWorkedOn = (game, airbaseID, planeName) => {
 // General Entities
 // --------------------------------------------------------------------
 
-const getNumBuilding = (game, clientID, buildingType) => {
+const getNumBuilding = (game, clientID, buildingType, upgradeType) => {
   let numBuilding = 0;
   for (const entityID in game.entities) {
     const entity = game.entities[entityID];
     if (entity.clientID == clientID && entity.type == buildingType) {
-      numBuilding++;
+      if (upgradeType == null || entity[upgradeType]) {
+        numBuilding++;
+      }
     }
   }
   return numBuilding;

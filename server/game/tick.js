@@ -34,7 +34,13 @@ const updateIncome = (game) => {
   for (const clientID in game.players) {
     const player = game.players[clientID];
     const numCities = getNumBuilding(game, clientID, 'CITY');
-    player.money += Math.round(numCities * game.config.moneyRate * game.config.msPerTick / 1000);
+    const {moneyRate, megaMultiplier, msPerTick} = game.config;
+    const numMegaCities = getNumBuilding(game, clientID, 'CITY', 'isMega');
+    player.money += Math.round((numCities + numMegaCities) * moneyRate * msPerTick / 1000);
+    // this is unwieldy, but works for non-multiples of 2 for megaMultiplier
+    // player.money += Math.round( // subtraction avoids the double counting
+    // (numMegaCities * moneyRate * megaMultiplier - numMegaCities * moneyRate) * msPerTick / 1000
+    // );
    }
 };
 
@@ -45,8 +51,9 @@ const updateResearch = (game) => {
     if (!player.researchProgress?.isStarted) continue;
 
     const numLabs = getNumBuilding(game, clientID, 'LAB');
+    const numMegaLabs = getNumBuilding(game, clientID, 'LAB', 'isMega');
     const totalResearchCost = Math.round(
-      numLabs * game.config.researchRate * game.config.msPerTick / 1000
+      (numLabs + numMegaLabs) * game.config.researchRate * game.config.msPerTick / 1000
     );
 
     // pay for research
@@ -87,13 +94,19 @@ const updateProduction = (game) => {
   for (const clientID in game.players) {
     const player = game.players[clientID];
     const numFactories = getNumBuilding(game, clientID, 'FACTORY');
+    const numMegaFactories = getNumBuilding(game, clientID, 'FACTORY', 'isMega');
+    const {productionRate, megaMultiplier, msPerTick} = game.config;
 
     // work on one plane per factory
     let numProduced = 0;
     let nextProductionQueue = [];
     for (let i = 0; i < player.productionQueue.length && i < numFactories; i++) {
       const production = player.productionQueue[i];
-      const cost = Math.round(game.config.productionRate * game.config.msPerTick / 1000);
+      let mult = 1;
+      if (i < numMegaFactories) {
+        mult = megaMultiplier;
+      }
+      const cost = Math.round(productionRate * mult * msPerTick / 1000);
       const {result, amount} = subtractWithDeficit(
         production.cost,
         Math.min(player.money, cost),
@@ -207,13 +220,17 @@ const moveAndFight = (session, game, socketClients) => {
         const targetEntity = game.entities[entity.targetEnemy];
         // if enemy can dogfight, then flip a coin whether you die instead,
         // with boost based on who is higher generation
-        if (entity.isFighter && (targetEntity.isFighter || targetEntity.isDogfighter)
+        // OR do the same calculation for bombers vs hardened cities
+        if (
+          (
+            (entity.isFighter && (targetEntity.isFighter || targetEntity.isDogfighter))
+            || (entity.isBomber && targetEntity.isHardened)
+          )
           && Math.random() < 0.5 + (genDogfightBonus * (targetEntity.gen - entity.gen))
-          && targetEntity.ammo > 0
+          && (targetEntity.ammo > 0 || targetEntity.isHardened)
         ) {
           delete game.entities[entityID];
           targetEntity.kills++;
-          targetEntity.ammo--;
           const explosion = makeExplosion(
             entity.position,
             entity.isBuilding ? 25 : 10,
@@ -221,6 +238,9 @@ const moveAndFight = (session, game, socketClients) => {
             entity.clientID,
           );
           game.entities[explosion.id] = explosion;
+          if (targetEntity.ammo) {
+            targetEntity.ammo--;
+          }
           if (targetEntity.ammo == 0) { // return to base
             targetEntity.targetPos = null;
             targetEntity.targetEnemy = null;

@@ -82,6 +82,25 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
 
       break;
     }
+    case 'UPGRADE_BUILDING': {
+      const {buildingID, upgradeType} = action;
+      let cost = session.config.megaCost;
+      if (upgradeType == 'isHardened') {
+        cost = session.config.hardenedCost;
+      }
+      if (cost > game.players[clientID].money) return;
+
+      const building = game.entities[buildingID];
+      if (!building) return;
+      if (building.isMega || building.isHardened) return;
+
+      building[upgradeType] = true;
+      if (upgradeType == 'isHardened') {
+        building.gen = session.config.hardenedGen;
+      }
+
+      break;
+    }
     case 'START_RESEARCH': {
       const {nationalityIndex, researchProgress} = game.players[clientID];
       researchProgress.isStarted = true;

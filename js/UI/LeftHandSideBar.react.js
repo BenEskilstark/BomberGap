@@ -52,10 +52,12 @@ const BuildingInfo = (props) => {
 
   const player = game.players[game.clientID];
   const numCities = getNumBuilding(game, game.clientID, 'CITY');
+  const numMegaCities = getNumBuilding(game, game.clientID, 'CITY', 'isMega');
   const numFactories = getNumBuilding(game, game.clientID, "FACTORY");
   const numLabs = getNumBuilding(game, game.clientID, "LAB");
   const numAirbases = getNumBuilding(game, game.clientID, "AIRBASE");
   const isResearching = player.researchProgress?.isStarted;
+  const {moneyRate} = game.config;
   return (
     <div
       style={{
@@ -64,7 +66,7 @@ const BuildingInfo = (props) => {
         gap: '2px',
       }}
     >
-      <div>Money: {player.money} (Income: {game.config.moneyRate * numCities})</div>
+      <div>Money: {player.money} (Income: {moneyRate * (numCities + numMegaCities)})</div>
       <div>
         Research Generation: {player.gen}
         <Button
@@ -272,9 +274,15 @@ const BuildingsSelected = (props) => {
             maxHeight: 300,
           }}
         >
-          Factory:
+          <BuildingUpgrade game={game} building={building} />
           {productionQueueUI}
         </div>
+      );
+    } else {
+      selectedBuildings.push(
+        <BuildingUpgrade
+          key={"selected_building_" + id}
+          game={game} building={building} />
       );
     }
   }
@@ -413,6 +421,46 @@ const PlaneDetail = (props) => {
     </div>
   );
 };
+
+const BuildingUpgrade = (props) => {
+  const {game, building} = props;
+  const player = game.players[game.clientID];
+
+  const isUpgraded = building.isMega || building.isHardened;
+  let upgradeLabel = building.type;
+  if (building.isMega) upgradeLabel = "MEGA-" + building.type;
+  if (building.isHardened) upgradeLabel = "ANTI-AIR-" + building.type;
+
+  return (
+    <div
+      style={{
+
+      }}
+    >
+      <div>{upgradeLabel}</div>
+      <Button
+        style={{display: 'block'}}
+        label={`Mega Upgrade ($${game.config.megaCost}k)`}
+        disabled={isUpgraded || game.config.megaCost > player.money}
+        onClick={() => {
+          dispatchToServer({type: 'UPGRADE_BUILDING',
+            buildingID: building.id, upgradeType: 'isMega'
+          });
+        }}
+      />
+      <Button
+        style={{display: 'block'}}
+        label={`Anti-Air Upgrade ($${game.config.hardenedCost}k)`}
+        disabled={isUpgraded || game.config.hardenedCost > player.money}
+        onClick={() => {
+          dispatchToServer({type: 'UPGRADE_BUILDING',
+            buildingID: building.id, upgradeType: 'isHardened'
+          });
+        }}
+      />
+    </div>
+  );
+}
 
 
 

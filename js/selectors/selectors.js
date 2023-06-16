@@ -150,12 +150,14 @@ const getPlanesBeingWorkedOn = (game, airbaseID, planeName) => {
 // General Entities
 // --------------------------------------------------------------------
 
-const getNumBuilding = (game, clientID, buildingType) => {
+const getNumBuilding = (game, clientID, buildingType, upgradeType) => {
   let numBuilding = 0;
   for (const entityID in game.entities) {
     const entity = game.entities[entityID];
     if (entity.clientID == clientID && entity.type == buildingType) {
-      numBuilding++;
+      if (upgradeType == null || entity[upgradeType]) {
+        numBuilding++;
+      }
     }
   }
   return numBuilding;

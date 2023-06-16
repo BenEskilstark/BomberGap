@@ -86,6 +86,8 @@ const makeBuilding = (clientID, position, type, planes) => {
     name: type, // helps with selection
     isBuilding: true,
     vision: 30,
+    isMega: false,
+    isHardened: false,
     position, speed: 0, targetPos: {...position}, targetEnemy: null,
   };
   if (type == 'AIRBASE') {
