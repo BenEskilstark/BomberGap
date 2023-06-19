@@ -89,6 +89,7 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
         cost = session.config.hardenedCost;
       }
       if (cost > game.players[clientID].money) return;
+      game.players[clientID].money -= cost;
 
       const building = game.entities[buildingID];
       if (!building) return;

@@ -1,6 +1,10 @@
 
 
   - playtest:
+    - upgrade costs are redundant
+
+
+
     - default selection for B52 (and hotkey)
     - bring back stats
     - allow resignation

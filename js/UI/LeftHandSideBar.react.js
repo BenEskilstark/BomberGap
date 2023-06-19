@@ -440,7 +440,7 @@ const BuildingUpgrade = (props) => {
       <div>{upgradeLabel}</div>
       <Button
         style={{display: 'block'}}
-        label={`Mega Upgrade ($${game.config.megaCost}k)`}
+        label={`Mega Upgrade ($${game.config.megaCost / 1000 }k)`}
         disabled={isUpgraded || game.config.megaCost > player.money}
         onClick={() => {
           dispatchToServer({type: 'UPGRADE_BUILDING',
@@ -450,7 +450,7 @@ const BuildingUpgrade = (props) => {
       />
       <Button
         style={{display: 'block'}}
-        label={`Anti-Air Upgrade ($${game.config.hardenedCost}k)`}
+        label={`Anti-Air Upgrade ($${game.config.hardenedCost / 1000}k)`}
         disabled={isUpgraded || game.config.hardenedCost > player.money}
         onClick={() => {
           dispatchToServer({type: 'UPGRADE_BUILDING',
