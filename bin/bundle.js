@@ -884,7 +884,7 @@ const BuildingUpgrade = props => {
     style: {
       display: 'block'
     },
-    label: `Mega Upgrade ($${game.config.megaCost}k)`,
+    label: `Mega Upgrade ($${game.config.megaCost / 1000}k)`,
     disabled: isUpgraded || game.config.megaCost > player.money,
     onClick: () => {
       dispatchToServer({
@@ -897,7 +897,7 @@ const BuildingUpgrade = props => {
     style: {
       display: 'block'
     },
-    label: `Anti-Air Upgrade ($${game.config.hardenedCost}k)`,
+    label: `Anti-Air Upgrade ($${game.config.hardenedCost / 1000}k)`,
     disabled: isUpgraded || game.config.hardenedCost > player.money,
     onClick: () => {
       dispatchToServer({
@@ -1377,12 +1377,12 @@ const config = {
   },
   formationRadius: 50,
   // starting configuration
-  gen: 3,
+  gen: 1,
   numAirbases: 1,
   numCities: 2,
   numFactories: 1,
   numLabs: 1,
-  startingMoney: 50000,
+  startingMoney: 5000,
   cityCost: 1000,
   moneyRate: 50,
   // money made per second
@@ -1397,6 +1397,7 @@ const config = {
   airbaseCost: 8000,
   megaCost: 8000,
   megaMultiplier: 2,
+  // NOTE: this doesn't affect city income or lab research
   hardenedCost: 4000,
   hardenedGen: 3,
   // stealthVisionReduction: 0.3,
@@ -1468,14 +1469,14 @@ const config = {
       isRecon: true
     },
     // gen3
-    'XB-70': {
-      name: 'XB-70',
-      nickname: 'Valkyrie',
-      cost: 4500,
+    'B-58': {
+      name: 'B-58',
+      nickname: 'Hustler',
+      cost: 3500,
       gen: 3,
-      fuel: 1600,
-      vision: 40,
-      speed: 3.1,
+      fuel: 1000,
+      vision: 45,
+      speed: 2.5,
       ammo: 1,
       isBomber: true,
       isNuclear: true
@@ -1497,39 +1498,46 @@ const config = {
       nickname: 'Blackbird',
       cost: 3000,
       gen: 3,
-      fuel: 2500,
-      vision: 100,
+      fuel: 1800,
+      vision: 80,
       speed: 3.3,
       ammo: 0,
       isRecon: true
     },
     // gen4
-    'F-117': {
-      name: 'F-117',
-      nickname: 'Nighthawk',
-      cost: 2500,
+    'XB-70': {
+      name: 'XB-70',
+      nickname: 'Valkyrie',
+      cost: 5000,
       gen: 4,
-      fuel: 1800,
-      vision: 55,
-      speed: 1.5,
-      ammo: 3,
-      isFighter: true,
+      fuel: 1600,
+      vision: 40,
+      speed: 3.1,
+      ammo: 1,
       isBomber: true,
-      isStealth: true
-    },
-    'B-2': {
-      name: 'B-2',
-      nickname: 'Spirit',
-      cost: 4500,
-      gen: 4,
-      fuel: 3000,
-      vision: 70,
-      speed: 1.8,
-      ammo: 3,
-      isBomber: true,
-      isStealth: true,
       isNuclear: true
+    },
+    'XF-108': {
+      name: 'XF-108',
+      nickname: 'Rapier',
+      cost: 4000,
+      gen: 4,
+      fuel: 1200,
+      vision: 50,
+      speed: 3.1,
+      ammo: 1,
+      isFighter: true
     }
+    // 'F-117': {
+    //   name: 'F-117', nickname: 'Nighthawk', cost: 2500,
+    //   gen: 4, fuel: 1800, vision: 55, speed: 1.5, ammo: 3,
+    //   isFighter: true, isBomber: true, isStealth: true,
+    // },
+    // 'B-2': {
+    //   name: 'B-2', nickname: 'Spirit', cost: 4500,
+    //   gen: 4, fuel: 3000, vision: 70, speed: 1.8, ammo: 3,
+    //   isBomber: true, isStealth: true, isNuclear: true,
+    // },
   },
   // USSR
   {
@@ -1543,7 +1551,8 @@ const config = {
       vision: 30,
       speed: 0.7,
       ammo: 1,
-      isBomber: true
+      isBomber: true,
+      isDogfighter: true
     },
     'MIG-15': {
       name: 'MIG-15',
@@ -1608,7 +1617,7 @@ const config = {
     'TU-160': {
       name: 'TU-160',
       nickname: 'White Swan',
-      cost: 4500,
+      cost: 4000,
       gen: 3,
       fuel: 2000,
       vision: 55,
@@ -1622,7 +1631,7 @@ const config = {
     'KH-55': {
       name: 'KH-55',
       nickname: 'AA Cruise Missile',
-      cost: 1000,
+      cost: 900,
       gen: 3,
       fuel: 500,
       vision: 40,
@@ -1646,9 +1655,9 @@ const config = {
     'MIG-31': {
       name: 'MIG-31',
       nickname: 'Foxbat',
-      cost: 2400,
+      cost: 3000,
       gen: 4,
-      fuel: 1200,
+      fuel: 1000,
       speed: 2.8,
       ammo: 3,
       vision: 45,
