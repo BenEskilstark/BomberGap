@@ -1666,7 +1666,7 @@ const config = {
     'KH-101': {
       name: 'KH-101',
       nickname: 'Nuclear Cruise Missile',
-      cost: 2500,
+      cost: 2000,
       gen: 4,
       fuel: 500,
       vision: 40,

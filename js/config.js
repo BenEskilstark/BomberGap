@@ -177,7 +177,7 @@ const config = {
         isFighter: true,
       },
       'KH-101': {
-        name: 'KH-101', nickname: 'Nuclear Cruise Missile', cost: 2500,
+        name: 'KH-101', nickname: 'Nuclear Cruise Missile', cost: 2000,
         gen: 4, fuel: 500, vision: 40, speed: 2.3, ammo: 1,
         isDrone: true, isNuclear: true, isBomber: true,
       },
