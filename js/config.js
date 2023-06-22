@@ -117,7 +117,7 @@ const config = {
       'IL-28': {
         name: 'IL-28', nickname: 'Beagle', cost: 500,
         gen: 1, fuel: 900, vision: 30, speed: 0.7, ammo: 1,
-        isBomber: true, isDogfighter: true,
+        isBomber: true, // isDogfighter: true,
       },
       'MIG-15': {
         name: 'MIG-15', nickname: 'Mother', cost: 400,
