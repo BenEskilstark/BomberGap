@@ -1551,9 +1551,9 @@ const config = {
       vision: 30,
       speed: 0.7,
       ammo: 1,
-      isBomber: true,
-      isDogfighter: true
+      isBomber: true // isDogfighter: true,
     },
+
     'MIG-15': {
       name: 'MIG-15',
       nickname: 'Mother',
