@@ -117,7 +117,7 @@ const config = {
       'IL-28': {
         name: 'IL-28', nickname: 'Beagle', cost: 500,
         gen: 1, fuel: 900, vision: 30, speed: 0.7, ammo: 1,
-        isBomber: true, // isDogfighter: true,
+        isBomber: true, isDogfighter: true,
       },
       'MIG-15': {
         name: 'MIG-15', nickname: 'Mother', cost: 400,
@@ -149,13 +149,13 @@ const config = {
 
       // gen3
       'TU-160': {
-        name: 'TU-160', nickname: 'White Swan', cost: 4000,
+        name: 'TU-160', nickname: 'White Swan', cost: 3500,
         gen: 3, fuel: 2000, vision: 55, speed: 2, ammo: 1,
-        planeCapacity: 4, planeTypes: ['KH-55', 'KH-101', 'KH-50'],
-        isBomber: true, isNuclear: true,
+        planeCapacity: 5, planeTypes: ['KH-55', 'KH-101', 'KH-50'],
+        isBomber: true, isNuclear: true, isDogfighter: true,
       },
       'KH-55': {
-        name: 'KH-55', nickname: 'AA Cruise Missile', cost: 900,
+        name: 'KH-55', nickname: 'AA Cruise Missile', cost: 750,
         gen: 3, fuel: 500, vision: 40, speed: 3.2, ammo: 1,
         isDrone: true, isFighter: true,
       },
@@ -177,7 +177,7 @@ const config = {
         isFighter: true,
       },
       'KH-101': {
-        name: 'KH-101', nickname: 'Nuclear Cruise Missile', cost: 2000,
+        name: 'KH-101', nickname: 'Nuclear Cruise Missile', cost: 1500,
         gen: 4, fuel: 500, vision: 40, speed: 2.3, ammo: 1,
         isDrone: true, isNuclear: true, isBomber: true,
       },
