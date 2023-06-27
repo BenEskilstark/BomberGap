@@ -67,6 +67,9 @@ const updateResearch = (game) => {
     // research complete
     if (player.researchProgress.cost <= 0) {
       player.gen = player.researchProgress.gen;
+      game.stats[clientID].generation.push({
+        x: game.time, y: player.gen,
+      });
       if (player.gen < 4) {
         player.researchProgress = {
           gen: player.gen + 1,

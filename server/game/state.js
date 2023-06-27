@@ -67,6 +67,7 @@ const initGameState = (
       LAB: [{x: 0, y: config.numLabs}],
       AIRBASE: [{x: 0, y: config.numAirbases}],
       airforceValue: [{x: 0, y: 0}],
+      generation: [{x: 0, y: config.gen}],
 
       'fighters_shot_down': 0,
       'bombers_shot_down': 0,

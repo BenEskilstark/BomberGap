@@ -26,7 +26,7 @@ const GameOverModal = (props) => {
       <div>{body}</div>
       <Dropdown
         value={stat}
-        options={['CITY', 'FACTORY', 'AIRBASE', 'LAB', 'airforceValue']}
+        options={['CITY', 'FACTORY', 'AIRBASE', 'LAB', 'airforceValue', 'generation']}
         onChange={setStat}
       />
       <PlotStack stats={stats} time={time} selectedStat={stat} />

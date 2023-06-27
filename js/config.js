@@ -26,7 +26,7 @@ const config = {
   productionRate: 50, // money spent per second per factory
   labCost: 5000,
   researchRate: 50, // money spent per second per lab
-  genCost: [0, 0, 15000, 50000, 50000], // cost per generation
+  genCost: [0, 0, 15000, 60000, 70000], // cost per generation
   airbaseCost: 8000,
 
   megaCost: 8000,

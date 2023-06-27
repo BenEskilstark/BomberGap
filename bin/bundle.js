@@ -64,7 +64,7 @@ const GameOverModal = props => {
   const [stat, setStat] = useState('CITY');
   body = /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, body), /*#__PURE__*/React.createElement(Dropdown, {
     value: stat,
-    options: ['CITY', 'FACTORY', 'AIRBASE', 'LAB', 'airforceValue'],
+    options: ['CITY', 'FACTORY', 'AIRBASE', 'LAB', 'airforceValue', 'generation'],
     onChange: setStat
   }), /*#__PURE__*/React.createElement(PlotStack, {
     stats: stats,
@@ -1438,7 +1438,7 @@ const config = {
   labCost: 5000,
   researchRate: 50,
   // money spent per second per lab
-  genCost: [0, 0, 15000, 50000, 50000],
+  genCost: [0, 0, 15000, 60000, 70000],
   // cost per generation
   airbaseCost: 8000,
   megaCost: 8000,
