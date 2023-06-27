@@ -101,6 +101,24 @@ const numTimesTargeted = (game, targetID) => {
   return num;
 }
 
+const getTotalAirforceValue = (game, clientID) => {
+  let total = 0;
+  const designs = getPlaneDesignsUpToGen(game.players[clientID].nationalityIndex, 4);
+  for (const entityID in game.entities) {
+    const entity = game.entities[entityID];
+    if (entity.clientID != clientID) continue;
+    if (entity.cost > 0) {
+      total += entity.cost;
+    }
+    if (entity.planes) {
+      for (const name in entity.planes) {
+        total += entity.planes[name] * designs[name].cost;
+      }
+    }
+  }
+  return total;
+}
+
 
 // --------------------------------------------------------------------
 // Intercept Course
@@ -178,4 +196,5 @@ module.exports = {
   getEntitiesByType,
   getInterceptPos,
   numTimesTargeted,
+  getTotalAirforceValue,
 };

@@ -62,6 +62,12 @@ const initGameState = (
     }
 
     game.stats[clientID] = {
+      CITY: [{x: 0, y: config.numCities}],
+      FACTORY: [{x: 0, y: config.numFactories}],
+      LAB: [{x: 0, y: config.numLabs}],
+      AIRBASE: [{x: 0, y: config.numAirbases}],
+      airforceValue: [{x: 0, y: 0}],
+
       'fighters_shot_down': 0,
       'bombers_shot_down': 0,
       'recons_shot_down': 0,

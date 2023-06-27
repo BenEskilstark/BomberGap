@@ -1,10 +1,10 @@
 const React = require('react');
-const {Modal} = require('bens_ui_components');
+const {Modal, Plot, Dropdown} = require('bens_ui_components');
 const {dispatchToServer} = require('../../clientToServer');
 const {useEffect, useState, useMemo} = React;
 
 const GameOverModal = (props) => {
-  const {winner, disconnect, stats} = props;
+  const {winner, disconnect, stats, time} = props;
   const state = getState(); // HACK this comes from window;
 
   let title = winner == state.clientID ? 'You Win!' : 'You Lose!';
@@ -19,21 +19,17 @@ const GameOverModal = (props) => {
     if (id != state.clientID) otherClientID = id;
   }
 
+  const [stat, setStat] = useState('CITY');
+
   body = (
     <div>
       <div>{body}</div>
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          gap: 70,
-        }}
-      >
-        <PlayerStats clientID={state.clientID}
-          otherID={otherClientID} isYou={true} stats={stats} />
-        <PlayerStats clientID={otherClientID}
-          otherID={state.clientID} isYou={false} stats={stats} />
-      </div>
+      <Dropdown
+        value={stat}
+        options={['CITY', 'FACTORY', 'AIRBASE', 'LAB', 'airforceValue']}
+        onChange={setStat}
+      />
+      <PlotStack stats={stats} time={time} selectedStat={stat} />
     </div>
   );
 
@@ -56,25 +52,66 @@ const GameOverModal = (props) => {
   );
 };
 
-const PlayerStats = (props) => {
-  return null;
-  const {isYou, stats, otherID, clientID} = props;
+const PlotStack = (props) => {
+  const {stats, time, selectedStat} = props;
+
+  let yMax = 0;
+  let colors = ['blue', 'red'];
+  let i = 0;
+  for (const clientID in stats) {
+    const points = stats[clientID][selectedStat];
+    for (const point of points) {
+      point.color = colors[i];
+      if (point.y > yMax) {
+        yMax = point.y;
+      }
+    }
+    i++;
+  }
+
+  const plots = [];
+  i = 0;
+  for (const clientID in stats) {
+    const initPoints = stats[clientID][selectedStat];
+    const points = [
+      ...initPoints,
+      {x: time, y: initPoints[initPoints.length - 1].y, color: colors[i]},
+    ];
+    console.log(points, time);
+    plots.push(
+      <Plot
+        canvasID={"plot"}
+        key={"plot_" + i + "_" + selectedStat}
+        isLinear={true}
+        style={{
+          position: 'absolute',
+        }}
+        points={points}
+        dontClear={true}
+        xAxis={{
+          dimension: 'x', hidden: true,
+          label: 'time', min: 0, max: time,
+        }}
+        yAxis={{
+          dimension: 'y', hidden: true,
+          label: selectedStat, min: 0, max: yMax + 1,
+        }}
+      />
+    );
+    i++;
+  }
+
   return (
     <div
       style={{
-
+        position: 'relative',
+        height: 250,
       }}
     >
-      <div><b>{isYou ? 'You' : 'Opponent'}</b></div>
-      <div>Fighter sorties flown: {stats[clientID].fighter_sorties}</div>
-      <div>Bomber sorties flown: {stats[clientID].bomber_sorties}</div>
-      <div>Enemy fighters shot down: {stats[otherID].fighters_shot_down}</div>
-      <div>Enemy bombers shot down: {stats[otherID].bombers_shot_down}</div>
-      <div>Fighter aces: {stats[clientID].fighter_aces}</div>
-      <div>Planes lost to no fuel: {stats[clientID].planes_no_fuel}</div>
-      <div>Enemy airbases destroyed: {stats[otherID].airbases_destroyed}</div>
+      {plots}
     </div>
   );
 }
+
 
 module.exports = GameOverModal;

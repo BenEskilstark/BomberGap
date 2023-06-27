@@ -10,7 +10,7 @@ const {
   getEntitiesByPlayer, getNearestAirbase, getOtherClientID,
   getNumBuilding, getEntitiesByType,
   getPlaneDesignsByGen, getInterceptPos,
-  numTimesTargeted,
+  numTimesTargeted, getTotalAirforceValue,
 } = require('./selectors');
 const {makePlane, makeExplosion} = require('./state');
 
@@ -127,6 +127,9 @@ const updateProduction = (game) => {
         }
 
         airbase.planes[production.name] += 1;
+        game.stats[clientID].airforceValue.push({
+          x: game.time, y: getTotalAirforceValue(game, clientID),
+        });
         numProduced++;
       } else {
         nextProductionQueue.push(production);
@@ -248,14 +251,10 @@ const moveAndFight = (session, game, socketClients) => {
           // TODO: stats for fighter kills
           continue;
         }
-        // TODO: update stats based on kill type
 
         // kill target, compute aces, ammo
         entity.ammo--;
         entity.kills++;
-        if (entity.kills == 5) {
-          game.stats[entity.clientID].fighter_aces++;
-        }
         if (entity.ammo == 0) { // return to base
           entity.targetPos = null;
           entity.targetEnemy = null;
@@ -268,6 +267,18 @@ const moveAndFight = (session, game, socketClients) => {
         );
         game.entities[explosion.id] = explosion;
         delete game.entities[targetEntity.id];
+
+        // update stats based on kill type
+        if (targetEntity.isBuilding) {
+          game.stats[targetEntity.clientID][targetEntity.type].push({
+            x: game.time, y: getNumBuilding(game, targetEntity.clientID, targetEntity.type),
+          });
+        } else {
+          game.stats[targetEntity.clientID].airforceValue.push({
+            x: game.time, y: getTotalAirforceValue(game, targetEntity.clientID),
+          });
+        }
+
         if (
           getNumBuilding(game, targetEntity.clientID, 'CITY') == 0 ||
           getNumBuilding(game, targetEntity.clientID, 'AIRBASE') == 0
@@ -362,7 +373,7 @@ const doGameOver = (session, socketClients, clientID, winner, disconnect) => {
   if (!game) return;
   emitToSession(
     session, socketClients,
-    {type: 'GAME_OVER', winner, disconnect, stats: game.stats},
+    {type: 'GAME_OVER', winner, disconnect, stats: game.stats, time: game.time},
     clientID, true, // include self
   );
   clearInterval(game.tickInterval);

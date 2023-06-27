@@ -38,10 +38,11 @@ const rootReducer = (state, action) => {
       };
     }
     case 'GAME_OVER': {
-      const {winner} = action;
+      const {winner, stats} = action;
 
       return {
         ...state,
+        stats,
         clientConfig: {
           money: config.startingMoney,
           planes: {}, // {[name]: number}

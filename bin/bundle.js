@@ -27,10 +27,12 @@ const FancyButton = props => {
   });
 };
 module.exports = FancyButton;
-},{"bens_ui_components":88,"react":105}],2:[function(require,module,exports){
+},{"bens_ui_components":90,"react":107}],2:[function(require,module,exports){
 const React = require('react');
 const {
-  Modal
+  Modal,
+  Plot,
+  Dropdown
 } = require('bens_ui_components');
 const {
   dispatchToServer
@@ -44,7 +46,8 @@ const GameOverModal = props => {
   const {
     winner,
     disconnect,
-    stats
+    stats,
+    time
   } = props;
   const state = getState(); // HACK this comes from window;
 
@@ -58,23 +61,16 @@ const GameOverModal = props => {
   for (const id in stats) {
     if (id != state.clientID) otherClientID = id;
   }
-  body = /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, body), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      flexDirection: 'row',
-      gap: 70
-    }
-  }, /*#__PURE__*/React.createElement(PlayerStats, {
-    clientID: state.clientID,
-    otherID: otherClientID,
-    isYou: true,
-    stats: stats
-  }), /*#__PURE__*/React.createElement(PlayerStats, {
-    clientID: otherClientID,
-    otherID: state.clientID,
-    isYou: false,
-    stats: stats
-  })));
+  const [stat, setStat] = useState('CITY');
+  body = /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, body), /*#__PURE__*/React.createElement(Dropdown, {
+    value: stat,
+    options: ['CITY', 'FACTORY', 'AIRBASE', 'LAB', 'airforceValue'],
+    onChange: setStat
+  }), /*#__PURE__*/React.createElement(PlotStack, {
+    stats: stats,
+    time: time,
+    selectedStat: stat
+  }));
   return /*#__PURE__*/React.createElement(Modal, {
     title: title,
     body: body,
@@ -99,20 +95,70 @@ const GameOverModal = props => {
     }]
   });
 };
-const PlayerStats = props => {
-  return null;
+const PlotStack = props => {
   const {
-    isYou,
     stats,
-    otherID,
-    clientID
+    time,
+    selectedStat
   } = props;
+  let yMax = 0;
+  let colors = ['blue', 'red'];
+  let i = 0;
+  for (const clientID in stats) {
+    const points = stats[clientID][selectedStat];
+    for (const point of points) {
+      point.color = colors[i];
+      if (point.y > yMax) {
+        yMax = point.y;
+      }
+    }
+    i++;
+  }
+  const plots = [];
+  i = 0;
+  for (const clientID in stats) {
+    const initPoints = stats[clientID][selectedStat];
+    const points = [...initPoints, {
+      x: time,
+      y: initPoints[initPoints.length - 1].y,
+      color: colors[i]
+    }];
+    console.log(points, time);
+    plots.push( /*#__PURE__*/React.createElement(Plot, {
+      canvasID: "plot",
+      key: "plot_" + i + "_" + selectedStat,
+      isLinear: true,
+      style: {
+        position: 'absolute'
+      },
+      points: points,
+      dontClear: true,
+      xAxis: {
+        dimension: 'x',
+        hidden: true,
+        label: 'time',
+        min: 0,
+        max: time
+      },
+      yAxis: {
+        dimension: 'y',
+        hidden: true,
+        label: selectedStat,
+        min: 0,
+        max: yMax + 1
+      }
+    }));
+    i++;
+  }
   return /*#__PURE__*/React.createElement("div", {
-    style: {}
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, isYou ? 'You' : 'Opponent')), /*#__PURE__*/React.createElement("div", null, "Fighter sorties flown: ", stats[clientID].fighter_sorties), /*#__PURE__*/React.createElement("div", null, "Bomber sorties flown: ", stats[clientID].bomber_sorties), /*#__PURE__*/React.createElement("div", null, "Enemy fighters shot down: ", stats[otherID].fighters_shot_down), /*#__PURE__*/React.createElement("div", null, "Enemy bombers shot down: ", stats[otherID].bombers_shot_down), /*#__PURE__*/React.createElement("div", null, "Fighter aces: ", stats[clientID].fighter_aces), /*#__PURE__*/React.createElement("div", null, "Planes lost to no fuel: ", stats[clientID].planes_no_fuel), /*#__PURE__*/React.createElement("div", null, "Enemy airbases destroyed: ", stats[otherID].airbases_destroyed));
+    style: {
+      position: 'relative',
+      height: 250
+    }
+  }, plots);
 };
 module.exports = GameOverModal;
-},{"../../clientToServer":11,"bens_ui_components":88,"react":105}],3:[function(require,module,exports){
+},{"../../clientToServer":11,"bens_ui_components":90,"react":107}],3:[function(require,module,exports){
 const React = require('react');
 const {
   useEffect,
@@ -156,7 +202,7 @@ const ProgressBar = props => {
   }, pips), enqueued !== null ? `(${enqueued})` : null);
 };
 module.exports = ProgressBar;
-},{"react":105}],4:[function(require,module,exports){
+},{"react":107}],4:[function(require,module,exports){
 const React = require('react');
 const {
   useEffect,
@@ -194,7 +240,7 @@ const RadioPicker = props => {
   }, optionToggles);
 };
 module.exports = RadioPicker;
-},{"react":105}],5:[function(require,module,exports){
+},{"react":107}],5:[function(require,module,exports){
 "use strict";
 
 var _postVisit = _interopRequireDefault(require("../postVisit"));
@@ -457,7 +503,7 @@ function Game(props) {
 }
 module.exports = Game;
 
-},{"../clientToServer":11,"../postVisit":14,"../render":19,"../selectors/selectors":20,"./LeftHandSideBar.react":6,"./RightHandSideBar.react":10,"bens_ui_components":88,"bens_utils":95,"react":105}],6:[function(require,module,exports){
+},{"../clientToServer":11,"../postVisit":14,"../render":19,"../selectors/selectors":20,"./LeftHandSideBar.react":6,"./RightHandSideBar.react":10,"bens_ui_components":90,"bens_utils":97,"react":107}],6:[function(require,module,exports){
 const React = require('react');
 const {
   InfoCard,
@@ -909,7 +955,7 @@ const BuildingUpgrade = props => {
   }));
 };
 module.exports = LeftHandSideBar;
-},{"../clientToServer":11,"../selectors/selectors":20,"./Components/Button.react":1,"./Components/ProgressBar.react":3,"./Components/RadioPicker.react":4,"./PlaneDesignDisplay.react":9,"bens_ui_components":88,"react":105}],7:[function(require,module,exports){
+},{"../clientToServer":11,"../selectors/selectors":20,"./Components/Button.react":1,"./Components/ProgressBar.react":3,"./Components/RadioPicker.react":4,"./PlaneDesignDisplay.react":9,"bens_ui_components":90,"react":107}],7:[function(require,module,exports){
 const React = require('react');
 const {
   Divider,
@@ -1165,7 +1211,7 @@ const Settings = props => {
   }));
 };
 module.exports = Lobby;
-},{"../clientToServer":11,"../selectors/sessions":21,"./Components/Button.react":1,"./PlaneDesignDisplay.react":9,"bens_ui_components":88,"react":105}],8:[function(require,module,exports){
+},{"../clientToServer":11,"../selectors/sessions":21,"./Components/Button.react":1,"./PlaneDesignDisplay.react":9,"bens_ui_components":90,"react":107}],8:[function(require,module,exports){
 "use strict";
 
 var _postVisit = _interopRequireDefault(require("../postVisit"));
@@ -1219,7 +1265,7 @@ function Main(props) {
 }
 module.exports = Main;
 
-},{"../clientToServer":11,"../postVisit":14,"../reducers/rootReducer":17,"./Game.react":5,"./Lobby.react":7,"bens_ui_components":88,"react":105}],9:[function(require,module,exports){
+},{"../clientToServer":11,"../postVisit":14,"../reducers/rootReducer":17,"./Game.react":5,"./Lobby.react":7,"bens_ui_components":90,"react":107}],9:[function(require,module,exports){
 const React = require('react');
 const {
   Button,
@@ -1285,7 +1331,7 @@ const PlaneDesignDisplay = props => {
   }, properties)));
 };
 module.exports = PlaneDesignDisplay;
-},{"bens_ui_components":88,"react":105}],10:[function(require,module,exports){
+},{"bens_ui_components":90,"react":107}],10:[function(require,module,exports){
 const React = require('react');
 const PlaneDesignDisplay = require('./PlaneDesignDisplay.react');
 const {
@@ -1333,7 +1379,7 @@ const RightHandSideBar = props => {
   }, planeDetails));
 };
 module.exports = RightHandSideBar;
-},{"../selectors/selectors":20,"./PlaneDesignDisplay.react":9,"react":105}],11:[function(require,module,exports){
+},{"../selectors/selectors":20,"./PlaneDesignDisplay.react":9,"react":107}],11:[function(require,module,exports){
 const {
   config
 } = require('./config');
@@ -1695,7 +1741,7 @@ function renderUI(root) {
 const root = _client.default.createRoot(document.getElementById('container'));
 renderUI(root);
 
-},{"./UI/Main.react":8,"react":105,"react-dom/client":101}],14:[function(require,module,exports){
+},{"./UI/Main.react":8,"react":107,"react-dom/client":103}],14:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1836,7 +1882,7 @@ const gameReducer = (game, action) => {
 module.exports = {
   gameReducer
 };
-},{"bens_utils":95}],16:[function(require,module,exports){
+},{"bens_utils":97}],16:[function(require,module,exports){
 const modalReducer = (state, action) => {
   switch (action.type) {
     case 'DISMISS_MODAL':
@@ -1921,10 +1967,12 @@ const rootReducer = (state, action) => {
     case 'GAME_OVER':
       {
         const {
-          winner
+          winner,
+          stats
         } = action;
         return {
           ...state,
+          stats,
           clientConfig: {
             money: config.startingMoney,
             planes: {},
@@ -2049,7 +2097,7 @@ module.exports = {
   rootReducer,
   initState
 };
-},{"../UI/Components/GameOverModal.react":2,"../config":12,"../selectors/selectors":20,"./gameReducer":15,"./modalReducer":16,"./sessionReducer":18,"bens_ui_components":88,"bens_utils":95,"react":105}],18:[function(require,module,exports){
+},{"../UI/Components/GameOverModal.react":2,"../config":12,"../selectors/selectors":20,"./gameReducer":15,"./modalReducer":16,"./sessionReducer":18,"bens_ui_components":90,"bens_utils":97,"react":107}],18:[function(require,module,exports){
 const {
   getSession
 } = require('../selectors/sessions');
@@ -2426,7 +2474,7 @@ const render = state => {
 module.exports = {
   render
 };
-},{"./selectors/sessions":21,"bens_utils":95}],20:[function(require,module,exports){
+},{"./selectors/sessions":21,"bens_utils":97}],20:[function(require,module,exports){
 const {
   dist,
   magnitude,
@@ -2665,7 +2713,7 @@ module.exports = {
   normalizePos,
   getCanvasSize
 };
-},{"../config":12,"bens_utils":95}],21:[function(require,module,exports){
+},{"../config":12,"bens_utils":97}],21:[function(require,module,exports){
 const getSession = state => {
   for (const id in state.sessions) {
     const session = state.sessions[id];
@@ -5074,7 +5122,7 @@ var _default = toFormData;
 exports.default = _default;
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"../core/AxiosError.js":30,"../platform/node/classes/FormData.js":51,"../utils.js":63,"buffer":96}],57:[function(require,module,exports){
+},{"../core/AxiosError.js":30,"../platform/node/classes/FormData.js":51,"../utils.js":63,"buffer":98}],57:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -6188,11 +6236,11 @@ const AudioWidget = props => {
   }));
 };
 module.exports = AudioWidget;
-},{"./Button.react":67,"react":105}],66:[function(require,module,exports){
+},{"./Button.react":67,"react":107}],66:[function(require,module,exports){
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 const React = require('react');
 const CheckerBackground = require('./CheckerBackground.react.js');
-const DragArea = require('./DragArea.react.js');
+const DragArea = require('./DragAreaDeprecated.react.js');
 const {
   useState,
   useEffect,
@@ -6307,7 +6355,7 @@ const Piece = props => {
   }, props.sprite);
 };
 module.exports = Board;
-},{"./CheckerBackground.react.js":70,"./DragArea.react.js":72,"react":105}],67:[function(require,module,exports){
+},{"./CheckerBackground.react.js":70,"./DragAreaDeprecated.react.js":72,"react":107}],67:[function(require,module,exports){
 const React = require('react');
 const {
   useState,
@@ -6322,6 +6370,7 @@ const {
 // onMouseUp: optional () => void
 // disabled: optional boolean
 // style: optional Object
+// hoverCard: optional JSX
 
 function Button(props) {
   const id = props.id || props.label;
@@ -6333,6 +6382,16 @@ function Button(props) {
     }
   };
   const [intervalID, setIntervalID] = useState(null);
+  const [hover, setHover] = useState(false);
+  let hoverDisplay = null;
+  if (hover) {
+    hoverDisplay = /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: 'relative'
+      }
+    }, props.hoverCard);
+  }
+  const [touched, setTouched] = useState(false);
   return /*#__PURE__*/React.createElement("button", {
     type: "button",
     style: {
@@ -6343,9 +6402,17 @@ function Button(props) {
     key: id || label,
     className: props.disabled ? 'buttonDisable' : '',
     id: id.toUpperCase() + '_button',
-    onClick: props.disabled ? () => {} : props.onClick,
+    onClick: () => {
+      if (props.disabled) {
+        return;
+      }
+      if (touched) {
+        setTouched(false);
+        return;
+      }
+      props.onClick();
+    },
     onTouchStart: ev => {
-      ev.preventDefault();
       if (props.disabled) {
         return;
       }
@@ -6355,14 +6422,17 @@ function Button(props) {
         setIntervalID(null);
       }
       touchFn();
+      setTouched(true);
       // HACK: if you set the right condition, allow repetive presses
-      if (false) {
-        const interval = setInterval(touchFn, 120);
-        setIntervalID(interval);
-      }
+      // if (false) {
+      //   const interval = setInterval(touchFn, 120);
+      //   setIntervalID(interval);
+      // }
     },
+
     onTouchEnd: ev => {
       ev.preventDefault();
+      ev.stopPropagation();
       clearInterval(intervalID);
       setIntervalID(null);
       props.onMouseUp;
@@ -6377,11 +6447,17 @@ function Button(props) {
     },
     onMouseDown: props.onMouseDown,
     onMouseUp: props.onMouseUp,
+    onMouseEnter: () => {
+      if (props.hoverCard) setHover(true);
+    },
+    onMouseLeave: () => {
+      setHover(false);
+    },
     disabled: props.disabled
-  }, props.label);
+  }, props.label, hoverDisplay);
 }
 module.exports = Button;
-},{"react":105}],68:[function(require,module,exports){
+},{"react":107}],68:[function(require,module,exports){
 const React = require('react');
 const {
   useResponsiveDimensions
@@ -6444,7 +6520,7 @@ function Canvas(props) {
   }));
 }
 module.exports = Canvas;
-},{"./hooks":86,"react":105}],69:[function(require,module,exports){
+},{"./hooks":88,"react":107}],69:[function(require,module,exports){
 const React = require('react');
 
 /**
@@ -6480,7 +6556,7 @@ function Checkbox(props) {
   }
 }
 module.exports = Checkbox;
-},{"react":105}],70:[function(require,module,exports){
+},{"react":107}],70:[function(require,module,exports){
 const React = require('react');
 
 /**
@@ -6528,7 +6604,7 @@ const CheckerBackground = props => {
   }, squares);
 };
 module.exports = CheckerBackground;
-},{"react":105}],71:[function(require,module,exports){
+},{"react":107}],71:[function(require,module,exports){
 const React = require('react');
 function Divider(props) {
   const {
@@ -6544,7 +6620,7 @@ function Divider(props) {
   });
 }
 module.exports = Divider;
-},{"react":105}],72:[function(require,module,exports){
+},{"react":107}],72:[function(require,module,exports){
 const React = require('react');
 const {
   useMouseHandler,
@@ -6804,7 +6880,7 @@ const clampToArea = (dragAreaID, pixel, style) => {
   };
 };
 module.exports = DragArea;
-},{"./hooks":86,"bens_utils":95,"react":105}],73:[function(require,module,exports){
+},{"./hooks":88,"bens_utils":97,"react":107}],73:[function(require,module,exports){
 const React = require('react');
 
 /**
@@ -6842,7 +6918,7 @@ const Dropdown = function (props) {
   }, optionTags);
 };
 module.exports = Dropdown;
-},{"react":105}],74:[function(require,module,exports){
+},{"react":107}],74:[function(require,module,exports){
 const React = require('react');
 const {
   useEffect,
@@ -6888,7 +6964,7 @@ const usePrevious = value => {
   return ref.current;
 };
 module.exports = Indicator;
-},{"react":105}],75:[function(require,module,exports){
+},{"react":107}],75:[function(require,module,exports){
 const React = require('react');
 const InfoCard = props => {
   const overrideStyle = props.style || {};
@@ -6912,7 +6988,7 @@ const InfoCard = props => {
   }, props.children);
 };
 module.exports = InfoCard;
-},{"react":105}],76:[function(require,module,exports){
+},{"react":107}],76:[function(require,module,exports){
 const React = require('react');
 const Button = require('./Button.react');
 const Divider = require('./Divider.react');
@@ -6941,14 +7017,16 @@ function Modal(props) {
     style,
     buttonStyle
   } = props;
+  const modalButtons = buttons ? buttons : [];
   const overrideStyle = style ? style : {};
   const overrideButtonStyle = buttonStyle ? buttonStyle : {};
-  const buttonHTML = buttons.map(b => {
+  const buttonHTML = modalButtons.map(b => {
     return /*#__PURE__*/React.createElement(Button, {
       key: "b_" + b.label,
       disabled: !!b.disabled,
       label: b.label,
-      onClick: b.onClick
+      onClick: b.onClick,
+      style: b.style || {}
     });
   });
   const rect = document.getElementById('container').getBoundingClientRect();
@@ -6992,7 +7070,7 @@ function Modal(props) {
       fontSize: 10
     },
     onClick: dismiss
-  })), body, /*#__PURE__*/React.createElement(Divider, {
+  })), body, modalButtons.length > 0 ? /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement(Divider, {
     style: {
       marginTop: 4,
       marginBottom: 4
@@ -7002,10 +7080,10 @@ function Modal(props) {
       marginBottom: 4,
       ...overrideButtonStyle
     }
-  }, buttonHTML)));
+  }, buttonHTML)) : null));
 }
 module.exports = Modal;
-},{"./Button.react":67,"./Divider.react":71,"react":105}],77:[function(require,module,exports){
+},{"./Button.react":67,"./Divider.react":71,"react":107}],77:[function(require,module,exports){
 const React = require('react');
 const {
   useState,
@@ -7087,7 +7165,7 @@ const submitValue = (onChange, nextVal, onlyInt) => {
   }
 };
 module.exports = NumberField;
-},{"react":105}],78:[function(require,module,exports){
+},{"react":107}],78:[function(require,module,exports){
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 /**
  * See ~/Code/teaching/clusters for an example of how to use the plot
@@ -7134,6 +7212,8 @@ const {
  *                   // up to a maximum number of points equal to the xAxis size
  *   changeOnly: ?boolean, // a watch prop, only add a point if watched prop changes
  *   inline: ?boolean,
+ *   dontClear: ?boolean,
+ *   style: ?object, // optional additional stylin
  *
  * canvas props:
  *   canvasID: ?string, // for when there's multiple plots
@@ -7203,8 +7283,10 @@ const Plot = props => {
     const transY = y => y * yTrans - ymin * yTrans;
 
     // clear canvas
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, width, height);
+    if (!props.dontClear) {
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, width, height);
+    }
 
     // drawing axes
     if (!xAxis.hidden) {
@@ -7265,7 +7347,7 @@ const Plot = props => {
         ctx.fillRect(x - size, y - size, size * 2, size * 2);
       }
       if (isLinear && prevPoint != null) {
-        ctx.fillStyle = 'black';
+        ctx.strokeStyle = point.color ? point.color : 'black';
         drawLine(ctx, prevPoint, {
           x,
           y
@@ -7299,7 +7381,8 @@ const Plot = props => {
   return /*#__PURE__*/React.createElement("div", {
     style: {
       width: 'fit-content',
-      display: props.inline ? 'inline' : 'table'
+      display: props.inline ? 'inline' : 'table',
+      ...props.style
     }
   }, yAxisLabel, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -7375,7 +7458,7 @@ const PlotWatcher = props => {
   }));
 };
 module.exports = PlotWatcher;
-},{"./Button.react":67,"./Canvas.react":68,"react":105}],79:[function(require,module,exports){
+},{"./Button.react":67,"./Canvas.react":68,"react":107}],79:[function(require,module,exports){
 const React = require('react');
 const Button = require('./Button.react');
 const Modal = require('./Modal.react');
@@ -7458,7 +7541,7 @@ const quitGameModal = dispatch => {
   });
 };
 module.exports = QuitButton;
-},{"./Button.react":67,"./Modal.react":76,"bens_utils":95,"react":105}],80:[function(require,module,exports){
+},{"./Button.react":67,"./Modal.react":76,"bens_utils":97,"react":107}],80:[function(require,module,exports){
 const React = require('react');
 
 // props:
@@ -7491,7 +7574,7 @@ class RadioPicker extends React.Component {
   }
 }
 module.exports = RadioPicker;
-},{"react":105}],81:[function(require,module,exports){
+},{"react":107}],81:[function(require,module,exports){
 const React = require('react');
 const NumberField = require('./NumberField.react');
 const {
@@ -7568,7 +7651,7 @@ function Slider(props) {
   }), props.noOriginalValue ? null : "(" + originalValue + ")"));
 }
 module.exports = Slider;
-},{"./NumberField.react":77,"react":105}],82:[function(require,module,exports){
+},{"./NumberField.react":77,"react":107}],82:[function(require,module,exports){
 const React = require('react');
 
 /**
@@ -7612,7 +7695,272 @@ const SpriteSheet = props => {
   }));
 };
 module.exports = SpriteSheet;
-},{"react":105}],83:[function(require,module,exports){
+},{"react":107}],83:[function(require,module,exports){
+function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+const React = require('react');
+const {
+  subtract,
+  add
+} = require('bens_utils').vectors;
+const {
+  useMouseHandler,
+  useEnhancedReducer,
+  mouseReducer
+} = require('./hooks');
+const {
+  useEffect,
+  useState,
+  useMemo
+} = React;
+
+/**
+ * Required Props:
+ *  - id: id of draggable area
+ *  - options: Array<{label, onClick, style, isCircular, color}>
+ *  - onSelectIndex: (index, option, isCancel) => void,
+ *  - selectedIndex: index,
+ *  - width: pixels
+ *  - height: pixels
+ */
+const SwipePicker = props => {
+  const {
+    options,
+    style,
+    width,
+    height,
+    id,
+    minSize = 0.6,
+    maxSize = 0.9,
+    selectedStyle = {},
+    deselectedStyle = {},
+    onSelectIndex,
+    selectedIndex,
+    defaultColor = 'rgb(205,202,179)',
+    gap = 10,
+    onMouseDown,
+    onMouseMove
+  } = props;
+
+  // options can have dynamic widths so use these to get them on the fly
+  const getOptionWidth = index => {
+    const optionElem = document.getElementById(id + "_option_" + index);
+    if (!optionElem) return 0;
+    return optionElem.getBoundingClientRect().width;
+  };
+  const getWidthToOption = index => {
+    let widthToCurrentElement = 0;
+    for (let i = 0; i < index; i++) {
+      widthToCurrentElement += getOptionWidth(i) + gap;
+    }
+    return widthToCurrentElement + getOptionWidth(index) / 2;
+  };
+
+  // distances to left, right, center
+  const getOptionDistFromLeft = (index, left) => {
+    const widthToCurrentElement = getWidthToOption(index);
+    return widthToCurrentElement + left;
+  };
+  const getOptionDistFromRight = (index, left) => {
+    const widthToCurrentElement = getWidthToOption(index);
+    return Math.abs(widthToCurrentElement + left - width);
+  };
+  const getOptionDistFromCenter = (index, left) => {
+    const widthToCurrentElement = getWidthToOption(index);
+    return widthToCurrentElement + left - width / 2;
+  };
+
+  // get option relative to location
+  const getOptionAtCenter = (options, left) => {
+    let index = 0;
+    let distToCenter = Math.abs(getOptionDistFromCenter(0, left));
+    for (let i = 0; i < options.length; i++) {
+      let testDist = Math.abs(getOptionDistFromCenter(i, left));
+      if (testDist < distToCenter) {
+        distToCenter = testDist;
+        index = i;
+      }
+    }
+    return index;
+  };
+  const getOptionAtOffset = (options, offset) => {
+    const parentLeft = document.getElementById(id).getBoundingClientRect().x;
+    for (let i = 0; i < options.length; i++) {
+      const optionElem = document.getElementById(id + "_option_" + i);
+      const {
+        x,
+        width
+      } = optionElem.getBoundingClientRect();
+      const left = x - parentLeft;
+      if (left < offset && left + width > offset) {
+        return i;
+      }
+    }
+    return null;
+  };
+
+  // handle state of everything
+  const [state, dispatch, getState] = useEnhancedReducer((state, action) => ({
+    ...state,
+    mouse: mouseReducer(state.mouse, action)
+  }), {
+    mouse: {},
+    selectedIndex,
+    left: 0,
+    prevLeft: 0
+  });
+
+  // drag handling
+  useMouseHandler(id, {
+    dispatch,
+    getState
+  }, {
+    mouseMove: (state, dispatch, pixel) => {
+      if (!state.mouse.isLeftDown) return;
+      dispatch({
+        left: state.prevLeft + subtract(pixel, state.mouse.downPixel).x
+      });
+      if (onMouseMove) {
+        onMouseMove(pixel);
+      }
+    },
+    leftDown: (state, dispatch, pixel) => {
+      dispatch({
+        prevLeft: state.left
+      });
+      if (onMouseDown) {
+        onMouseDown(pixel);
+      }
+    },
+    leftUp: (state, dispatch, pixel) => {
+      const nextSelectedIndex = getOptionAtCenter(options, state.left);
+      // check for onClick:
+      const indexAtPixel = getOptionAtOffset(options, pixel.x);
+      if (indexAtPixel != null && indexAtPixel == state.selectedIndex && options[indexAtPixel].onClick && nextSelectedIndex == state.selectedIndex) {
+        options[indexAtPixel].onClick();
+      }
+      dispatch({
+        selectedIndex: nextSelectedIndex
+      });
+      if (onSelectIndex) {
+        onSelectIndex(nextSelectedIndex, options[nextSelectedIndex]);
+      }
+    },
+    mouseLeave: (state, dispatch) => {
+      if (!state.mouse.isLeftDown) return;
+      const selectedIndex = getOptionAtCenter(options, state.left);
+      dispatch({
+        type: 'SET_MOUSE_DOWN',
+        isLeft: true,
+        isDown: false
+      });
+      dispatch({
+        selectedIndex
+      });
+      if (onSelectIndex) {
+        onSelectIndex(selectedIndex, options[selectedIndex], true /* is cancel */);
+      }
+    }
+  }, [options], 12 // throttle rate for mouse move
+  );
+
+  // listening for selected element changing from outside
+  useEffect(() => {
+    dispatch({
+      selectedIndex
+    });
+  }, [selectedIndex]);
+
+  // centering selected element
+  useEffect(() => {
+    const widthToSelectedElement = getWidthToOption(state.selectedIndex);
+    dispatch({
+      left: width / 2 - widthToSelectedElement
+    });
+  }, [state.selectedIndex, !state.mouse.isLeftDown, width]);
+  return /*#__PURE__*/React.createElement("div", {
+    id: id,
+    style: {
+      position: 'relative',
+      width,
+      height,
+      overflow: 'hidden',
+      ...style
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap,
+      overflowX: 'hidden',
+      position: 'absolute',
+      left: state.left,
+      transition: 'left ' + (state.mouse.isLeftDown ? '0s' : '0.25s'),
+      top: 0,
+      pointerEvents: 'none'
+    }
+  }, options.map((o, i) => /*#__PURE__*/React.createElement(PickerOption, _extends({
+    key: id + "_option_" + o.label + "_" + i
+  }, o, {
+    width: width,
+    height: height,
+    color: o.color ?? defaultColor,
+    style: {
+      ...o.style,
+      ...(i == state.selectedIndex ? selectedStyle : deselectedStyle),
+      background: getOptionDistFromLeft(i, state.left) < getOptionWidth(i) ? `linear-gradient(to right, transparent 0%, ${o.color ?? defaultColor} ${300 - getOptionDistFromLeft(i, state.left) / getOptionWidth(i) * 300}%)` : getOptionDistFromRight(i, state.left) < getOptionWidth(i) ? `linear-gradient(to left, transparent 0%, ${o.color ?? defaultColor} ${300 - getOptionDistFromRight(i, state.left) / getOptionWidth(i) * 300}%)` : o.color ?? defaultColor // NO-OP
+    },
+
+    isSelected: i == state.selectedIndex,
+    sizeMult: !state.mouse.isLeftDown ? i == state.selectedIndex ? maxSize : minSize : Math.max(maxSize - Math.abs(getOptionDistFromCenter(i, state.left)) / (width / 2), minSize),
+    id: id + "_option_" + i
+  })))));
+};
+
+/**
+ * Props:
+ *  - isSelected: boolean
+ *  - onClick: () => void
+ *  - style: style overrides for outermost component
+ */
+const PickerOption = props => {
+  const {
+    style,
+    isSelected,
+    onClick,
+    label,
+    width: parentWidth,
+    height: parentHeight,
+    isCircular,
+    id,
+    sizeMult,
+    color: backgroundColor
+  } = props;
+  return /*#__PURE__*/React.createElement("div", {
+    id: id,
+    style: {
+      backgroundColor,
+      borderRadius: isCircular ? '50%' : 5,
+      // transition: 'background 0.5s',
+
+      height: sizeMult * parentHeight,
+      width: isCircular ? sizeMult * parentHeight : 'auto',
+      padding: isCircular ? 0 : '0 ' + parentHeight * 0.2,
+      textAlign: 'center',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+      pointerEvents: 'none',
+      userSelect: 'none',
+      ...style
+    }
+    // onClick={onClick}
+  }, label);
+};
+module.exports = SwipePicker;
+},{"./hooks":88,"bens_utils":97,"react":107}],84:[function(require,module,exports){
 const React = require('react');
 const Button = require('./Button.react');
 const Dropdown = require('./Dropdown.react');
@@ -7726,7 +8074,7 @@ function Table(props) {
         fontWeight: 'normal'
       }
     }, "Sort:", /*#__PURE__*/React.createElement(Button, {
-      label: "/\\\\",
+      label: "/\\",
       fontSize: 12,
       onClick: () => {
         setSortByColumn({
@@ -7799,7 +8147,7 @@ function Table(props) {
   }, props.hideNumRows ? null : /*#__PURE__*/React.createElement("span", null, "Total Rows: ", rows.length, " Rows Displayed: ", filteredRows.length), /*#__PURE__*/React.createElement("table", null, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, headers)), /*#__PURE__*/React.createElement("tbody", null, rowHTML)));
 }
 module.exports = Table;
-},{"./Button.react":67,"./Dropdown.react":73,"react":105}],84:[function(require,module,exports){
+},{"./Button.react":67,"./Dropdown.react":73,"react":107}],85:[function(require,module,exports){
 const React = require('react');
 
 /**
@@ -7847,7 +8195,7 @@ const TextArea = props => {
   });
 };
 module.exports = TextArea;
-},{"react":105}],85:[function(require,module,exports){
+},{"react":107}],86:[function(require,module,exports){
 const React = require('react');
 
 /**
@@ -7889,7 +8237,55 @@ const TextField = props => {
   });
 };
 module.exports = TextField;
-},{"react":105}],86:[function(require,module,exports){
+},{"react":107}],87:[function(require,module,exports){
+const React = require('react');
+const {
+  useEffect,
+  useState,
+  createContext
+} = React;
+const WindowSizeContext = createContext({});
+const WindowSizeProvider = ({
+  children
+}) => {
+  // detect orientation changes
+  const [orientation, setOrientation] = useState(window.innerHeight > window.innerWidth ? 'portrait' : 'landscape');
+  useEffect(() => {
+    const handleResize = () => {
+      let isPortrait = window.innerHeight > window.innerWidth;
+      setOrientation(isPortrait ? 'portrait' : 'landscape');
+    };
+    window.matchMedia("(orientation: portrait)").addEventListener("change", handleResize);
+  }, []);
+
+  // screen resize
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [windowHeight, setWindowHeight] = useState(window.innerHeight);
+  useEffect(() => {
+    function handleResize() {
+      setWindowWidth(window.innerWidth);
+      setWindowHeight(window.innerHeight);
+    }
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [orientation]);
+  const values = {
+    orientation,
+    windowWidth,
+    windowHeight
+  };
+  return /*#__PURE__*/React.createElement(WindowSizeContext.Provider, {
+    value: values
+  }, children);
+};
+module.exports = {
+  WindowSizeContext,
+  WindowSizeProvider
+};
+},{"react":107}],88:[function(require,module,exports){
 const React = require('react');
 const {
   throttle
@@ -8116,9 +8512,9 @@ const getUpDownLeftRight = (ev, noWASD) => {
 //  rightDown, rightUp,
 //  scroll,
 // };
-const useMouseHandler = (elementID, pseudoStore, handlers, dependencies) => {
+const useMouseHandler = (elementID, pseudoStore, handlers, dependencies, moveThrottle) => {
   useEffect(() => {
-    const mvFn = throttle(onMove, [elementID, pseudoStore, handlers], 12);
+    const mvFn = throttle(onMove, [elementID, pseudoStore, handlers], moveThrottle ?? 12);
     const touchMvFn = ev => {
       // if (ev.target.id != elementID) ev.preventDefault();
       onMove(elementID, pseudoStore, handlers, ev);
@@ -8380,7 +8776,7 @@ module.exports = {
   useCompare,
   usePrevious
 };
-},{"bens_utils":95,"react":105}],87:[function(require,module,exports){
+},{"bens_utils":97,"react":107}],89:[function(require,module,exports){
 // type Point = {
 //   x: number,
 //   y: number,
@@ -8465,7 +8861,7 @@ const plotReducer = (state, action) => {
 module.exports = {
   plotReducer
 };
-},{}],88:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 
 // const React = require('react');
 // const ReactDOM = require('react-dom');
@@ -8480,7 +8876,7 @@ module.exports = {
   Checkbox: require('./bin/Checkbox.react.js'),
   CheckerBackground: require('./bin/CheckerBackground.react.js'),
   Divider: require('./bin/Divider.react.js'),
-  DragArea: require('./bin/DragArea.react.js'),
+  DragArea: require('./bin/DragAreaDeprecated.react.js'),
   Dropdown: require('./bin/Dropdown.react.js'),
   Indicator: require('./bin/Indicator.react.js'),
   InfoCard: require('./bin/InfoCard.react.js'),
@@ -8492,15 +8888,17 @@ module.exports = {
   RadioPicker: require('./bin/RadioPicker.react.js'),
   Slider: require('./bin/Slider.react.js'),
   SpriteSheet: require('./bin/SpriteSheet.react.js'),
+  SwipePicker: require('./bin/SwipePicker.react.js'),
   Table: require('./bin/Table.react.js'),
   TextField: require('./bin/TextField.react.js'),
   TextArea: require('./bin/TextArea.react.js'),
+  ...require('./bin/WindowSizeContext.react.js'),
   ...require('./bin/hooks.js'),
 };
 
 
 
-},{"./bin/AudioWidget.react.js":65,"./bin/Board.react.js":66,"./bin/Button.react.js":67,"./bin/Canvas.react.js":68,"./bin/Checkbox.react.js":69,"./bin/CheckerBackground.react.js":70,"./bin/Divider.react.js":71,"./bin/DragArea.react.js":72,"./bin/Dropdown.react.js":73,"./bin/Indicator.react.js":74,"./bin/InfoCard.react.js":75,"./bin/Modal.react.js":76,"./bin/NumberField.react.js":77,"./bin/Plot.react.js":78,"./bin/QuitButton.react.js":79,"./bin/RadioPicker.react.js":80,"./bin/Slider.react.js":81,"./bin/SpriteSheet.react.js":82,"./bin/Table.react.js":83,"./bin/TextArea.react.js":84,"./bin/TextField.react.js":85,"./bin/hooks.js":86,"./bin/plotReducer.js":87}],89:[function(require,module,exports){
+},{"./bin/AudioWidget.react.js":65,"./bin/Board.react.js":66,"./bin/Button.react.js":67,"./bin/Canvas.react.js":68,"./bin/Checkbox.react.js":69,"./bin/CheckerBackground.react.js":70,"./bin/Divider.react.js":71,"./bin/DragAreaDeprecated.react.js":72,"./bin/Dropdown.react.js":73,"./bin/Indicator.react.js":74,"./bin/InfoCard.react.js":75,"./bin/Modal.react.js":76,"./bin/NumberField.react.js":77,"./bin/Plot.react.js":78,"./bin/QuitButton.react.js":79,"./bin/RadioPicker.react.js":80,"./bin/Slider.react.js":81,"./bin/SpriteSheet.react.js":82,"./bin/SwipePicker.react.js":83,"./bin/Table.react.js":84,"./bin/TextArea.react.js":85,"./bin/TextField.react.js":86,"./bin/WindowSizeContext.react.js":87,"./bin/hooks.js":88,"./bin/plotReducer.js":89}],91:[function(require,module,exports){
 'use strict';
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -8664,7 +9062,7 @@ module.exports = {
   getEntityPositions: getEntityPositions,
   entityInsideGrid: entityInsideGrid
 };
-},{"./helpers":90,"./math":91,"./vectors":94}],90:[function(require,module,exports){
+},{"./helpers":92,"./math":93,"./vectors":96}],92:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -8828,7 +9226,7 @@ module.exports = {
   deepCopy: deepCopy,
   throttle: throttle, debounce: debounce
 };
-},{"./vectors":94}],91:[function(require,module,exports){
+},{"./vectors":96}],93:[function(require,module,exports){
 "use strict";
 
 var clamp = function clamp(val, min, max) {
@@ -8873,7 +9271,7 @@ module.exports = {
   clamp: clamp,
   subtractWithDeficit: subtractWithDeficit
 };
-},{}],92:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 'use strict';
 
 function isIpad() {
@@ -8904,7 +9302,7 @@ module.exports = {
   isMobile: isMobile,
   isPhone: isPhone
 };
-},{}],93:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 "use strict";
 
 var floor = Math.floor,
@@ -8959,7 +9357,7 @@ module.exports = {
   oneOf: oneOf,
   weightedOneOf: weightedOneOf
 };
-},{}],94:[function(require,module,exports){
+},{}],96:[function(require,module,exports){
 "use strict";
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
@@ -9158,7 +9556,7 @@ module.exports = {
   rotate: rotate,
   abs: abs
 };
-},{}],95:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 
 module.exports = {
   vectors: require('./bin/vectors'),
@@ -9169,7 +9567,7 @@ module.exports = {
   math: require('./bin/math'),
 }
 
-},{"./bin/gridHelpers":89,"./bin/helpers":90,"./bin/math":91,"./bin/platform":92,"./bin/stochastic":93,"./bin/vectors":94}],96:[function(require,module,exports){
+},{"./bin/gridHelpers":91,"./bin/helpers":92,"./bin/math":93,"./bin/platform":94,"./bin/stochastic":95,"./bin/vectors":96}],98:[function(require,module,exports){
 (function (Buffer){(function (){
 /*!
  * The buffer module from node.js, for the browser.
@@ -10950,7 +11348,7 @@ function numberIsNaN (obj) {
 }
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"base64-js":64,"buffer":96,"ieee754":97}],97:[function(require,module,exports){
+},{"base64-js":64,"buffer":98,"ieee754":99}],99:[function(require,module,exports){
 /*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
@@ -11037,7 +11435,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],98:[function(require,module,exports){
+},{}],100:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -11223,7 +11621,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],99:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 (function (process){(function (){
 /**
  * @license React
@@ -16178,7 +16576,7 @@ if(/^(https?|file):$/.test(protocol)){// eslint-disable-next-line react-internal
 console.info('%cDownload the React DevTools '+'for a better development experience: '+'https://reactjs.org/link/react-devtools'+(protocol==='file:'?'\nYou might need to use a local HTTP server (instead of file://): '+'https://reactjs.org/link/react-devtools-faq':''),'font-weight:bold');}}}}exports.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED=Internals;exports.createPortal=createPortal$1;exports.createRoot=createRoot$1;exports.findDOMNode=findDOMNode;exports.flushSync=flushSync$1;exports.hydrate=hydrate;exports.hydrateRoot=hydrateRoot$1;exports.render=render;exports.unmountComponentAtNode=unmountComponentAtNode;exports.unstable_batchedUpdates=batchedUpdates$1;exports.unstable_renderSubtreeIntoContainer=renderSubtreeIntoContainer;exports.version=ReactVersion;/* global __REACT_DEVTOOLS_GLOBAL_HOOK__ */if(typeof __REACT_DEVTOOLS_GLOBAL_HOOK__!=='undefined'&&typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop==='function'){__REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop(new Error());}})();}
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":98,"react":105,"scheduler":108}],100:[function(require,module,exports){
+},{"_process":100,"react":107,"scheduler":110}],102:[function(require,module,exports){
 /**
  * @license React
  * react-dom.production.min.js
@@ -16503,7 +16901,7 @@ exports.hydrateRoot=function(a,b,c){if(!ol(a))throw Error(p(405));var d=null!=c&
 e);return new nl(b)};exports.render=function(a,b,c){if(!pl(b))throw Error(p(200));return sl(null,a,b,!1,c)};exports.unmountComponentAtNode=function(a){if(!pl(a))throw Error(p(40));return a._reactRootContainer?(Sk(function(){sl(null,null,a,!1,function(){a._reactRootContainer=null;a[uf]=null})}),!0):!1};exports.unstable_batchedUpdates=Rk;
 exports.unstable_renderSubtreeIntoContainer=function(a,b,c,d){if(!pl(c))throw Error(p(200));if(null==a||void 0===a._reactInternals)throw Error(p(38));return sl(a,b,c,!1,d)};exports.version="18.2.0-next-9e3b772b8-20220608";
 
-},{"react":105,"scheduler":108}],101:[function(require,module,exports){
+},{"react":107,"scheduler":110}],103:[function(require,module,exports){
 (function (process){(function (){
 'use strict';
 
@@ -16532,7 +16930,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":98,"react-dom":102}],102:[function(require,module,exports){
+},{"_process":100,"react-dom":104}],104:[function(require,module,exports){
 (function (process){(function (){
 'use strict';
 
@@ -16574,7 +16972,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this)}).call(this,require('_process'))
-},{"./cjs/react-dom.development.js":99,"./cjs/react-dom.production.min.js":100,"_process":98}],103:[function(require,module,exports){
+},{"./cjs/react-dom.development.js":101,"./cjs/react-dom.production.min.js":102,"_process":100}],105:[function(require,module,exports){
 (function (process){(function (){
 /**
  * @license React
@@ -18979,7 +19377,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":98}],104:[function(require,module,exports){
+},{"_process":100}],106:[function(require,module,exports){
 /**
  * @license React
  * react.production.min.js
@@ -19007,7 +19405,7 @@ exports.useCallback=function(a,b){return U.current.useCallback(a,b)};exports.use
 exports.useInsertionEffect=function(a,b){return U.current.useInsertionEffect(a,b)};exports.useLayoutEffect=function(a,b){return U.current.useLayoutEffect(a,b)};exports.useMemo=function(a,b){return U.current.useMemo(a,b)};exports.useReducer=function(a,b,e){return U.current.useReducer(a,b,e)};exports.useRef=function(a){return U.current.useRef(a)};exports.useState=function(a){return U.current.useState(a)};exports.useSyncExternalStore=function(a,b,e){return U.current.useSyncExternalStore(a,b,e)};
 exports.useTransition=function(){return U.current.useTransition()};exports.version="18.2.0";
 
-},{}],105:[function(require,module,exports){
+},{}],107:[function(require,module,exports){
 (function (process){(function (){
 'use strict';
 
@@ -19018,7 +19416,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this)}).call(this,require('_process'))
-},{"./cjs/react.development.js":103,"./cjs/react.production.min.js":104,"_process":98}],106:[function(require,module,exports){
+},{"./cjs/react.development.js":105,"./cjs/react.production.min.js":106,"_process":100}],108:[function(require,module,exports){
 (function (process,setImmediate){(function (){
 /**
  * @license React
@@ -19656,7 +20054,7 @@ if (
 }
 
 }).call(this)}).call(this,require('_process'),require("timers").setImmediate)
-},{"_process":98,"timers":109}],107:[function(require,module,exports){
+},{"_process":100,"timers":111}],109:[function(require,module,exports){
 (function (setImmediate){(function (){
 /**
  * @license React
@@ -19679,7 +20077,7 @@ exports.unstable_scheduleCallback=function(a,b,c){var d=exports.unstable_now();"
 exports.unstable_shouldYield=M;exports.unstable_wrapCallback=function(a){var b=y;return function(){var c=y;y=b;try{return a.apply(this,arguments)}finally{y=c}}};
 
 }).call(this)}).call(this,require("timers").setImmediate)
-},{"timers":109}],108:[function(require,module,exports){
+},{"timers":111}],110:[function(require,module,exports){
 (function (process){(function (){
 'use strict';
 
@@ -19690,7 +20088,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this)}).call(this,require('_process'))
-},{"./cjs/scheduler.development.js":106,"./cjs/scheduler.production.min.js":107,"_process":98}],109:[function(require,module,exports){
+},{"./cjs/scheduler.development.js":108,"./cjs/scheduler.production.min.js":109,"_process":100}],111:[function(require,module,exports){
 (function (setImmediate,clearImmediate){(function (){
 var nextTick = require('process/browser.js').nextTick;
 var apply = Function.prototype.apply;
@@ -19769,4 +20167,4 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
   delete immediateIds[id];
 };
 }).call(this)}).call(this,require("timers").setImmediate,require("timers").clearImmediate)
-},{"process/browser.js":98,"timers":109}]},{},[13]);
+},{"process/browser.js":100,"timers":111}]},{},[13]);

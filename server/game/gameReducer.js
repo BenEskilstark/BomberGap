@@ -80,6 +80,11 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
       }
       game.entities[building.id] = building;
 
+      // update stats:
+      game.stats[clientID][buildingType].push(
+        {x: game.time, y: getNumBuilding(game, clientID, buildingType)},
+      );
+
       break;
     }
     case 'UPGRADE_BUILDING': {
