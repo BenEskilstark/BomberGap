@@ -925,7 +925,7 @@ const BuildingUpgrade = props => {
   if (building.isMega) upgradeLabel = "MEGA-" + building.type;
   if (building.isHardened) upgradeLabel = "ANTI-AIR-" + building.type;
   let cost = game.config.megaCost;
-  if (build.type == 'CITY') {
+  if (building.type == 'CITY') {
     cost = game.config.megaCityCost;
   }
   return /*#__PURE__*/React.createElement("div", {
