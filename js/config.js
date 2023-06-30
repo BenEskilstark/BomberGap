@@ -29,9 +29,10 @@ const config = {
   genCost: [0, 0, 15000, 60000, 70000], // cost per generation
   airbaseCost: 8000,
 
+  megaCityCost: 12000,
   megaCost: 8000,
   megaMultiplier: 2, // NOTE: this doesn't affect city income or lab research
-  hardenedCost: 4000,
+  hardenedCost: 6000,
   hardenedGen: 3,
 
   // stealthVisionReduction: 0.3,
@@ -43,12 +44,12 @@ const config = {
     {
       // gen1
       'B-47': {
-        name: 'B-47', nickname: 'Stratojet', cost: 700,
+        name: 'B-47', nickname: 'Stratojet', cost: 1200,
         gen: 1, fuel: 1000, vision: 30, speed: 0.7, ammo: 1,
         isBomber: true, isNuclear: true,
       },
       'F-86': {
-        name: 'F-86', nickname: 'Sabre', cost: 500,
+        name: 'F-86', nickname: 'Sabre', cost: 750,
         gen: 1, fuel: 500, vision: 40, speed: 0.9, ammo: 1,
         isFighter: true,
       },
@@ -61,29 +62,29 @@ const config = {
         isBomber: true, isNuclear: true,
       },
       'F-100': {
-        name: 'F-100', nickname: 'Super Sabre', cost: 1000,
+        name: 'F-100', nickname: 'Super Sabre', cost: 2000,
         gen: 2, fuel: 600, vision: 40, speed: 1.2, ammo: 1,
         isFighter: true, isBomber: true,
       },
       'U-2': {
         name: 'U-2', nickname: 'Dragon', cost: 600,
-        gen: 2, fuel: 2400, vision: 75, speed: 0.75, ammo: 0,
+        gen: 2, fuel: 2400, vision: 70, speed: 0.75, ammo: 0,
         isRecon: true,
       },
 
       // gen3
       'B-58': {
         name: 'B-58', nickname: 'Hustler', cost: 3500,
-        gen: 3, fuel: 1000, vision: 45, speed: 2.5, ammo: 1,
+        gen: 3, fuel: 950, vision: 45, speed: 2.5, ammo: 1,
         isBomber: true, isNuclear: true,
       },
       'F-4': {
         name: 'F-4', nickname: 'Phantom', cost: 3000,
         gen: 3, fuel: 1000, vision: 50, speed: 2.2, ammo: 2,
-        isFighter: true, isBomber: true,
+        isFighter: true, // isBomber: true,
       },
       'SR-71': {
-        name: 'SR-71', nickname: 'Blackbird', cost: 3000,
+        name: 'SR-71', nickname: 'Blackbird', cost: 4000,
         gen: 3, fuel: 1800, vision: 80, speed: 3.3, ammo: 0,
         isRecon: true,
       },
@@ -91,7 +92,7 @@ const config = {
       // gen4
       'XB-70': {
         name: 'XB-70', nickname: 'Valkyrie', cost: 5000,
-        gen: 4, fuel: 1600, vision: 40, speed: 3.1, ammo: 1,
+        gen: 4, fuel: 1600, vision: 45, speed: 3.1, ammo: 1,
         isBomber: true, isNuclear: true,
       },
       'XF-108': {
@@ -116,7 +117,7 @@ const config = {
       // gen1
       'IL-28': {
         name: 'IL-28', nickname: 'Beagle', cost: 500,
-        gen: 1, fuel: 900, vision: 30, speed: 0.7, ammo: 1,
+        gen: 1, fuel: 1000, vision: 30, speed: 0.8, ammo: 1,
         isBomber: true, isDogfighter: true,
       },
       'MIG-15': {
@@ -126,13 +127,13 @@ const config = {
       },
       'YAK-25': {
         name: 'YAK-25', nickname: 'Yellow', cost: 400,
-        gen: 1, fuel: 800, vision: 60, speed: 0.8, ammo: 0,
+        gen: 1, fuel: 800, vision: 60, speed: 0.9, ammo: 0,
         isRecon: true,
       },
 
       // gen2
       'TU-16': {
-        name: 'TU-16', nickname: 'Badger', cost: 1700,
+        name: 'TU-16', nickname: 'Badger', cost: 1600,
         gen: 2, fuel: 1800, vision: 40, speed: 0.9, ammo: 2,
         isBomber: true, isDogfighter: true, isNuclear: true,
       },
@@ -149,15 +150,15 @@ const config = {
 
       // gen3
       'TU-160': {
-        name: 'TU-160', nickname: 'White Swan', cost: 3200,
+        name: 'TU-160', nickname: 'White Swan', cost: 2500,
         gen: 3, fuel: 2000, vision: 55, speed: 2.1, ammo: 1,
         planeCapacity: 5, planeTypes: ['KH-55', 'KH-101', 'KH-50'],
         isBomber: true, isNuclear: true, isDogfighter: true,
       },
       'KH-55': {
-        name: 'KH-55', nickname: 'AA Cruise Missile', cost: 750,
+        name: 'KH-55', nickname: 'AA Cruise Missile', cost: 500,
         gen: 3, fuel: 500, vision: 40, speed: 3.2, ammo: 1,
-        isDrone: true, isFighter: true,
+        isDrone: true, isFighter: true, isBomber: true,
       },
       // 'TU-22M': {
       //   name: 'TU-22M', nickname: 'Backfire', cost: 3000,
@@ -177,8 +178,8 @@ const config = {
         isFighter: true,
       },
       'KH-101': {
-        name: 'KH-101', nickname: 'Nuclear Cruise Missile', cost: 1500,
-        gen: 4, fuel: 500, vision: 40, speed: 2.3, ammo: 1,
+        name: 'KH-101', nickname: 'Nuclear Cruise Missile', cost: 500,
+        gen: 4, fuel: 500, vision: 40, speed: 2.8, ammo: 1,
         isDrone: true, isNuclear: true, isBomber: true,
       },
 

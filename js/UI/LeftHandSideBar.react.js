@@ -431,6 +431,11 @@ const BuildingUpgrade = (props) => {
   if (building.isMega) upgradeLabel = "MEGA-" + building.type;
   if (building.isHardened) upgradeLabel = "ANTI-AIR-" + building.type;
 
+  let cost = game.config.megaCost;
+  if (build.type == 'CITY') {
+    cost = game.config.megaCityCost;
+  }
+
   return (
     <div
       style={{
@@ -440,8 +445,8 @@ const BuildingUpgrade = (props) => {
       <div>{upgradeLabel}</div>
       <Button
         style={{display: 'block'}}
-        label={`Mega Upgrade ($${game.config.megaCost / 1000 }k)`}
-        disabled={isUpgraded || game.config.megaCost > player.money}
+        label={`Mega Upgrade ($${cost / 1000 }k)`}
+        disabled={isUpgraded || cost > player.money}
         onClick={() => {
           dispatchToServer({type: 'UPGRADE_BUILDING',
             buildingID: building.id, upgradeType: 'isMega'

@@ -924,14 +924,18 @@ const BuildingUpgrade = props => {
   let upgradeLabel = building.type;
   if (building.isMega) upgradeLabel = "MEGA-" + building.type;
   if (building.isHardened) upgradeLabel = "ANTI-AIR-" + building.type;
+  let cost = game.config.megaCost;
+  if (build.type == 'CITY') {
+    cost = game.config.megaCityCost;
+  }
   return /*#__PURE__*/React.createElement("div", {
     style: {}
   }, /*#__PURE__*/React.createElement("div", null, upgradeLabel), /*#__PURE__*/React.createElement(Button, {
     style: {
       display: 'block'
     },
-    label: `Mega Upgrade ($${game.config.megaCost / 1000}k)`,
-    disabled: isUpgraded || game.config.megaCost > player.money,
+    label: `Mega Upgrade ($${cost / 1000}k)`,
+    disabled: isUpgraded || cost > player.money,
     onClick: () => {
       dispatchToServer({
         type: 'UPGRADE_BUILDING',
@@ -1441,10 +1445,11 @@ const config = {
   genCost: [0, 0, 15000, 60000, 70000],
   // cost per generation
   airbaseCost: 8000,
+  megaCityCost: 12000,
   megaCost: 8000,
   megaMultiplier: 2,
   // NOTE: this doesn't affect city income or lab research
-  hardenedCost: 4000,
+  hardenedCost: 6000,
   hardenedGen: 3,
   // stealthVisionReduction: 0.3,
   stealthVisionRadius: 25,
@@ -1456,7 +1461,7 @@ const config = {
     'B-47': {
       name: 'B-47',
       nickname: 'Stratojet',
-      cost: 700,
+      cost: 1200,
       gen: 1,
       fuel: 1000,
       vision: 30,
@@ -1468,7 +1473,7 @@ const config = {
     'F-86': {
       name: 'F-86',
       nickname: 'Sabre',
-      cost: 500,
+      cost: 750,
       gen: 1,
       fuel: 500,
       vision: 40,
@@ -1494,7 +1499,7 @@ const config = {
     'F-100': {
       name: 'F-100',
       nickname: 'Super Sabre',
-      cost: 1000,
+      cost: 2000,
       gen: 2,
       fuel: 600,
       vision: 40,
@@ -1509,7 +1514,7 @@ const config = {
       cost: 600,
       gen: 2,
       fuel: 2400,
-      vision: 75,
+      vision: 70,
       speed: 0.75,
       ammo: 0,
       isRecon: true
@@ -1520,7 +1525,7 @@ const config = {
       nickname: 'Hustler',
       cost: 3500,
       gen: 3,
-      fuel: 1000,
+      fuel: 950,
       vision: 45,
       speed: 2.5,
       ammo: 1,
@@ -1536,13 +1541,13 @@ const config = {
       vision: 50,
       speed: 2.2,
       ammo: 2,
-      isFighter: true,
-      isBomber: true
+      isFighter: true // isBomber: true,
     },
+
     'SR-71': {
       name: 'SR-71',
       nickname: 'Blackbird',
-      cost: 3000,
+      cost: 4000,
       gen: 3,
       fuel: 1800,
       vision: 80,
@@ -1557,7 +1562,7 @@ const config = {
       cost: 5000,
       gen: 4,
       fuel: 1600,
-      vision: 40,
+      vision: 45,
       speed: 3.1,
       ammo: 1,
       isBomber: true,
@@ -1593,9 +1598,9 @@ const config = {
       nickname: 'Beagle',
       cost: 500,
       gen: 1,
-      fuel: 900,
+      fuel: 1000,
       vision: 30,
-      speed: 0.7,
+      speed: 0.8,
       ammo: 1,
       isBomber: true,
       isDogfighter: true
@@ -1618,7 +1623,7 @@ const config = {
       gen: 1,
       fuel: 800,
       vision: 60,
-      speed: 0.8,
+      speed: 0.9,
       ammo: 0,
       isRecon: true
     },
@@ -1626,7 +1631,7 @@ const config = {
     'TU-16': {
       name: 'TU-16',
       nickname: 'Badger',
-      cost: 1700,
+      cost: 1600,
       gen: 2,
       fuel: 1800,
       vision: 40,
@@ -1663,7 +1668,7 @@ const config = {
     'TU-160': {
       name: 'TU-160',
       nickname: 'White Swan',
-      cost: 3200,
+      cost: 2500,
       gen: 3,
       fuel: 2000,
       vision: 55,
@@ -1678,14 +1683,15 @@ const config = {
     'KH-55': {
       name: 'KH-55',
       nickname: 'AA Cruise Missile',
-      cost: 750,
+      cost: 500,
       gen: 3,
       fuel: 500,
       vision: 40,
       speed: 3.2,
       ammo: 1,
       isDrone: true,
-      isFighter: true
+      isFighter: true,
+      isBomber: true
     },
     // 'TU-22M': {
     //   name: 'TU-22M', nickname: 'Backfire', cost: 3000,
@@ -1713,11 +1719,11 @@ const config = {
     'KH-101': {
       name: 'KH-101',
       nickname: 'Nuclear Cruise Missile',
-      cost: 1500,
+      cost: 500,
       gen: 4,
       fuel: 500,
       vision: 40,
-      speed: 2.3,
+      speed: 2.8,
       ammo: 1,
       isDrone: true,
       isNuclear: true,

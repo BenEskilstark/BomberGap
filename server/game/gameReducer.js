@@ -89,15 +89,19 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
     }
     case 'UPGRADE_BUILDING': {
       const {buildingID, upgradeType} = action;
+      const building = game.entities[buildingID];
+      if (!building) return;
       let cost = session.config.megaCost;
+
       if (upgradeType == 'isHardened') {
         cost = session.config.hardenedCost;
+      } else if (building.type == 'CITY') {
+        cost = session.config.megaCityCost;
       }
+
       if (cost > game.players[clientID].money) return;
       game.players[clientID].money -= cost;
 
-      const building = game.entities[buildingID];
-      if (!building) return;
       if (building.isMega || building.isHardened) return;
 
       building[upgradeType] = true;
