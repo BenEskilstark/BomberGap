@@ -102,7 +102,7 @@ const PlotStack = props => {
     selectedStat
   } = props;
   let yMax = 0;
-  let colors = ['blue', 'red'];
+  let colors = ['red', 'blue'];
   let i = 0;
   for (const clientID in stats) {
     const points = stats[clientID][selectedStat];
@@ -1370,7 +1370,7 @@ const RightHandSideBar = props => {
       flexDirection: 'column',
       gap: 20,
       top: 0,
-      left: window.innerWidth - 255,
+      left: window.innerWidth - 300,
       margin: 4,
       minWidth: 250,
       color: '#6ce989'
@@ -1442,7 +1442,7 @@ const config = {
   labCost: 5000,
   researchRate: 50,
   // money spent per second per lab
-  genCost: [0, 0, 15000, 60000, 70000],
+  genCost: [0, 0, 15000, 50000, 60000],
   // cost per generation
   airbaseCost: 8000,
   megaCityCost: 12000,
@@ -1541,9 +1541,9 @@ const config = {
       vision: 50,
       speed: 2.2,
       ammo: 2,
-      isFighter: true // isBomber: true,
+      isFighter: true,
+      isBomber: true
     },
-
     'SR-71': {
       name: 'SR-71',
       nickname: 'Blackbird',
@@ -1559,7 +1559,7 @@ const config = {
     'XB-70': {
       name: 'XB-70',
       nickname: 'Valkyrie',
-      cost: 5000,
+      cost: 4500,
       gen: 4,
       fuel: 1600,
       vision: 45,
@@ -1571,7 +1571,7 @@ const config = {
     'XF-108': {
       name: 'XF-108',
       nickname: 'Rapier',
-      cost: 4000,
+      cost: 3500,
       gen: 4,
       fuel: 1200,
       vision: 50,
@@ -1596,7 +1596,7 @@ const config = {
     'IL-28': {
       name: 'IL-28',
       nickname: 'Beagle',
-      cost: 500,
+      cost: 600,
       gen: 1,
       fuel: 1000,
       vision: 30,
@@ -1631,11 +1631,11 @@ const config = {
     'TU-16': {
       name: 'TU-16',
       nickname: 'Badger',
-      cost: 1600,
+      cost: 1700,
       gen: 2,
       fuel: 1800,
       vision: 40,
-      speed: 0.9,
+      speed: 0.8,
       ammo: 2,
       isBomber: true,
       isDogfighter: true,
@@ -1690,9 +1690,9 @@ const config = {
       speed: 3.2,
       ammo: 1,
       isDrone: true,
-      isFighter: true,
-      isBomber: true
+      isFighter: true // isBomber: true,
     },
+
     // 'TU-22M': {
     //   name: 'TU-22M', nickname: 'Backfire', cost: 3000,
     //   gen: 3, fuel: 1800, speed: 1.8, ammo: 2, vision: 45,

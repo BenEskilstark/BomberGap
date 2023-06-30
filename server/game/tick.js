@@ -10,7 +10,7 @@ const {
   getEntitiesByPlayer, getNearestAirbase, getOtherClientID,
   getNumBuilding, getEntitiesByType,
   getPlaneDesignsByGen, getInterceptPos,
-  numTimesTargeted, getTotalAirforceValue,
+  numTimesTargeted, getTotalAirforceValue, getIncome,
 } = require('./selectors');
 const {makePlane, makeExplosion} = require('./state');
 
@@ -273,9 +273,15 @@ const moveAndFight = (session, game, socketClients) => {
 
         // update stats based on kill type
         if (targetEntity.isBuilding) {
-          game.stats[targetEntity.clientID][targetEntity.type].push({
-            x: game.time, y: getNumBuilding(game, targetEntity.clientID, targetEntity.type),
-          });
+          if (targetEntity.type == 'CITY') {
+            game.stats[targetEntity.clientID].CITY.push({
+              x: game.time, y: getIncome(game, targetEntity.clientID),
+            });
+          } else {
+            game.stats[targetEntity.clientID][targetEntity.type].push({
+              x: game.time, y: getNumBuilding(game, targetEntity.clientID, targetEntity.type),
+            });
+          }
         } else {
           game.stats[targetEntity.clientID].airforceValue.push({
             x: game.time, y: getTotalAirforceValue(game, targetEntity.clientID),

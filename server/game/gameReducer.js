@@ -10,6 +10,7 @@ const {
 const {
   getEntitiesByPlayer, getNearestAirbase, getOtherClientID,
   getPlaneDesignsUpToGen, getEntitiesByType, getNumBuilding,
+  getIncome,
 } = require('./selectors');
 const {throwDart} = require('./utils');
 const {tick, doGameOver} = require('./tick');
@@ -81,9 +82,15 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
       game.entities[building.id] = building;
 
       // update stats:
-      game.stats[clientID][buildingType].push(
-        {x: game.time, y: getNumBuilding(game, clientID, buildingType)},
-      );
+      if (buildingType == 'CITY') {
+        game.stats[clientID].CITY.push(
+          {x: game.time, y: getIncome(game, clientID)},
+        );
+      } else {
+        game.stats[clientID][buildingType].push(
+          {x: game.time, y: getNumBuilding(game, clientID, buildingType)},
+        );
+      }
 
       break;
     }
@@ -107,6 +114,13 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
       building[upgradeType] = true;
       if (upgradeType == 'isHardened') {
         building.gen = session.config.hardenedGen;
+      }
+
+      // update stats:
+      if (building.type == 'CITY') {
+        game.stats[clientID].CITY.push(
+          {x: game.time, y: getIncome(game, clientID)},
+        );
       }
 
       break;

@@ -56,7 +56,7 @@ const PlotStack = (props) => {
   const {stats, time, selectedStat} = props;
 
   let yMax = 0;
-  let colors = ['blue', 'red'];
+  let colors = ['red', 'blue'];
   let i = 0;
   for (const clientID in stats) {
     const points = stats[clientID][selectedStat];

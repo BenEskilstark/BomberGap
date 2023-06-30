@@ -26,7 +26,7 @@ const config = {
   productionRate: 50, // money spent per second per factory
   labCost: 5000,
   researchRate: 50, // money spent per second per lab
-  genCost: [0, 0, 15000, 60000, 70000], // cost per generation
+  genCost: [0, 0, 15000, 50000, 60000], // cost per generation
   airbaseCost: 8000,
 
   megaCityCost: 12000,
@@ -81,7 +81,7 @@ const config = {
       'F-4': {
         name: 'F-4', nickname: 'Phantom', cost: 3000,
         gen: 3, fuel: 1000, vision: 50, speed: 2.2, ammo: 2,
-        isFighter: true, // isBomber: true,
+        isFighter: true, isBomber: true,
       },
       'SR-71': {
         name: 'SR-71', nickname: 'Blackbird', cost: 4000,
@@ -91,12 +91,12 @@ const config = {
 
       // gen4
       'XB-70': {
-        name: 'XB-70', nickname: 'Valkyrie', cost: 5000,
+        name: 'XB-70', nickname: 'Valkyrie', cost: 4500,
         gen: 4, fuel: 1600, vision: 45, speed: 3.1, ammo: 1,
         isBomber: true, isNuclear: true,
       },
       'XF-108': {
-        name: 'XF-108', nickname: 'Rapier', cost: 4000,
+        name: 'XF-108', nickname: 'Rapier', cost: 3500,
         gen: 4, fuel: 1200, vision: 50, speed: 3.1, ammo: 1,
         isFighter: true,
       },
@@ -116,7 +116,7 @@ const config = {
     {
       // gen1
       'IL-28': {
-        name: 'IL-28', nickname: 'Beagle', cost: 500,
+        name: 'IL-28', nickname: 'Beagle', cost: 600,
         gen: 1, fuel: 1000, vision: 30, speed: 0.8, ammo: 1,
         isBomber: true, isDogfighter: true,
       },
@@ -133,8 +133,8 @@ const config = {
 
       // gen2
       'TU-16': {
-        name: 'TU-16', nickname: 'Badger', cost: 1600,
-        gen: 2, fuel: 1800, vision: 40, speed: 0.9, ammo: 2,
+        name: 'TU-16', nickname: 'Badger', cost: 1700,
+        gen: 2, fuel: 1800, vision: 40, speed: 0.8, ammo: 2,
         isBomber: true, isDogfighter: true, isNuclear: true,
       },
       'MIG-21': {
@@ -158,7 +158,7 @@ const config = {
       'KH-55': {
         name: 'KH-55', nickname: 'AA Cruise Missile', cost: 500,
         gen: 3, fuel: 500, vision: 40, speed: 3.2, ammo: 1,
-        isDrone: true, isFighter: true, isBomber: true,
+        isDrone: true, isFighter: true, // isBomber: true,
       },
       // 'TU-22M': {
       //   name: 'TU-22M', nickname: 'Backfire', cost: 3000,

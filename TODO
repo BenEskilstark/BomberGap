@@ -1,6 +1,10 @@
 
 
   - playtest:
+    - graph:
+      - track income, not cities
+
+
     - when you kill all cities it says you killed airbases
     - could have defensive building gen scale with player gen
     - default selection for B52 (and hotkey)

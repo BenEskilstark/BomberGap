@@ -64,6 +64,10 @@ const getNumBuilding = (game, clientID, buildingType, upgradeType) => {
   return numBuilding;
 }
 
+const getIncome = (game, clientID) => {
+  return getNumBuilding(game, clientID, 'CITY') + getNumBuilding(game, clientID, 'CITY', 'isMega');
+}
+
 const getOtherClientID = (session, clientID) => {
   for (const id of session.clients) {
     if (id != clientID) return id;
@@ -197,4 +201,5 @@ module.exports = {
   getInterceptPos,
   numTimesTargeted,
   getTotalAirforceValue,
+  getIncome,
 };
