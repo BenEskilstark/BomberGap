@@ -30,10 +30,10 @@ const LeftHandSideBar = (props) => {
         display: 'flex',
         flexDirection: 'column',
         gap: 20,
+        height: '100%',
         top: 0,
         left: 0,
-        margin: 4,
-        padding: 8,
+        padding: 12,
         minWidth: 150,
         color: '#6ce989',
       }}
@@ -41,6 +41,17 @@ const LeftHandSideBar = (props) => {
       <BuildingInfo {...props} />
       <PlanesSelected {...props} />
       <BuildingsSelected {...props} />
+
+      <Button
+        label="Resign"
+        style={{
+          position: 'absolute',
+          bottom: 12,
+        }}
+        onClick={() => {
+          dispatchToServer({type: 'RESIGN'});
+        }}
+      />
     </div>
   );
 };

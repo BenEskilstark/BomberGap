@@ -1,35 +1,27 @@
 
 
-  - playtest:
-    - graph:
-      - track income, not cities
+  - graph:
+    - track changes to gen research
+    - bomber drone is selectable in gen 3 and breaks graph
+    - pass nationalityIndex along with stats
 
-
-    - when you kill all cities it says you killed airbases
-    - could have defensive building gen scale with player gen
+  - more ergonomic hotkeys
     - default selection for B52 (and hotkey)
-    - allow resignation
 
+  - when you kill all cities it says you killed airbases
 
   - lobby
-    - editing config from lobby for game speed, starting resources, buildings, gen
     - don't allow creating another game unless you leave your current
+    - allow selecting nationality
 
-
-  - refactor:
-    - selectors are copypastad between server and client
-    - getPlaneDesignsByGen should take in game (on both server and client)
 
 
 
   - CPU opponent:
     - UI for selecting AI opponent
     - server state for AI opponent
-    - randomized AI plane designs and deployments
     - randomized AI daemon for launching planes
 
 
-  - maybe features
-    - planes have to refit before they can launch again
-    - try out rollback netcode
+  - try out rollback netcode
 

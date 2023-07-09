@@ -546,14 +546,25 @@ const LeftHandSideBar = props => {
       display: 'flex',
       flexDirection: 'column',
       gap: 20,
+      height: '100%',
       top: 0,
       left: 0,
-      margin: 4,
-      padding: 8,
+      padding: 12,
       minWidth: 150,
       color: '#6ce989'
     }
-  }, /*#__PURE__*/React.createElement(BuildingInfo, props), /*#__PURE__*/React.createElement(PlanesSelected, props), /*#__PURE__*/React.createElement(BuildingsSelected, props));
+  }, /*#__PURE__*/React.createElement(BuildingInfo, props), /*#__PURE__*/React.createElement(PlanesSelected, props), /*#__PURE__*/React.createElement(BuildingsSelected, props), /*#__PURE__*/React.createElement(Button, {
+    label: "Resign",
+    style: {
+      position: 'absolute',
+      bottom: 0
+    },
+    onClick: () => {
+      dispatchToServer({
+        type: 'RESIGN'
+      });
+    }
+  }));
 };
 const BuildingInfo = props => {
   var _player$researchProgr;
@@ -1729,8 +1740,81 @@ const config = {
       isNuclear: true,
       isBomber: true
     }
+  },
+  // EU
+  {
+    // gen1
+    'recon1': {
+      name: 'recon1',
+      cost: 1000,
+      gen: 1,
+      fuel: 1400,
+      speed: 0.7,
+      vision: 60,
+      ammo: 1,
+      isRecon: true,
+      isDogfighter: true
+    },
+    'bomber1': {
+      name: 'bomber1',
+      cost: 1200,
+      gen: 1,
+      fuel: 1000,
+      vision: 30,
+      speed: 0.7,
+      ammo: 1,
+      isBomber: true,
+      isNuclear: true
+    },
+    'fighter1': {
+      name: 'fighter1',
+      cost: 400,
+      gen: 1,
+      fuel: 450,
+      vision: 35,
+      speed: 0.8,
+      ammo: 1,
+      isFighter: true
+    },
+    // gen 2
+    'reconbomber': {
+      name: 'reconbomber',
+      cost: 1500,
+      gen: 2,
+      fuel: 2000,
+      speed: 0.8,
+      vision: 75,
+      ammo: 1,
+      isRecon: true,
+      isBomber: true,
+      isNuclear: true
+    },
+    'heavyfighter': {
+      name: 'heavyfighter',
+      cost: 3000,
+      gen: 2,
+      fuel: 1000,
+      speed: 1.6,
+      vision: 40,
+      ammo: 3,
+      isFighter: true
+    },
+    // gen 3
+    'tanker': {
+      name: 'tanker',
+      cost: 1500,
+      gen: 3,
+      fuel: 2500,
+      speed: 0.9,
+      vision: 30,
+      ammo: 0,
+      isTanker: true // TODO
+    }
+
+    // gen 4
   }]
 };
+
 module.exports = {
   config
 };
@@ -2625,6 +2709,31 @@ const getPlanesBeingWorkedOn = (game, airbaseID, planeName) => {
 };
 
 // --------------------------------------------------------------------
+// Stats helpers
+// --------------------------------------------------------------------
+
+const getTotalAirforceValue = (game, clientID) => {
+  let total = 0;
+  const designs = getPlaneDesignsUpToGen(game.players[clientID].nationalityIndex, 4);
+  for (const entityID in game.entities) {
+    const entity = game.entities[entityID];
+    if (entity.clientID != clientID) continue;
+    if (entity.cost > 0) {
+      total += entity.cost;
+    }
+    if (entity.planes) {
+      for (const name in entity.planes) {
+        total += entity.planes[name] * designs[name].cost;
+      }
+    }
+  }
+  return total;
+};
+const getIncome = (game, clientID) => {
+  return getNumBuilding(game, clientID, 'CITY') + getNumBuilding(game, clientID, 'CITY', 'isMega');
+};
+
+// --------------------------------------------------------------------
 // General Entities
 // --------------------------------------------------------------------
 
@@ -2660,15 +2769,30 @@ const getEntitiesByType = (game, type, clientID) => {
   }
   return entities;
 };
+const numTimesTargeted = (game, targetID) => {
+  let num = 0;
+  for (const entityID in game.entities) {
+    const entity = game.entities[entityID];
+    if (entity.targetEnemy == targetID) num++;
+  }
+  return num;
+};
 
 // --------------------------------------------------------------------
 // Session
 // --------------------------------------------------------------------
 
 const getOtherClientID = (game, clientID) => {
-  for (const id of game.clientIDs) {
-    if (id != clientID) {
-      return id;
+  // HACK: this is implemented differently on the server:
+  if (game.clients) {
+    for (const id of game.clients) {
+      if (id != clientID) return id;
+    }
+  } else {
+    for (const id of game.clientIDs) {
+      if (id != clientID) {
+        return id;
+      }
     }
   }
 };
@@ -2699,6 +2823,70 @@ const getCanvasSize = () => {
     };
   }
 };
+
+// --------------------------------------------------------------------
+// Intercept Course
+// --------------------------------------------------------------------
+
+const getInterceptPos = (game, entity, target) => {
+  if (target.isBuilding) return {
+    ...target.position
+  };
+  let targetTargetPos = target.targetPos;
+  if (!targetTargetPos) {
+    var _getNearestAirbase;
+    targetTargetPos = (_getNearestAirbase = getNearestAirbase(game, target)) === null || _getNearestAirbase === void 0 ? void 0 : _getNearestAirbase.position;
+  }
+  if (!targetTargetPos) return {
+    ...target.position
+  };
+  const targetToTargetVector = subtract(targetTargetPos, target.position);
+  const toTargetVector = subtract(target.position, entity.position);
+  const targetVelocity = makeVector(vectorTheta(targetToTargetVector), target.speed);
+  const entityVelocity = makeVector(vectorTheta(toTargetVector), entity.speed);
+  const relativeVelocity = {
+    x: targetVelocity.x - entityVelocity.x,
+    y: targetVelocity.y - entityVelocity.y
+  };
+  if (magnitude(relativeVelocity) == 0) {
+    return {
+      ...target.position
+    };
+  }
+  const distance = dist(entity.position, target.position);
+  if (distance < entity.speed + target.speed + 1) {
+    return target.position;
+  }
+  const timeToIntercept = distance / magnitude(relativeVelocity);
+  const timeToTarget = dist(target.position, targetTargetPos) / target.speed;
+  if (timeToIntercept > timeToTarget) {
+    return {
+      ...target.position
+    };
+  }
+  const targetPos = {
+    x: target.position.x + targetVelocity.x * timeToIntercept,
+    y: target.position.y + targetVelocity.y * timeToIntercept
+  };
+  return targetPos;
+
+  // const toTargetVector = subtract(target.position, entity.position);
+  // const thetaBetween = vectorTheta(subtract(targetToTargetVector, toTargetVector));
+  // const component = Math.cos(thetaBetween);
+  // if (component * target.speed >= entity.speed) {
+  //   return {...target.position};
+  // }
+  // if (component < 0) {
+  //   return {...target.position};
+  // }
+
+  // const distance = dist(entity.position, target.position);
+  // const numTicks = distance / Math.abs(component * target.speed - entity.speed);
+  // const targetInterceptPoint = add(scale(targetVelocity, numTicks), target.position);
+
+  // return targetInterceptPoint;
+};
+
 module.exports = {
   getTotalPlanesAtBase,
   getNearestAirbase,
@@ -2717,7 +2905,11 @@ module.exports = {
   isHost,
   getEntitiesByType,
   normalizePos,
-  getCanvasSize
+  getCanvasSize,
+  getInterceptPos,
+  numTimesTargeted,
+  getTotalAirforceValue,
+  getIncome
 };
 },{"../config":12,"bens_utils":97}],21:[function(require,module,exports){
 const getSession = state => {

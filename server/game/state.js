@@ -1,6 +1,8 @@
 const {randomIn, normalIn} = require('bens_utils').stochastic;
 const {throwDart} = require('./utils');
-const {getPlaneDesignsUpToGen} = require('./selectors');
+const {
+  getPlaneDesignsUpToGen,
+} = require('../../js/selectors/selectors');
 
 const initGameState = (
   clientIDs, config,

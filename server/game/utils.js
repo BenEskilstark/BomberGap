@@ -1,6 +1,8 @@
 const {randomIn, normalIn} = require('bens_utils').stochastic;
 const {dist} = require('bens_utils').vectors;
-const {getEntitiesByPlayer} = require('./selectors');
+const {
+  getEntitiesByPlayer
+} = require('../../js/selectors/selectors');
 
 const throwDart = (game, playerIndex, worldSize) => {
   const clientID = Object.keys(game.players)[playerIndex];

@@ -11,7 +11,7 @@ const {
   getEntitiesByPlayer, getNearestAirbase, getOtherClientID,
   getPlaneDesignsUpToGen, getEntitiesByType, getNumBuilding,
   getIncome,
-} = require('./selectors');
+} = require('../../js/selectors/selectors');
 const {throwDart} = require('./utils');
 const {tick, doGameOver} = require('./tick');
 
@@ -170,6 +170,10 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
     }
     case 'STOP': {
       doGameOver(session, socketClients, clientID, null, true);
+      return state;
+    }
+    case 'RESIGN': {
+      doGameOver(session, socketClients, clientID, getOtherClientID(session, clientID));
       return state;
     }
 

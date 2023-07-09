@@ -147,6 +147,33 @@ const getPlanesBeingWorkedOn = (game, airbaseID, planeName) => {
 
 
 // --------------------------------------------------------------------
+// Stats helpers
+// --------------------------------------------------------------------
+
+const getTotalAirforceValue = (game, clientID) => {
+  let total = 0;
+  const designs = getPlaneDesignsUpToGen(game.players[clientID].nationalityIndex, 4);
+  for (const entityID in game.entities) {
+    const entity = game.entities[entityID];
+    if (entity.clientID != clientID) continue;
+    if (entity.cost > 0) {
+      total += entity.cost;
+    }
+    if (entity.planes) {
+      for (const name in entity.planes) {
+        total += entity.planes[name] * designs[name].cost;
+      }
+    }
+  }
+  return total;
+}
+
+const getIncome = (game, clientID) => {
+  return getNumBuilding(game, clientID, 'CITY') + getNumBuilding(game, clientID, 'CITY', 'isMega');
+}
+
+
+// --------------------------------------------------------------------
 // General Entities
 // --------------------------------------------------------------------
 
@@ -186,14 +213,31 @@ const getEntitiesByType = (game, type, clientID) => {
 }
 
 
+const numTimesTargeted = (game, targetID) => {
+  let num = 0;
+  for (const entityID in game.entities) {
+    const entity = game.entities[entityID];
+    if (entity.targetEnemy == targetID) num++;
+  }
+  return num;
+}
+
+
 // --------------------------------------------------------------------
 // Session
 // --------------------------------------------------------------------
 
 const getOtherClientID = (game, clientID) => {
-  for (const id of game.clientIDs) {
-    if (id != clientID) {
-      return id;
+  // HACK: this is implemented differently on the server:
+  if (game.clients) {
+    for (const id of game.clients) {
+      if (id != clientID) return id;
+    }
+  } else {
+    for (const id of game.clientIDs) {
+      if (id != clientID) {
+        return id;
+      }
     }
   }
 };
@@ -229,6 +273,71 @@ const getCanvasSize = () => {
 }
 
 
+// --------------------------------------------------------------------
+// Intercept Course
+// --------------------------------------------------------------------
+
+const getInterceptPos = (game, entity, target) => {
+  if (target.isBuilding) return {...target.position};
+
+  let targetTargetPos = target.targetPos;
+  if (!targetTargetPos) {
+    targetTargetPos = getNearestAirbase(game, target)?.position;
+  }
+  if (!targetTargetPos) return {...target.position};
+  const targetToTargetVector = subtract(targetTargetPos, target.position);
+  const toTargetVector = subtract(target.position, entity.position);
+
+  const targetVelocity = makeVector(
+    vectorTheta(targetToTargetVector), target.speed
+  );
+  const entityVelocity = makeVector(vectorTheta(toTargetVector), entity.speed);
+
+  const relativeVelocity = {
+    x: targetVelocity.x - entityVelocity.x,
+    y: targetVelocity.y - entityVelocity.y
+  };
+  if (magnitude(relativeVelocity) == 0) {
+    return {...target.position};
+  }
+  const distance = dist(entity.position, target.position);
+  if (distance < entity.speed + target.speed + 1) {
+    return target.position;
+  }
+
+  const timeToIntercept = distance / magnitude(relativeVelocity);
+
+  const timeToTarget = dist(target.position, targetTargetPos) / target.speed;
+  if (timeToIntercept > timeToTarget) {
+    return {...target.position};
+  }
+
+  const targetPos = {
+    x: target.position.x + targetVelocity.x * timeToIntercept,
+    y: target.position.y + targetVelocity.y * timeToIntercept
+  };
+
+  return targetPos;
+
+
+  // const toTargetVector = subtract(target.position, entity.position);
+  // const thetaBetween = vectorTheta(subtract(targetToTargetVector, toTargetVector));
+  // const component = Math.cos(thetaBetween);
+  // if (component * target.speed >= entity.speed) {
+  //   return {...target.position};
+  // }
+  // if (component < 0) {
+  //   return {...target.position};
+  // }
+
+  // const distance = dist(entity.position, target.position);
+  // const numTicks = distance / Math.abs(component * target.speed - entity.speed);
+  // const targetInterceptPoint = add(scale(targetVelocity, numTicks), target.position);
+
+  // return targetInterceptPoint;
+}
+
+
 
 module.exports = {
   getTotalPlanesAtBase,
@@ -249,4 +358,8 @@ module.exports = {
   getEntitiesByType,
   normalizePos,
   getCanvasSize,
+  getInterceptPos,
+  numTimesTargeted,
+  getTotalAirforceValue,
+  getIncome,
 };

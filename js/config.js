@@ -182,6 +182,47 @@ const config = {
         gen: 4, fuel: 500, vision: 40, speed: 2.8, ammo: 1,
         isDrone: true, isNuclear: true, isBomber: true,
       },
+    },
+
+    // EU
+    {
+      // gen1
+      'recon1': {
+        name: 'recon1', cost: 1000,
+        gen: 1, fuel: 1400, speed: 0.7, vision: 60, ammo: 1,
+        isRecon: true, isDogfighter: true,
+      },
+      'bomber1': {
+        name: 'bomber1', cost: 1200,
+        gen: 1, fuel: 1000, vision: 30, speed: 0.7, ammo: 1,
+        isBomber: true, isNuclear: true,
+      },
+      'fighter1': {
+        name: 'fighter1', cost: 400,
+        gen: 1, fuel: 450, vision: 35, speed: 0.8, ammo: 1,
+        isFighter: true,
+      },
+
+      // gen 2
+      'reconbomber': {
+        name: 'reconbomber', cost: 1500,
+        gen: 2, fuel: 2000, speed: 0.8, vision: 75, ammo: 1,
+        isRecon: true, isBomber: true, isNuclear: true,
+      },
+      'heavyfighter': {
+        name: 'heavyfighter', cost: 3000,
+        gen: 2, fuel: 1000, speed: 1.6, vision: 40, ammo: 3,
+        isFighter: true,
+      },
+
+      // gen 3
+      'tanker': {
+        name: 'tanker', cost: 1500,
+        gen: 3, fuel: 2500, speed: 0.9, vision: 30, ammo: 0,
+        isTanker: true, // TODO
+      },
+
+      // gen 4
 
     },
   ],

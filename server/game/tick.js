@@ -11,7 +11,7 @@ const {
   getNumBuilding, getEntitiesByType,
   getPlaneDesignsByGen, getInterceptPos,
   numTimesTargeted, getTotalAirforceValue, getIncome,
-} = require('./selectors');
+} = require('../../js/selectors/selectors');
 const {makePlane, makeExplosion} = require('./state');
 
 const tick = (game, session, socketClients) => {
