@@ -81,6 +81,7 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
       const position = throwDart(game, playerIndex, game.worldSize);
       let building = null;
       if (buildingType == 'AIRBASE') {
+        const planes = {};
         const planeDesigns = getPlaneDesignsUpToGen(nationalityIndex, gen);
         for (const name in planeDesigns) {
           planes[name] = 0;
