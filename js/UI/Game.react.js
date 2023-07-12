@@ -16,6 +16,7 @@ const LeftHandSideBar = require('./LeftHandSideBar.react');
 const RightHandSideBar = require('./RightHandSideBar.react');
 const {
   normalizePos, getCanvasSize, getPlaneDesignsUnlocked,
+  getPlaneNameByHotkey,
   isAirbaseSelected, getEntitiesByType,
 } = require('../selectors/selectors');
 
@@ -92,30 +93,42 @@ function Game(props) {
   );
 
   // hotKeys
-  useHotKeyHandler({dispatch, getState: () => getState().game.hotKeys});
+  useHotKeyHandler({dispatch, getState: () => getState().game.hotKeys}, true /*noWASD*/);
   useEffect(() => {
-    const planeNames = Object.keys(getPlaneDesignsUnlocked(game, game.clientID));
-    for (let i = 0; i < planeNames.length; i++) {
-      const name = planeNames[i];
+    for (let i = 0;  i < 10; i ++) {
       dispatch({type: 'SET_HOTKEY', key: ""+((i+1)%10) , press: 'onKeyDown',
         fn: () => {
           const game = getState().game;
           const airbases = getEntitiesByType(game, 'AIRBASE', game.clientID);
-          if (isAirbaseSelected(game)) {
-            dispatch({type: 'SET', launchName: name});
-            dispatch({type: 'SET', clickMode: 'LAUNCH'});
-          } else if (i < airbases.length) {
+          if (i < airbases.length) {
             dispatch({type: 'SET',  selectedIDs: ['' + airbases[i].id]});
           }
         }
       });
     }
-  }, [player.gen]);
-  useEffect(() => {
-    dispatch({type: 'SET_HOTKEY', key: 'M', press: 'onKeyDown',
+    ['Q', 'W', 'E', 'R', 'A', 'S', 'D', 'F', 'Z', 'X', 'C', 'V'].forEach((key) => {
+      dispatch({type: 'SET_HOTKEY', key, press: 'onKeyDown',
+        fn: () => {
+          const game = getState().game;
+          // if (!isAirbaseSelected(game)) return;
+          const launchName = getPlaneNameByHotkey(game, key);
+          if (!launchName) return;
+          dispatch({type: 'SET', launchName});
+          // dispatch({type: 'SET', clickMode: 'LAUNCH'});
+        }
+      });
+    });
+
+    dispatch({type: 'SET_HOTKEY', key: 'Y', press: 'onKeyDown',
+      fn: () => dispatchToServer({
+        type: 'SET_AFTERBURNER', entityIDs: getState().game.selectedIDs,
+      }),
+    });
+
+    dispatch({type: 'SET_HOTKEY', key: 'T', press: 'onKeyDown',
       fn: () => dispatch({type: 'SET', clickMode: 'MOVE'}),
     });
-    dispatch({type: 'SET_HOTKEY', key: 'L', press: 'onKeyDown',
+    dispatch({type: 'SET_HOTKEY', key: 'G', press: 'onKeyDown',
       fn: () => dispatch({type: 'SET', clickMode: 'LAUNCH'}),
     });
     dispatch({type: 'SET_HOTKEY', key: 'B', press: 'onKeyDown',

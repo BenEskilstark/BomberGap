@@ -79,7 +79,9 @@ const sessionReducer = (state, action, clientID, socket, newSession) => {
       clientToSession[clientID] = session.id;
 
       // update dynamic config items
-      // session.dynamicConfig[clientID] = {};
+      session.dynamicConfig[clientID] = {
+        nationalityIndex: 1,
+      };
       // session.dynamicConfig[clientID].money = session.config.startingMoney;
       // session.dynamicConfig[clientID].planes = {};
       // session.dynamicConfig[clientID].planeDesigns = {};
@@ -109,15 +111,16 @@ const sessionReducer = (state, action, clientID, socket, newSession) => {
         // tell the client that just joined what the settings are:
         socket.emit('receiveAction', {type: 'EDIT_SESSION_PARAMS', ...session.config});
         for (const alreadyJoinedClientID of session.clients) {
-          // if (session.dynamicConfig[alreadyJoinedClientID].planeDesigns) {
-          //   for (const name in session.dynamicConfig[alreadyJoinedClientID].planeDesigns) {
-          //     socket.emit('receiveAction',
-          //       {type: 'ADD_PLANE_DESIGN',
-          //       plane: session.dynamicConfig[alreadyJoinedClientID].planeDesigns[name],
-          //       clientID: alreadyJoinedClientID},
-          //     );
-          //   }
-          // }
+          emitToAllClients(socketClients, {
+            type: 'SET_NATIONALITY_INDEX',
+            clientID,
+            nationalityIndex: session.dynamicConfig[clientID].nationalityIndex,
+          });
+          emitToAllClients(socketClients, {
+            type: 'SET_NATIONALITY_INDEX',
+            clientID: alreadyJoinedClientID,
+            nationalityIndex: session.dynamicConfig[alreadyJoinedClientID].nationalityIndex,
+          });
         }
       }
       break;

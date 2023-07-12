@@ -1,19 +1,9 @@
 
-
-  - graph:
-    - track changes to gen research
-    - bomber drone is selectable in gen 3 and breaks graph
-    - pass nationalityIndex along with stats
-
-  - more ergonomic hotkeys
-    - default selection for B52 (and hotkey)
-
-  - when you kill all cities it says you killed airbases
-
-  - lobby
-    - don't allow creating another game unless you leave your current
-    - allow selecting nationality
-
+  - abilities:
+    - thermonuclear
+    - factory:
+      - need to consolidate radio picker betweeen carrier and airbase (for loading indicator)
+      - plane still finishes production at an airbase (because of airbaseID undefined)
 
 
 

@@ -8,10 +8,10 @@ const GameOverModal = (props) => {
   const state = getState(); // HACK this comes from window;
 
   let title = winner == state.clientID ? 'You Win!' : 'You Lose!';
-  let body = winner == state.clientID ? "You destroyed the enemy airbase" : "Your airbase was destroyed";
+  let body = winner == state.clientID ? "You defeated the enemy" : "You were defeated";
   if (disconnect) {
     title = "Opponent Disconnected";
-    body = "The other player has closed the tab and disconnected. So I guess you win by forfeit...";
+    body = "The other player has closed the tab and disconnected. So you win by forfeit";
   }
 
   let otherClientID = null;
@@ -29,7 +29,7 @@ const GameOverModal = (props) => {
         options={['CITY', 'FACTORY', 'AIRBASE', 'LAB', 'airforceValue', 'generation']}
         onChange={setStat}
       />
-      <PlotStack stats={stats} time={time} selectedStat={stat} />
+      <PlotStack stats={stats} time={time} selectedStat={stat} players={state.game.players} />
     </div>
   );
 
@@ -53,15 +53,15 @@ const GameOverModal = (props) => {
 };
 
 const PlotStack = (props) => {
-  const {stats, time, selectedStat} = props;
+  const {stats, time, selectedStat, players} = props;
 
   let yMax = 0;
-  let colors = ['red', 'blue'];
+  let colors = ['blue', 'red', 'orange'];
   let i = 0;
   for (const clientID in stats) {
     const points = stats[clientID][selectedStat];
     for (const point of points) {
-      point.color = colors[i];
+      point.color = colors[players[clientID].nationalityIndex];
       if (point.y > yMax) {
         yMax = point.y;
       }
@@ -75,7 +75,11 @@ const PlotStack = (props) => {
     const initPoints = stats[clientID][selectedStat];
     const points = [
       ...initPoints,
-      {x: time, y: initPoints[initPoints.length - 1].y, color: colors[i]},
+      {
+        x: time,
+        y: initPoints[initPoints.length - 1].y,
+        color: colors[players[clientID].nationalityIndex],
+      },
     ];
     console.log(points, time);
     plots.push(

@@ -95,6 +95,17 @@ const getPlaneDesignsUnlocked = (game, clientID) => {
   return getPlaneDesignsUpToGen(player.nationalityIndex, player.gen);
 }
 
+const getPlaneNameByHotkey = (game, key) => {
+  const planeDesigns = getPlaneDesignsUnlocked(game, game.clientID);
+  for (const planeName in planeDesigns) {
+    const design = planeDesigns[planeName];
+    if (design.hotkey == key) {
+      return planeName;
+    }
+  }
+  return null;
+}
+
 
 // --------------------------------------------------------------------
 // Production
@@ -170,6 +181,20 @@ const getTotalAirforceValue = (game, clientID) => {
 
 const getIncome = (game, clientID) => {
   return getNumBuilding(game, clientID, 'CITY') + getNumBuilding(game, clientID, 'CITY', 'isMega');
+}
+
+const getTotalResearchSpending = (game, clientID) => {
+  let spending = 0;
+  for (let i = 0; i <= game.players[clientID].gen; i++) {
+    spending += game.config.genCost[i];
+  }
+
+  if (game.players[clientID].researchProgress != null) {
+    const {gen, cost} = game.players[clientID].researchProgress;
+    spending += game.config.genCost[gen] - cost;
+  }
+
+  return spending;
 }
 
 
@@ -351,6 +376,7 @@ module.exports = {
   getPlaneInProductionAtBase,
   getPlanesBeingWorkedOn,
   getPlaneDesignsUnlocked,
+  getPlaneNameByHotkey,
   getNumBuilding,
   getEntitiesByPlayer,
   getOtherClientID,
@@ -362,4 +388,5 @@ module.exports = {
   numTimesTargeted,
   getTotalAirforceValue,
   getIncome,
+  getTotalResearchSpending,
 };

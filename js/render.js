@@ -57,6 +57,10 @@ const render = (state) => {
       ctx.fillStyle = "red";
     }
 
+    if (entity.afterburn % 2 == 1) {
+      ctx.fillStyle = 'orange';
+    }
+
     let width = 4;
     let height = 4;
     let shape = 'circle'; // default shape is circle
@@ -84,6 +88,11 @@ const render = (state) => {
       shape = 'square';
     } else if (entity.isPlane) {
       width = 6;
+    }
+
+    if (entity.isGiant) {
+      height *= 3;
+      width *= 3;
     }
 
     // rotate

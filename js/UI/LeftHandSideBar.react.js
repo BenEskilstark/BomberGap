@@ -34,7 +34,7 @@ const LeftHandSideBar = (props) => {
         top: 0,
         left: 0,
         padding: 12,
-        minWidth: 150,
+        width: 275,
         color: '#6ce989',
       }}
     >
@@ -193,10 +193,12 @@ const BuildingsSelected = (props) => {
 
           }}
         >
-          <PlaneDetail
-            canBuy={true}
-            planeDesign={getPlaneDesignByName(game, state.game.launchName)}
-            airbaseID={id}
+          <PlaneDesignDisplay planeDesign={getPlaneDesignByName(game, state.game.launchName)} />
+          <Button
+            label={`Build (${getPlaneDesignByName(game, state.game.launchName).cost}) (B)`}
+            onClick={() => {
+              dispatchToServer({type: 'BUILD_PLANE', name: getState().game.launchName, airbaseID: airbase.id});
+            }}
           />
           <div style={{textAlign: 'center'}}><b>Airbase #{getAirbaseNumByID(game, id)}</b></div>
           <div>Launch Type: </div>
@@ -321,11 +323,15 @@ const PlanesSelected = (props) => {
 
   const selections = {};
   const planes = {}; // for motherships
+  const planeNameToEntities = {};
   for (const entityID of game.selectedIDs) {
     const entity = game.entities[entityID];
     if (entity) {
       if (!selections[entity.name]) selections[entity.name] = 0;
       selections[entity.name] += 1;
+      if (!planeNameToEntities[entity.name]) planeNameToEntities[entity.name] = [];
+      planeNameToEntities[entity.name].push(entity);
+
       if (entity.planes) {
         for (const planeName in entity.planes) {
           if (!planes[planeName]) planes[planeName] = 0;
@@ -346,6 +352,8 @@ const PlanesSelected = (props) => {
         {name}: {selections[name]}
         <div className="hidden" style={{display: planeDesign.planeCapacity ? 'block' : 'noop'}}>
           <PlaneDetail
+            canBuy={planeDesign.isFactory}
+            entities={planeNameToEntities[name]}
             game={game}
             planeDesign={planeDesign} clickMode={game.clickMode}
             planesCarried={planeDesign.planeCapacity ? planes : null}
@@ -369,24 +377,23 @@ const PlanesSelected = (props) => {
 
 
 const PlaneDetail = (props) => {
-  const {planeDesign, airbaseID, canBuy, planesCarried, clickMode, game} = props;
+  const {planeDesign, entities, canBuy, planesCarried, clickMode, game} = props;
   const {name, cost} = planeDesign;
-
-  const [launchIndex, setLaunchIndex] = useState(0);
 
   let carrier = null;
   if (planesCarried) {
     const planeNames = Object.keys(planesCarried);
-    if (game.launchName != planeNames[launchIndex]) {
-      dispatch({type: 'SET', launchName: planeNames[launchIndex]});
+    if (!planeNames.includes(game.launchName)) {
+      dispatch({type: 'SET', launchName: planeNames[0]});
     }
     carrier = (
       <div>
-        <Button
-          label={clickMode == 'MOVE' ? "Switch to Launch Mode (L)" : "Switch to Target Mode (M)"}
-          onClick={() => {
-            dispatch({type: 'SET', clickMode: clickMode == 'MOVE' ? 'LAUNCH' : 'MOVE'});
-          }}
+        Mode:
+        <RadioPicker
+          options={['MOVE', 'LAUNCH']}
+          displayOptions={['Targeting (T)', 'Launching (G)']}
+          selected={clickMode}
+          onChange={(nextClickMode) => dispatch({type: 'SET', clickMode: nextClickMode})}
         />
         <RadioPicker
           options={planeNames}
@@ -401,13 +408,30 @@ const PlaneDetail = (props) => {
               planeType = 'BOMBER';
             }
             return (
-                <div>{name} ({planeType}): {planesCarried[name]}</div>
+              <div>{name} ({planeType}): {planesCarried[name]}</div>
             );
           })}
-          selected={planeNames[launchIndex]}
+          selected={game.launchName}
           onChange={(launchName) => {
-            setLaunchIndex(planeNames.indexOf(launchName));
             dispatch({type: 'SET', launchName});
+          }}
+        />
+      </div>
+    );
+  }
+  let activatedAbilities = [];
+  if (planeDesign.isAfterburner) {
+    activatedAbilities.push(
+      <div
+        key={"afterburnerability"}
+        style={{
+
+        }}
+      >
+        <Button
+          label="Afterburner (Y)"
+          onClick={() => {
+            dispatchToServer({type: 'SET_AFTERBURNER', entityIDs: entities.map(e => e.id)});
           }}
         />
       </div>
@@ -421,12 +445,13 @@ const PlaneDetail = (props) => {
     }}
     >
       <PlaneDesignDisplay planeDesign={planeDesign} />
+      {activatedAbilities}
       {carrier}
       <Button
         style={{display: canBuy ? 'block' : 'none'}}
         label={`Build (${planeDesign.cost}) (B)`}
         onClick={() => {
-          dispatchToServer({type: 'BUILD_PLANE', name, airbaseID});
+          dispatchToServer({type: 'BUILD_PLANE', name: getState().game.launchName, airbaseID});
         }}
       />
     </div>

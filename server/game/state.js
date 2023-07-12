@@ -1,12 +1,12 @@
 const {randomIn, normalIn} = require('bens_utils').stochastic;
 const {throwDart} = require('./utils');
 const {
-  getPlaneDesignsUpToGen,
+  getPlaneDesignsUpToGen, getTotalResearchSpending,
 } = require('../../js/selectors/selectors');
 
 const initGameState = (
   clientIDs, config,
-  // dynamicConfig, // additional parameters set by users before game start
+  dynamicConfig, // additional parameters set by users before game start
                  // keyed by clientID and currenty::
                  // planeDesigns {[name]: {cost, fuel, vision, type, speed, productionTime}}
                  // planes {{[name]: number}}
@@ -22,11 +22,13 @@ const initGameState = (
     stats: {},
   };
 
-  let nationalityIndex = 0;
+  let playerIndex = 0;
   for (const clientID of clientIDs) {
+    const nationalityIndex = dynamicConfig[clientID].nationalityIndex;
     // initialize player
     game.players[clientID] = {
       nationalityIndex,
+      playerIndex,
       money: config.startingMoney,
       gen: config.gen,
       productionQueue: [], // {name: string, cost: remaining cost, airbaseID}
@@ -44,22 +46,22 @@ const initGameState = (
         planes[name] = 0;
       }
       const airbase = makeBuilding(
-        clientID, throwDart(game, nationalityIndex, game.worldSize), 'AIRBASE', planes,
+        clientID, throwDart(game, playerIndex, game.worldSize), 'AIRBASE', planes,
       );
       game.entities[airbase.id] = airbase;
     }
     for (let j = 0; j < config.numCities; j++) {
-      const city = makeBuilding(clientID, throwDart(game, nationalityIndex, game.worldSize), 'CITY');
+      const city = makeBuilding(clientID, throwDart(game, playerIndex, game.worldSize), 'CITY');
       game.entities[city.id] = city;
     }
     for (let j = 0; j < config.numFactories; j++) {
       const factory = makeBuilding(
-        clientID, throwDart(game, nationalityIndex, game.worldSize), 'FACTORY',
+        clientID, throwDart(game, playerIndex, game.worldSize), 'FACTORY',
       );
       game.entities[factory.id] = factory;
     }
     for (let j = 0; j < config.numLabs; j++) {
-      const lab = makeBuilding(clientID, throwDart(game, nationalityIndex, game.worldSize), 'LAB');
+      const lab = makeBuilding(clientID, throwDart(game, playerIndex, game.worldSize), 'LAB');
       game.entities[lab.id] = lab;
     }
 
@@ -69,7 +71,7 @@ const initGameState = (
       LAB: [{x: 0, y: config.numLabs}],
       AIRBASE: [{x: 0, y: config.numAirbases}],
       airforceValue: [{x: 0, y: 0}],
-      generation: [{x: 0, y: config.gen}],
+      generation: [{x: 0, y: getTotalResearchSpending(game, clientID)}],
 
       'fighters_shot_down': 0,
       'bombers_shot_down': 0,
@@ -80,8 +82,8 @@ const initGameState = (
       'recon_sorties': 0,
       'fighter_aces': 0,
       'airbases_destroyed': 0,
-    },
-    nationalityIndex++;
+    }
+    playerIndex++;
   }
 
   return game;

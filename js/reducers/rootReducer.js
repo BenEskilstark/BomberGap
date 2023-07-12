@@ -17,11 +17,12 @@ const rootReducer = (state, action) => {
     case 'UPDATE_SESSION':
     case 'END_SESSION':
     case 'EDIT_SESSION_PARAMS':
+    case 'SET_NATIONALITY_INDEX':
       return sessionReducer(state, action);
     case 'START': {
       const {entities, clientIDs} = action;
       const game = {
-        ...initGameState(state.config, state.clientID, clientIDs),
+        ...initGameState(state.config, state.clientID, clientIDs, state.dynamicConfig),
         clientID: state.clientID,
         entities,
         // prevTickTime = new Date().getTime();
@@ -103,15 +104,16 @@ const initState = () => {
     modal: null,
     sessions: {},
     config: deepCopy(config),
+    dynamicConfig: {},
   };
 }
 
-const initGameState = (config, clientID, clientIDs) => {
+const initGameState = (config, clientID, clientIDs, dynamicConfig) => {
   const players = {};
   let nationalityIndex = 0;
   for (const id of clientIDs) {
     players[id] = {
-      nationalityIndex,
+      nationalityIndex: dynamicConfig[id].nationalityIndex,
       money: config.startingMoney,
       gen: 1,
       productionQueue: [], // {name: string, cost: remaining cost, airbaseID}
@@ -121,7 +123,6 @@ const initGameState = (config, clientID, clientIDs) => {
     nationalityIndex++;
   }
 
-  console.log(players, clientID, clientIDs);
 
   const game = {
     config: deepCopy(config),

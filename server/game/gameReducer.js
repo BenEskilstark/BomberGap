@@ -10,7 +10,7 @@ const {
 const {
   getEntitiesByPlayer, getNearestAirbase, getOtherClientID,
   getPlaneDesignsUpToGen, getEntitiesByType, getNumBuilding,
-  getIncome,
+  getIncome, getTotalResearchSpending,
 } = require('../../js/selectors/selectors');
 const {throwDart} = require('./utils');
 const {tick, doGameOver} = require('./tick');
@@ -66,11 +66,21 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
       if (cost > game.players[clientID].money) return;
       game.players[clientID].money -= cost;
 
-      const {nationalityIndex, gen} = game.players[clientID];
-      const position = throwDart(game, nationalityIndex, game.worldSize);
+      // update stats beforehand too to make it a step function
+      if (buildingType == 'CITY') {
+        game.stats[clientID].CITY.push(
+          {x: game.time, y: getIncome(game, clientID)},
+        );
+      } else {
+        game.stats[clientID][buildingType].push(
+          {x: game.time, y: getNumBuilding(game, clientID, buildingType)},
+        );
+      }
+
+      const {playerIndex, nationalityIndex, gen} = game.players[clientID];
+      const position = throwDart(game, playerIndex, game.worldSize);
       let building = null;
       if (buildingType == 'AIRBASE') {
-        const planes = {};
         const planeDesigns = getPlaneDesignsUpToGen(nationalityIndex, gen);
         for (const name in planeDesigns) {
           planes[name] = 0;
@@ -109,6 +119,13 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
       if (cost > game.players[clientID].money) return;
       game.players[clientID].money -= cost;
 
+      // update stats beforehand too to make it a step function
+      if (building.type == 'CITY') {
+        game.stats[clientID].CITY.push(
+          {x: game.time, y: getIncome(game, clientID)},
+        );
+      }
+
       if (building.isMega || building.isHardened) return;
 
       building[upgradeType] = true;
@@ -128,11 +145,17 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
     case 'START_RESEARCH': {
       const {nationalityIndex, researchProgress} = game.players[clientID];
       researchProgress.isStarted = true;
+      game.stats[clientID].generation.push(
+        {x: game.time, y: getTotalResearchSpending(game, clientID)},
+      );
       break;
     }
     case 'PAUSE_RESEARCH': {
       const {nationalityIndex, researchProgress} = game.players[clientID];
       researchProgress.isStarted = false;
+      game.stats[clientID].generation.push(
+        {x: game.time, y: getTotalResearchSpending(game, clientID)},
+      );
       break;
     }
 
@@ -149,7 +172,7 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
     case 'START': {
       console.log("Start", session.id);
       session.game = {
-        ...initGameState(session.clients, session.config),
+        ...initGameState(session.clients, session.config, session.dynamicConfig),
         prevTickTime: new Date().getTime(),
         tickInterval: setInterval(
           // HACK: dispatch is only available via dispatch function above
@@ -174,6 +197,14 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
     }
     case 'RESIGN': {
       doGameOver(session, socketClients, clientID, getOtherClientID(session, clientID));
+      return state;
+    }
+    case 'SET_NATIONALITY_INDEX': {
+      const {nationalityIndex} = action;
+      session.dynamicConfig[clientID].nationalityIndex = nationalityIndex;
+      emitToSession(session, socketClients,
+        {type: 'SET_NATIONALITY_INDEX', ...action}, clientID, true,
+      );
       return state;
     }
 
@@ -220,6 +251,19 @@ const gameReducer = (state, action, clientID, socket, dispatch) => {
 
       // only need to send to clients that can see this entity
       // emitToSession(session, socketClients, action, clientID, true);
+      break;
+    }
+    case 'SET_AFTERBURNER': {
+      const {entityIDs} = action;
+      for (const entityID of entityIDs) {
+        const entity = game.entities[entityID];
+        if (!entity) continue;
+        if (!entity.isAfterburner) continue;
+        entity.afterburn = session.config.afterburnDuration;
+        entity.fuel -= session.config.afterburnFuelCost;
+        entity.prevSpeed = entity.speed;
+        entity.speed *= session.config.afterburnSpeedMultiplier;
+      }
       break;
     }
     case 'TICK': {

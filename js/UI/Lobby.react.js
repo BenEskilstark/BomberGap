@@ -7,9 +7,11 @@ const {
   CheckerBackground,
 } = require('bens_ui_components');
 const Button = require('./Components/Button.react');
+const RadioPicker = require('./Components/RadioPicker.react');
 const PlaneDesignDisplay = require('./PlaneDesignDisplay.react');
 const {dispatchToServer} = require('../clientToServer');
 const {isHost, getSession} = require('../selectors/sessions');
+const {config} = require('../config');
 const {useEffect, useState, useMemo} = React;
 
 const Lobby = (props) => {
@@ -70,6 +72,7 @@ const CreateGameCard = (props) => {
       </div>
       <Button
         label="Create Game"
+        disabled={getSession(getState())}
         style={{
           width: '100%',
           height: 30,
@@ -87,16 +90,68 @@ const CreateGameCard = (props) => {
 const SessionCard = (props) => {
   const {session, joinedSessionID, state, dispatch} = props;
   const {id, name, clients} = session;
+  const clientID = state.clientID;
+  let otherClientID = null;
+  for (const client in state.dynamicConfig) {
+    if (client != clientID) {
+      otherClientID = client;
+      break;
+    }
+  }
 
   return (
     <div
       style={{
         width: 600,
         marginLeft: 0,
+        marginTop: 12,
+        padding: 8,
+        border: '1px solid #6ce989',
       }}
     >
       <div style={{textAlign: 'center'}}><b>{name}</b></div>
+      {isHost(props.state) && joinedSessionID == session.id ? (<div><b>Host: </b> You</div>) : null}
       Players: {clients.length}
+
+      <div
+        style={{
+          width: '100%',
+          display: joinedSessionID == session.id ? 'flex' : 'none',
+          gap: '5%',
+          marginBottom: 12,
+        }}
+      >
+        <div
+          style={{
+            width: '47.5%',
+            border: '1px solid #6ce989',
+          }}
+        >
+          <div style={{textAlign: 'center'}}><b>You</b></div>
+          <RadioPicker
+            options={[0, 1, 2]}
+            displayOptions={config.factionNames}
+            selected={state.dynamicConfig[clientID]?.nationalityIndex}
+            onChange={(nationalityIndex) => {
+              dispatchToServer({type: 'SET_NATIONALITY_INDEX', nationalityIndex, clientID});
+            }}
+          />
+
+        </div>
+        <div
+          style={{
+            width: '47.5%',
+            border: '1px solid #6ce989',
+            display: clients.length >= 2 ? 'block' : 'none',
+          }}
+        >
+          <div style={{textAlign: 'center'}}><b>Opponent</b></div>
+          <div>Faction: {config.factionNames[state.dynamicConfig[otherClientID]?.nationalityIndex]}</div>
+
+        </div>
+
+      </div>
+
       {joinedSessionID == id ? (
         <Button
           style={{
@@ -122,7 +177,7 @@ const SessionCard = (props) => {
             width: '100%',
             height: 30,
           }}
-          disabled={clients.length >= 2 || session.started}
+          disabled={clients.length >= 2 || session.started || joinedSessionID != null}
           label={"Join Game"}
           onClick={() => {
             dispatchToServer({type: 'JOIN_SESSION', sessionID: id});
@@ -134,110 +189,6 @@ const SessionCard = (props) => {
   );
 };
 
-const Settings = (props) => {
-  const {state, dispatch} = props;
-
-  const planeDesigns = [];
-  for (const name in state.clientConfig.planes) {
-    const planeDesign = state.clientConfig.planeDesigns[state.clientID][name];
-    planeDesigns.push(
-      <PlaneDesignDisplay
-        key={"plane_design_" + planeDesign.name}
-        planeDesign={planeDesign}
-        quantity={state.clientConfig.planes[name]}
-        dispatch={(action) => {
-          dispatch(action);
-          dispatchToServer(action);
-        }}
-        money={state.clientConfig.money}
-      />
-    );
-  }
-
-  let numPlaneDesigns = 0;
-  let planeNames = [];
-  if (state.clientConfig.planeDesigns[state.clientID]) {
-    numPlaneDesigns = Object.keys(state.clientConfig.planeDesigns[state.clientID]).length;
-    planeNames = Object.keys(state.clientConfig.planeDesigns[state.clientID]);
-  }
-
-      // <Button
-      //   label="VS. AI Opponent"
-      //   disabled={clients.length >= 2}
-      //   onClick={() => {
-      //     dispatchToServer({type: 'JOIN_SESSION', sessionID: id, AI: true});
-      //   }}
-      // />
-  return (
-    <div>
-      <div><b>Settings:</b></div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-        }}
-      >
-        <div>
-          Game ms per tick:
-          <Slider value={state.config.msPerTick} min={1} max={1000}
-            noOriginalValue={true}
-            onChange={(msPerTick) => {
-              dispatch({type: 'EDIT_SESSION_PARAMS', msPerTick});
-              dispatchToServer({type: 'EDIT_SESSION_PARAMS', msPerTick});
-            }}
-          />
-        </div>
-        <div>
-          Map Width/Height:
-          <Slider value={state.config.worldSize.width} min={100} max={1600}
-            noOriginalValue={true}
-            onChange={(width) => {
-              dispatch({type: 'EDIT_SESSION_PARAMS', worldSize: {height: width, width}});
-              dispatchToServer({type: 'EDIT_SESSION_PARAMS', worldSize: {height: width, width}});
-            }}
-          />
-        </div>
-        <div>
-          Airbases per player:
-          <Slider value={state.config.numAirbases} min={1} max={5}
-            noOriginalValue={true}
-            onChange={(numAirbases) => {
-              dispatch({type: 'EDIT_SESSION_PARAMS', numAirbases});
-              dispatchToServer({type: 'EDIT_SESSION_PARAMS', numAirbases});
-            }}
-          />
-        </div>
-      </div>
-      <Divider style={{marginTop: 4, marginBottom: 4}} />
-      Money Available: {state.clientConfig.money}
-      <div></div>
-      Designs Remaining: {state.config.maxPlaneDesigns - numPlaneDesigns}
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-        }}
-      >
-        {planeDesigns}
-      </div>
-
-      {
-        numPlaneDesigns < state.config.maxPlaneDesigns ?
-          <PlaneDesigner
-            config={state.config}
-            clientID={state.clientID}
-            dispatch={(action) => {
-              dispatch(action);
-              dispatchToServer(action);
-            }}
-            planeNames={planeNames}
-          /> :
-          'Max Planes Designed'
-      }
-      <Divider style={{marginTop: 4, marginBottom: 4}} />
-    </div>
-  );
-};
 
 
 module.exports = Lobby;

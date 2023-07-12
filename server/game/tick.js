@@ -11,6 +11,7 @@ const {
   getNumBuilding, getEntitiesByType,
   getPlaneDesignsByGen, getInterceptPos,
   numTimesTargeted, getTotalAirforceValue, getIncome,
+  getTotalResearchSpending,
 } = require('../../js/selectors/selectors');
 const {makePlane, makeExplosion} = require('./state');
 
@@ -24,10 +25,27 @@ const tick = (game, session, socketClients) => {
   updateResearch(game);
 
   updateExplosions(game);
+  updateAfterburners(game);
   moveAndFight(session, game, socketClients);
   computeVisionAndTargeting(session, game, socketClients);
   sendPlayerUpdates(session, game, socketClients);
 }
+
+
+const updateAfterburners = (game) => {
+  for (const entityID in game.entities) {
+    const entity = game.entities[entityID];
+    if (!entity) continue;
+    if (!entity.isAfterburner) continue;
+
+    if (entity.afterburn > 0) {
+      entity.afterburn--;
+    }
+    if (entity.afterburn == 0) {
+      entity.speed = entity.prevSpeed;
+    }
+  }
+};
 
 
 const updateIncome = (game) => {
@@ -67,9 +85,6 @@ const updateResearch = (game) => {
     // research complete
     if (player.researchProgress.cost <= 0) {
       player.gen = player.researchProgress.gen;
-      game.stats[clientID].generation.push({
-        x: game.time, y: player.gen,
-      });
       if (player.gen < 4) {
         player.researchProgress = {
           gen: player.gen + 1,
@@ -79,6 +94,9 @@ const updateResearch = (game) => {
       } else {
         player.researchProgress = null;
       }
+      game.stats[clientID].generation.push({
+        x: game.time, y: getTotalResearchSpending(game, clientID),
+      });
 
       // update all airbases with new available planes
       const planeDesigns = getPlaneDesignsByGen(player.nationalityIndex, player.gen);
@@ -128,8 +146,15 @@ const updateProduction = (game) => {
           // nextProductionQueue.push(production);
           continue; // if no airbases at all just continue
         }
+        // update stats beforehand too
+        game.stats[clientID].airforceValue.push({
+          x: game.time, y: getTotalAirforceValue(game, clientID),
+        });
 
+        // make the plane
         airbase.planes[production.name] += 1;
+
+        // update stats
         game.stats[clientID].airforceValue.push({
           x: game.time, y: getTotalAirforceValue(game, clientID),
         });
@@ -150,6 +175,7 @@ const sendPlayerUpdates = (session, game, socketClients) => {
       clientID,
       player: {...game.players[clientID]},
     };
+    if (!socketClients[clientID]) continue;
     socketClients[clientID].emit("receiveAction", clientAction);
   }
 };
@@ -216,7 +242,9 @@ const moveAndFight = (session, game, socketClients) => {
         // check if you're carrying planes, also dock those
         if (entity.planes) {
           for (const name in entity.planes) {
-            nearestAirbase.planes[name] += entity.planes[name];
+            if (entity.planes > 0) { // HACK to avoid returning planes with next-gen capacity
+              nearestAirbase.planes[name] += entity.planes[name];
+            }
           }
         }
         delete game.entities[entity.id];
@@ -232,9 +260,13 @@ const moveAndFight = (session, game, socketClients) => {
             (entity.isFighter && (targetEntity.isFighter || targetEntity.isDogfighter))
             || (entity.isBomber && targetEntity.isHardened)
           )
-          && Math.random() < 0.5 + (genDogfightBonus * (targetEntity.gen - entity.gen))
+          && (Math.random() < 0.5 + (genDogfightBonus * (targetEntity.gen - entity.gen)) || targetEntity.isShielded)
           && (targetEntity.ammo > 0 || targetEntity.isHardened)
+          && !(entity.isShielded && entity.ammo > 0) // if you are shielded then you always win
         ) {
+          game.stats[entity.clientID].airforceValue.push({
+            x: game.time, y: getTotalAirforceValue(game, entity.clientID),
+          });
           delete game.entities[entityID];
           targetEntity.kills++;
           const explosion = makeExplosion(
@@ -251,7 +283,9 @@ const moveAndFight = (session, game, socketClients) => {
             targetEntity.targetPos = null;
             targetEntity.targetEnemy = null;
           }
-          // TODO: stats for fighter kills
+          game.stats[entity.clientID].airforceValue.push({
+            x: game.time, y: getTotalAirforceValue(game, entity.clientID),
+          });
           continue;
         }
 
@@ -269,6 +303,26 @@ const moveAndFight = (session, game, socketClients) => {
           entity.clientID,
         );
         game.entities[explosion.id] = explosion;
+
+        // update stats based on kill type before the thing is destroyed too
+        // to get a nice step function
+        if (targetEntity.isBuilding) {
+          if (targetEntity.type == 'CITY') {
+            game.stats[targetEntity.clientID].CITY.push({
+              x: game.time, y: getIncome(game, targetEntity.clientID),
+            });
+          } else {
+            game.stats[targetEntity.clientID][targetEntity.type].push({
+              x: game.time, y: getNumBuilding(game, targetEntity.clientID, targetEntity.type),
+            });
+          }
+        } else {
+          game.stats[targetEntity.clientID].airforceValue.push({
+            x: game.time, y: getTotalAirforceValue(game, targetEntity.clientID),
+          });
+        }
+
+        // do the actual destroying
         delete game.entities[targetEntity.id];
 
         // update stats based on kill type
@@ -313,8 +367,13 @@ const moveAndFight = (session, game, socketClients) => {
 
     // compute running out of fuel
     if (entity.fuel <= 0) {
+      game.stats[entity.clientID].airforceValue.push({
+        x: game.time, y: getTotalAirforceValue(game, entity.clientID),
+      });
       delete game.entities[entity.id];
-      game.stats[entity.clientID].planes_no_fuel++;
+      game.stats[entity.clientID].airforceValue.push({
+        x: game.time, y: getTotalAirforceValue(game, entity.clientID),
+      });
     }
   }
 }
@@ -380,6 +439,16 @@ const computeVisionAndTargeting = (session, game, socketClients) => {
 const doGameOver = (session, socketClients, clientID, winner, disconnect) => {
   const game = session.game;
   if (!game) return;
+
+  // update final stats
+  for (let id in game.players) {
+    const player = game.players[id];
+    game.stats[id].generation.push({
+      x: game.time, y: getTotalResearchSpending(game, id),
+    });
+  }
+
+
   emitToSession(
     session, socketClients,
     {type: 'GAME_OVER', winner, disconnect, stats: game.stats, time: game.time},

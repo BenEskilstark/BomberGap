@@ -16,6 +16,11 @@ const sessionReducer = (state, action) => {
       return {
         ...state,
         sessions: {...state.sessions, [session.id]: session},
+        dynamicConfig: {
+          [clientID]: {
+            nationalityIndex: 0,
+          }
+        },
       };
     }
     case 'JOIN_SESSION': {
@@ -31,6 +36,11 @@ const sessionReducer = (state, action) => {
       return {
         ...state,
         sessions: {...state.sessions, [sessionID]: {...session}},
+        dynamicConfig: {
+          [clientID]: {
+            nationalityIndex: 1,
+          }
+        },
       };
     }
     case 'UPDATE_SESSION': {
@@ -46,6 +56,7 @@ const sessionReducer = (state, action) => {
         state.screen = 'LOBBY';
         state.game = null;
         state.modal = null;
+        state.dynamicConfig = {};
       }
       delete state.sessions[sessionID];
       return {...state};
@@ -55,6 +66,15 @@ const sessionReducer = (state, action) => {
       delete action.type;
       for (const property in action) {
         state.config[property] = action[property];
+      }
+      return {...state};
+    }
+    case 'SET_NATIONALITY_INDEX': {
+      const {nationalityIndex, clientID} = action;
+      if (state.dynamicConfig[clientID]) {
+        state.dynamicConfig[clientID].nationalityIndex = nationalityIndex;
+      } else {
+        state.dynamicConfig[clientID]= {nationalityIndex};
       }
       return {...state};
     }

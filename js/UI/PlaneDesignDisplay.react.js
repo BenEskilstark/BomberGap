@@ -11,19 +11,20 @@ const keyToProp = {
   isDogfighter: 'tailgun ',
   isDrone: 'drone ',
   planeCapacity: 'mothership ',
+  isGiant: 'giant ',
+  isShielded: 'shield ',
+  isFactory: 'factory ',
+  isAfterburner: 'afterburners ',
+  isThermonuclear: 'thermonuclear ',
 }
 
 const PlaneDesignDisplay = (props) => {
   const {planeDesign} = props;
 
-  const properties = [];
+  let properties = '';
   for (const key in planeDesign) {
     if (!keyToProp[key]) continue;
-    properties.push(
-      <span key={planeDesign.name + "_" + key}>
-        {keyToProp[key]}
-      </span>
-    );
+    properties += keyToProp[key];
   }
 
   return (
@@ -54,8 +55,11 @@ const PlaneDesignDisplay = (props) => {
           <div>Vision: {planeDesign.vision}</div><div>Ammo: {planeDesign.ammo}</div>
         </div>
         {planeDesign.planeCapacity ? <div>Plane Capacity: {planeDesign.planeCapacity}</div> : null}
-        <div style={{display: 'flex', justifyContent: 'space-between'}}>
-            {properties}
+        <div style={{
+          // display: 'flex', justifyContent: 'space-between'
+          textWrap: 'wrap',
+        }}>
+          {properties}
         </div>
       </div>
     </div>

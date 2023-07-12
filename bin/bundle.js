@@ -52,10 +52,10 @@ const GameOverModal = props => {
   const state = getState(); // HACK this comes from window;
 
   let title = winner == state.clientID ? 'You Win!' : 'You Lose!';
-  let body = winner == state.clientID ? "You destroyed the enemy airbase" : "Your airbase was destroyed";
+  let body = winner == state.clientID ? "You defeated the enemy" : "You were defeated";
   if (disconnect) {
     title = "Opponent Disconnected";
-    body = "The other player has closed the tab and disconnected. So I guess you win by forfeit...";
+    body = "The other player has closed the tab and disconnected. So you win by forfeit";
   }
   let otherClientID = null;
   for (const id in stats) {
@@ -69,7 +69,8 @@ const GameOverModal = props => {
   }), /*#__PURE__*/React.createElement(PlotStack, {
     stats: stats,
     time: time,
-    selectedStat: stat
+    selectedStat: stat,
+    players: state.game.players
   }));
   return /*#__PURE__*/React.createElement(Modal, {
     title: title,
@@ -99,15 +100,16 @@ const PlotStack = props => {
   const {
     stats,
     time,
-    selectedStat
+    selectedStat,
+    players
   } = props;
   let yMax = 0;
-  let colors = ['red', 'blue'];
+  let colors = ['blue', 'red', 'orange'];
   let i = 0;
   for (const clientID in stats) {
     const points = stats[clientID][selectedStat];
     for (const point of points) {
-      point.color = colors[i];
+      point.color = colors[players[clientID].nationalityIndex];
       if (point.y > yMax) {
         yMax = point.y;
       }
@@ -121,7 +123,7 @@ const PlotStack = props => {
     const points = [...initPoints, {
       x: time,
       y: initPoints[initPoints.length - 1].y,
-      color: colors[i]
+      color: colors[players[clientID].nationalityIndex]
     }];
     console.log(points, time);
     plots.push( /*#__PURE__*/React.createElement(Plot, {
@@ -277,6 +279,7 @@ const {
   normalizePos,
   getCanvasSize,
   getPlaneDesignsUnlocked,
+  getPlaneNameByHotkey,
   isAirbaseSelected,
   getEntitiesByType
 } = require('../selectors/selectors');
@@ -390,11 +393,9 @@ function Game(props) {
   useHotKeyHandler({
     dispatch,
     getState: () => getState().game.hotKeys
-  });
+  }, true /*noWASD*/);
   useEffect(() => {
-    const planeNames = Object.keys(getPlaneDesignsUnlocked(game, game.clientID));
-    for (let i = 0; i < planeNames.length; i++) {
-      const name = planeNames[i];
+    for (let i = 0; i < 10; i++) {
       dispatch({
         type: 'SET_HOTKEY',
         key: "" + (i + 1) % 10,
@@ -402,16 +403,7 @@ function Game(props) {
         fn: () => {
           const game = getState().game;
           const airbases = getEntitiesByType(game, 'AIRBASE', game.clientID);
-          if (isAirbaseSelected(game)) {
-            dispatch({
-              type: 'SET',
-              launchName: name
-            });
-            dispatch({
-              type: 'SET',
-              clickMode: 'LAUNCH'
-            });
-          } else if (i < airbases.length) {
+          if (i < airbases.length) {
             dispatch({
               type: 'SET',
               selectedIDs: ['' + airbases[i].id]
@@ -420,11 +412,37 @@ function Game(props) {
         }
       });
     }
-  }, [player.gen]);
-  useEffect(() => {
+    ['Q', 'W', 'E', 'R', 'A', 'S', 'D', 'F', 'Z', 'X', 'C', 'V'].forEach(key => {
+      dispatch({
+        type: 'SET_HOTKEY',
+        key,
+        press: 'onKeyDown',
+        fn: () => {
+          const game = getState().game;
+          // if (!isAirbaseSelected(game)) return;
+          const launchName = getPlaneNameByHotkey(game, key);
+          if (!launchName) return;
+          dispatch({
+            type: 'SET',
+            launchName
+          });
+          // dispatch({type: 'SET', clickMode: 'LAUNCH'});
+        }
+      });
+    });
+
     dispatch({
       type: 'SET_HOTKEY',
-      key: 'M',
+      key: 'Y',
+      press: 'onKeyDown',
+      fn: () => dispatchToServer({
+        type: 'SET_AFTERBURNER',
+        entityIDs: getState().game.selectedIDs
+      })
+    });
+    dispatch({
+      type: 'SET_HOTKEY',
+      key: 'T',
       press: 'onKeyDown',
       fn: () => dispatch({
         type: 'SET',
@@ -433,7 +451,7 @@ function Game(props) {
     });
     dispatch({
       type: 'SET_HOTKEY',
-      key: 'L',
+      key: 'G',
       press: 'onKeyDown',
       fn: () => dispatch({
         type: 'SET',
@@ -550,14 +568,14 @@ const LeftHandSideBar = props => {
       top: 0,
       left: 0,
       padding: 12,
-      minWidth: 150,
+      width: 275,
       color: '#6ce989'
     }
   }, /*#__PURE__*/React.createElement(BuildingInfo, props), /*#__PURE__*/React.createElement(PlanesSelected, props), /*#__PURE__*/React.createElement(BuildingsSelected, props), /*#__PURE__*/React.createElement(Button, {
     label: "Resign",
     style: {
       position: 'absolute',
-      bottom: 0
+      bottom: 12
     },
     onClick: () => {
       dispatchToServer({
@@ -697,10 +715,17 @@ const BuildingsSelected = props => {
       selectedBuildings.push( /*#__PURE__*/React.createElement("div", {
         key: "selected_building_" + id,
         style: {}
-      }, /*#__PURE__*/React.createElement(PlaneDetail, {
-        canBuy: true,
-        planeDesign: getPlaneDesignByName(game, state.game.launchName),
-        airbaseID: id
+      }, /*#__PURE__*/React.createElement(PlaneDesignDisplay, {
+        planeDesign: getPlaneDesignByName(game, state.game.launchName)
+      }), /*#__PURE__*/React.createElement(Button, {
+        label: `Build (${getPlaneDesignByName(game, state.game.launchName).cost}) (B)`,
+        onClick: () => {
+          dispatchToServer({
+            type: 'BUILD_PLANE',
+            name: getState().game.launchName,
+            airbaseID: airbase.id
+          });
+        }
       }), /*#__PURE__*/React.createElement("div", {
         style: {
           textAlign: 'center'
@@ -807,11 +832,14 @@ const PlanesSelected = props => {
   if (!anyPlanesSelected) return null;
   const selections = {};
   const planes = {}; // for motherships
+  const planeNameToEntities = {};
   for (const entityID of game.selectedIDs) {
     const entity = game.entities[entityID];
     if (entity) {
       if (!selections[entity.name]) selections[entity.name] = 0;
       selections[entity.name] += 1;
+      if (!planeNameToEntities[entity.name]) planeNameToEntities[entity.name] = [];
+      planeNameToEntities[entity.name].push(entity);
       if (entity.planes) {
         for (const planeName in entity.planes) {
           if (!planes[planeName]) planes[planeName] = 0;
@@ -836,6 +864,8 @@ const PlanesSelected = props => {
         display: planeDesign.planeCapacity ? 'block' : 'noop'
       }
     }, /*#__PURE__*/React.createElement(PlaneDetail, {
+      canBuy: planeDesign.isFactory,
+      entities: planeNameToEntities[name],
       game: game,
       planeDesign: planeDesign,
       clickMode: game.clickMode,
@@ -853,7 +883,7 @@ const PlanesSelected = props => {
 const PlaneDetail = props => {
   const {
     planeDesign,
-    airbaseID,
+    entities,
     canBuy,
     planesCarried,
     clickMode,
@@ -863,24 +893,23 @@ const PlaneDetail = props => {
     name,
     cost
   } = planeDesign;
-  const [launchIndex, setLaunchIndex] = useState(0);
   let carrier = null;
   if (planesCarried) {
     const planeNames = Object.keys(planesCarried);
-    if (game.launchName != planeNames[launchIndex]) {
+    if (!planeNames.includes(game.launchName)) {
       dispatch({
         type: 'SET',
-        launchName: planeNames[launchIndex]
+        launchName: planeNames[0]
       });
     }
-    carrier = /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Button, {
-      label: clickMode == 'MOVE' ? "Switch to Launch Mode (L)" : "Switch to Target Mode (M)",
-      onClick: () => {
-        dispatch({
-          type: 'SET',
-          clickMode: clickMode == 'MOVE' ? 'LAUNCH' : 'MOVE'
-        });
-      }
+    carrier = /*#__PURE__*/React.createElement("div", null, "Mode:", /*#__PURE__*/React.createElement(RadioPicker, {
+      options: ['MOVE', 'LAUNCH'],
+      displayOptions: ['Targeting (T)', 'Launching (G)'],
+      selected: clickMode,
+      onChange: nextClickMode => dispatch({
+        type: 'SET',
+        clickMode: nextClickMode
+      })
     }), /*#__PURE__*/React.createElement(RadioPicker, {
       options: planeNames,
       displayOptions: planeNames.map(name => {
@@ -895,9 +924,8 @@ const PlaneDetail = props => {
         }
         return /*#__PURE__*/React.createElement("div", null, name, " (", planeType, "): ", planesCarried[name]);
       }),
-      selected: planeNames[launchIndex],
+      selected: game.launchName,
       onChange: launchName => {
-        setLaunchIndex(planeNames.indexOf(launchName));
         dispatch({
           type: 'SET',
           launchName
@@ -905,13 +933,28 @@ const PlaneDetail = props => {
       }
     }));
   }
+  let activatedAbilities = [];
+  if (planeDesign.isAfterburner) {
+    activatedAbilities.push( /*#__PURE__*/React.createElement("div", {
+      key: "afterburnerability",
+      style: {}
+    }, /*#__PURE__*/React.createElement(Button, {
+      label: "Afterburner (Y)",
+      onClick: () => {
+        dispatchToServer({
+          type: 'SET_AFTERBURNER',
+          entityIDs: entities.map(e => e.id)
+        });
+      }
+    })));
+  }
   return /*#__PURE__*/React.createElement("div", {
     style: {
       padding: 8
     }
   }, /*#__PURE__*/React.createElement(PlaneDesignDisplay, {
     planeDesign: planeDesign
-  }), carrier, /*#__PURE__*/React.createElement(Button, {
+  }), activatedAbilities, carrier, /*#__PURE__*/React.createElement(Button, {
     style: {
       display: canBuy ? 'block' : 'none'
     },
@@ -919,7 +962,7 @@ const PlaneDetail = props => {
     onClick: () => {
       dispatchToServer({
         type: 'BUILD_PLANE',
-        name,
+        name: getState().game.launchName,
         airbaseID
       });
     }
@@ -981,6 +1024,7 @@ const {
   CheckerBackground
 } = require('bens_ui_components');
 const Button = require('./Components/Button.react');
+const RadioPicker = require('./Components/RadioPicker.react');
 const PlaneDesignDisplay = require('./PlaneDesignDisplay.react');
 const {
   dispatchToServer
@@ -989,6 +1033,9 @@ const {
   isHost,
   getSession
 } = require('../selectors/sessions');
+const {
+  config
+} = require('../config');
 const {
   useEffect,
   useState,
@@ -1044,6 +1091,7 @@ const CreateGameCard = props => {
     onChange: setName
   })), /*#__PURE__*/React.createElement(Button, {
     label: "Create Game",
+    disabled: getSession(getState()),
     style: {
       width: '100%',
       height: 30,
@@ -1058,6 +1106,7 @@ const CreateGameCard = props => {
   }), /*#__PURE__*/React.createElement("div", null, "Number of Players in Lobby: ", getState().numClients));
 };
 const SessionCard = props => {
+  var _state$dynamicConfig$, _state$dynamicConfig$2;
   const {
     session,
     joinedSessionID,
@@ -1069,16 +1118,64 @@ const SessionCard = props => {
     name,
     clients
   } = session;
+  const clientID = state.clientID;
+  let otherClientID = null;
+  for (const client in state.dynamicConfig) {
+    if (client != clientID) {
+      otherClientID = client;
+      break;
+    }
+  }
   return /*#__PURE__*/React.createElement("div", {
     style: {
       width: 600,
-      marginLeft: 0
+      marginLeft: 0,
+      marginTop: 12,
+      padding: 8,
+      border: '1px solid #6ce989'
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: 'center'
     }
-  }, /*#__PURE__*/React.createElement("b", null, name)), "Players: ", clients.length, joinedSessionID == id ? /*#__PURE__*/React.createElement(Button, {
+  }, /*#__PURE__*/React.createElement("b", null, name)), isHost(props.state) && joinedSessionID == session.id ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, "Host: "), " You") : null, "Players: ", clients.length, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: '100%',
+      display: joinedSessionID == session.id ? 'flex' : 'none',
+      gap: '5%',
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: '47.5%',
+      border: '1px solid #6ce989'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: 'center'
+    }
+  }, /*#__PURE__*/React.createElement("b", null, "You")), /*#__PURE__*/React.createElement(RadioPicker, {
+    options: [0, 1, 2],
+    displayOptions: config.factionNames,
+    selected: (_state$dynamicConfig$ = state.dynamicConfig[clientID]) === null || _state$dynamicConfig$ === void 0 ? void 0 : _state$dynamicConfig$.nationalityIndex,
+    onChange: nationalityIndex => {
+      dispatchToServer({
+        type: 'SET_NATIONALITY_INDEX',
+        nationalityIndex,
+        clientID
+      });
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: '47.5%',
+      border: '1px solid #6ce989',
+      display: clients.length >= 2 ? 'block' : 'none'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: 'center'
+    }
+  }, /*#__PURE__*/React.createElement("b", null, "Opponent")), /*#__PURE__*/React.createElement("div", null, "Faction: ", config.factionNames[(_state$dynamicConfig$2 = state.dynamicConfig[otherClientID]) === null || _state$dynamicConfig$2 === void 0 ? void 0 : _state$dynamicConfig$2.nationalityIndex]))), joinedSessionID == id ? /*#__PURE__*/React.createElement(Button, {
     style: {
       width: '100%',
       height: 30
@@ -1101,7 +1198,7 @@ const SessionCard = props => {
       width: '100%',
       height: 30
     },
-    disabled: clients.length >= 2 || session.started,
+    disabled: clients.length >= 2 || session.started || joinedSessionID != null,
     label: "Join Game",
     onClick: () => {
       dispatchToServer({
@@ -1111,122 +1208,8 @@ const SessionCard = props => {
     }
   }));
 };
-const Settings = props => {
-  const {
-    state,
-    dispatch
-  } = props;
-  const planeDesigns = [];
-  for (const name in state.clientConfig.planes) {
-    const planeDesign = state.clientConfig.planeDesigns[state.clientID][name];
-    planeDesigns.push( /*#__PURE__*/React.createElement(PlaneDesignDisplay, {
-      key: "plane_design_" + planeDesign.name,
-      planeDesign: planeDesign,
-      quantity: state.clientConfig.planes[name],
-      dispatch: action => {
-        dispatch(action);
-        dispatchToServer(action);
-      },
-      money: state.clientConfig.money
-    }));
-  }
-  let numPlaneDesigns = 0;
-  let planeNames = [];
-  if (state.clientConfig.planeDesigns[state.clientID]) {
-    numPlaneDesigns = Object.keys(state.clientConfig.planeDesigns[state.clientID]).length;
-    planeNames = Object.keys(state.clientConfig.planeDesigns[state.clientID]);
-  }
-
-  // <Button
-  //   label="VS. AI Opponent"
-  //   disabled={clients.length >= 2}
-  //   onClick={() => {
-  //     dispatchToServer({type: 'JOIN_SESSION', sessionID: id, AI: true});
-  //   }}
-  // />
-  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, "Settings:")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      justifyContent: 'space-between'
-    }
-  }, /*#__PURE__*/React.createElement("div", null, "Game ms per tick:", /*#__PURE__*/React.createElement(Slider, {
-    value: state.config.msPerTick,
-    min: 1,
-    max: 1000,
-    noOriginalValue: true,
-    onChange: msPerTick => {
-      dispatch({
-        type: 'EDIT_SESSION_PARAMS',
-        msPerTick
-      });
-      dispatchToServer({
-        type: 'EDIT_SESSION_PARAMS',
-        msPerTick
-      });
-    }
-  })), /*#__PURE__*/React.createElement("div", null, "Map Width/Height:", /*#__PURE__*/React.createElement(Slider, {
-    value: state.config.worldSize.width,
-    min: 100,
-    max: 1600,
-    noOriginalValue: true,
-    onChange: width => {
-      dispatch({
-        type: 'EDIT_SESSION_PARAMS',
-        worldSize: {
-          height: width,
-          width
-        }
-      });
-      dispatchToServer({
-        type: 'EDIT_SESSION_PARAMS',
-        worldSize: {
-          height: width,
-          width
-        }
-      });
-    }
-  })), /*#__PURE__*/React.createElement("div", null, "Airbases per player:", /*#__PURE__*/React.createElement(Slider, {
-    value: state.config.numAirbases,
-    min: 1,
-    max: 5,
-    noOriginalValue: true,
-    onChange: numAirbases => {
-      dispatch({
-        type: 'EDIT_SESSION_PARAMS',
-        numAirbases
-      });
-      dispatchToServer({
-        type: 'EDIT_SESSION_PARAMS',
-        numAirbases
-      });
-    }
-  }))), /*#__PURE__*/React.createElement(Divider, {
-    style: {
-      marginTop: 4,
-      marginBottom: 4
-    }
-  }), "Money Available: ", state.clientConfig.money, /*#__PURE__*/React.createElement("div", null), "Designs Remaining: ", state.config.maxPlaneDesigns - numPlaneDesigns, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      flexWrap: 'wrap'
-    }
-  }, planeDesigns), numPlaneDesigns < state.config.maxPlaneDesigns ? /*#__PURE__*/React.createElement(PlaneDesigner, {
-    config: state.config,
-    clientID: state.clientID,
-    dispatch: action => {
-      dispatch(action);
-      dispatchToServer(action);
-    },
-    planeNames: planeNames
-  }) : 'Max Planes Designed', /*#__PURE__*/React.createElement(Divider, {
-    style: {
-      marginTop: 4,
-      marginBottom: 4
-    }
-  }));
-};
 module.exports = Lobby;
-},{"../clientToServer":11,"../selectors/sessions":21,"./Components/Button.react":1,"./PlaneDesignDisplay.react":9,"bens_ui_components":90,"react":107}],8:[function(require,module,exports){
+},{"../clientToServer":11,"../config":12,"../selectors/sessions":21,"./Components/Button.react":1,"./Components/RadioPicker.react":4,"./PlaneDesignDisplay.react":9,"bens_ui_components":90,"react":107}],8:[function(require,module,exports){
 "use strict";
 
 var _postVisit = _interopRequireDefault(require("../postVisit"));
@@ -1299,18 +1282,21 @@ const keyToProp = {
   isStealth: 'stealth ',
   isDogfighter: 'tailgun ',
   isDrone: 'drone ',
-  planeCapacity: 'mothership '
+  planeCapacity: 'mothership ',
+  isGiant: 'giant ',
+  isShielded: 'shield ',
+  isFactory: 'factory ',
+  isAfterburner: 'afterburners ',
+  isThermonuclear: 'thermonuclear '
 };
 const PlaneDesignDisplay = props => {
   const {
     planeDesign
   } = props;
-  const properties = [];
+  let properties = '';
   for (const key in planeDesign) {
     if (!keyToProp[key]) continue;
-    properties.push( /*#__PURE__*/React.createElement("span", {
-      key: planeDesign.name + "_" + key
-    }, keyToProp[key]));
+    properties += keyToProp[key];
   }
   return /*#__PURE__*/React.createElement("div", {
     style: {}
@@ -1340,8 +1326,8 @@ const PlaneDesignDisplay = props => {
     }
   }, /*#__PURE__*/React.createElement("div", null, "Vision: ", planeDesign.vision), /*#__PURE__*/React.createElement("div", null, "Ammo: ", planeDesign.ammo)), planeDesign.planeCapacity ? /*#__PURE__*/React.createElement("div", null, "Plane Capacity: ", planeDesign.planeCapacity) : null, /*#__PURE__*/React.createElement("div", {
     style: {
-      display: 'flex',
-      justifyContent: 'space-between'
+      // display: 'flex', justifyContent: 'space-between'
+      textWrap: 'wrap'
     }
   }, properties)));
 };
@@ -1437,13 +1423,17 @@ const config = {
     height: 1000
   },
   formationRadius: 50,
+  factionNames: ['USA', 'USSR', 'Z'],
   // starting configuration
-  gen: 1,
+  gen: 4,
+  //TODO
   numAirbases: 1,
   numCities: 2,
   numFactories: 1,
   numLabs: 1,
-  startingMoney: 5000,
+  startingMoney: 50000,
+  //TODO
+
   cityCost: 1000,
   moneyRate: 50,
   // money made per second
@@ -1462,7 +1452,9 @@ const config = {
   // NOTE: this doesn't affect city income or lab research
   hardenedCost: 6000,
   hardenedGen: 3,
-  // stealthVisionReduction: 0.3,
+  afterburnDuration: 18,
+  afterburnFuelCost: 200,
+  afterburnSpeedMultiplier: 3,
   stealthVisionRadius: 25,
   genDogfightBonus: 0.15,
   planeDesigns: [
@@ -1479,7 +1471,8 @@ const config = {
       speed: 0.7,
       ammo: 1,
       isBomber: true,
-      isNuclear: true
+      isNuclear: true,
+      hotkey: 'Q'
     },
     'F-86': {
       name: 'F-86',
@@ -1490,13 +1483,15 @@ const config = {
       vision: 40,
       speed: 0.9,
       ammo: 1,
-      isFighter: true
+      isFighter: true,
+      hotkey: 'A'
     },
     // gen2
     'B-52': {
       name: 'B-52',
       nickname: 'Stratofortress',
-      cost: 2400,
+      cost: 240,
+      //TODO
       gen: 2,
       fuel: 2000,
       vision: 45,
@@ -1505,7 +1500,8 @@ const config = {
       planeCapacity: 3,
       planeTypes: ['F-100', 'F-86'],
       isBomber: true,
-      isNuclear: true
+      isNuclear: true,
+      hotkey: 'W'
     },
     'F-100': {
       name: 'F-100',
@@ -1517,7 +1513,8 @@ const config = {
       speed: 1.2,
       ammo: 1,
       isFighter: true,
-      isBomber: true
+      isBomber: true,
+      hotkey: 'S'
     },
     'U-2': {
       name: 'U-2',
@@ -1528,7 +1525,8 @@ const config = {
       vision: 70,
       speed: 0.75,
       ammo: 0,
-      isRecon: true
+      isRecon: true,
+      hotkey: 'X'
     },
     // gen3
     'B-58': {
@@ -1541,7 +1539,8 @@ const config = {
       speed: 2.5,
       ammo: 1,
       isBomber: true,
-      isNuclear: true
+      isNuclear: true,
+      hotkey: 'E'
     },
     'F-4': {
       name: 'F-4',
@@ -1553,7 +1552,9 @@ const config = {
       speed: 2.2,
       ammo: 2,
       isFighter: true,
-      isBomber: true
+      isBomber: true,
+      isAfterburner: true,
+      hotkey: 'D'
     },
     'SR-71': {
       name: 'SR-71',
@@ -1564,7 +1565,9 @@ const config = {
       vision: 80,
       speed: 3.3,
       ammo: 0,
-      isRecon: true
+      isRecon: true,
+      isAfterburner: true,
+      hotkey: 'C'
     },
     // gen4
     'XB-70': {
@@ -1577,7 +1580,8 @@ const config = {
       speed: 3.1,
       ammo: 1,
       isBomber: true,
-      isNuclear: true
+      isNuclear: true,
+      hotkey: 'R'
     },
     'XF-108': {
       name: 'XF-108',
@@ -1588,18 +1592,9 @@ const config = {
       vision: 50,
       speed: 3.1,
       ammo: 1,
-      isFighter: true
+      isFighter: true,
+      hotkey: 'F'
     }
-    // 'F-117': {
-    //   name: 'F-117', nickname: 'Nighthawk', cost: 2500,
-    //   gen: 4, fuel: 1800, vision: 55, speed: 1.5, ammo: 3,
-    //   isFighter: true, isBomber: true, isStealth: true,
-    // },
-    // 'B-2': {
-    //   name: 'B-2', nickname: 'Spirit', cost: 4500,
-    //   gen: 4, fuel: 3000, vision: 70, speed: 1.8, ammo: 3,
-    //   isBomber: true, isStealth: true, isNuclear: true,
-    // },
   },
   // USSR
   {
@@ -1614,7 +1609,8 @@ const config = {
       speed: 0.8,
       ammo: 1,
       isBomber: true,
-      isDogfighter: true
+      isDogfighter: true,
+      hotkey: 'Q'
     },
     'MIG-15': {
       name: 'MIG-15',
@@ -1625,7 +1621,8 @@ const config = {
       vision: 35,
       speed: 0.8,
       ammo: 1,
-      isFighter: true
+      isFighter: true,
+      hotkey: 'A'
     },
     'YAK-25': {
       name: 'YAK-25',
@@ -1636,7 +1633,8 @@ const config = {
       vision: 60,
       speed: 0.9,
       ammo: 0,
-      isRecon: true
+      isRecon: true,
+      hotkey: 'Z'
     },
     // gen2
     'TU-16': {
@@ -1650,7 +1648,8 @@ const config = {
       ammo: 2,
       isBomber: true,
       isDogfighter: true,
-      isNuclear: true
+      isNuclear: true,
+      hotkey: 'W'
     },
     'MIG-21': {
       name: 'MIG-21',
@@ -1661,7 +1660,9 @@ const config = {
       speed: 1.5,
       ammo: 1,
       vision: 45,
-      isFighter: true
+      isFighter: true,
+      isAfterburner: true,
+      hotkey: 'S'
     },
     'KH-50': {
       name: 'KH-50',
@@ -1673,7 +1674,8 @@ const config = {
       speed: 1.5,
       ammo: 0,
       isDrone: true,
-      isRecon: true
+      isRecon: true,
+      hotkey: 'X'
     },
     // gen3
     'TU-160': {
@@ -1689,7 +1691,8 @@ const config = {
       planeTypes: ['KH-55', 'KH-101', 'KH-50'],
       isBomber: true,
       isNuclear: true,
-      isDogfighter: true
+      isDogfighter: true,
+      hotkey: 'E'
     },
     'KH-55': {
       name: 'KH-55',
@@ -1701,32 +1704,11 @@ const config = {
       speed: 3.2,
       ammo: 1,
       isDrone: true,
-      isFighter: true // isBomber: true,
+      isFighter: true,
+      // isBomber: true,
+      hotkey: 'D'
     },
-
-    // 'TU-22M': {
-    //   name: 'TU-22M', nickname: 'Backfire', cost: 3000,
-    //   gen: 3, fuel: 1800, speed: 1.8, ammo: 2, vision: 45,
-    //   isBomber: true, isDogfighter: true, // isNuclear: true,
-    // },
-    // 'MIG-25': {
-    //   name: 'MIG-25', nickname: 'Foxbat', cost: 2200,
-    //   gen: 3, fuel: 900, speed: 3.2, ammo: 2, vision: 45,
-    //   isFighter: true,
-    // },
-
     // gen4
-    'MIG-31': {
-      name: 'MIG-31',
-      nickname: 'Foxhound',
-      cost: 3000,
-      gen: 4,
-      fuel: 1000,
-      speed: 2.8,
-      ammo: 3,
-      vision: 45,
-      isFighter: true
-    },
     'KH-101': {
       name: 'KH-101',
       nickname: 'Nuclear Cruise Missile',
@@ -1738,14 +1720,40 @@ const config = {
       ammo: 1,
       isDrone: true,
       isNuclear: true,
-      isBomber: true
+      isBomber: true,
+      hotkey: 'R'
+    },
+    'MIG-31': {
+      name: 'MIG-31',
+      nickname: 'Foxhound',
+      cost: 3000,
+      gen: 4,
+      fuel: 1000,
+      speed: 2.8,
+      ammo: 3,
+      vision: 45,
+      isFighter: true,
+      isAfterburner: true,
+      hotkey: 'F'
     }
   },
-  // EU
+  // Z
   {
     // gen1
-    'recon1': {
-      name: 'recon1',
+    'ZF-1': {
+      name: 'ZF-1',
+      cost: 800,
+      gen: 1,
+      fuel: 600,
+      vision: 35,
+      speed: 1,
+      ammo: 1,
+      isFighter: true,
+      isBomber: true,
+      hotkey: 'A'
+    },
+    'ZR-1': {
+      name: 'ZR-1',
       cost: 1000,
       gen: 1,
       fuel: 1400,
@@ -1753,68 +1761,108 @@ const config = {
       vision: 60,
       ammo: 1,
       isRecon: true,
-      isDogfighter: true
-    },
-    'bomber1': {
-      name: 'bomber1',
-      cost: 1200,
-      gen: 1,
-      fuel: 1000,
-      vision: 30,
-      speed: 0.7,
-      ammo: 1,
-      isBomber: true,
-      isNuclear: true
-    },
-    'fighter1': {
-      name: 'fighter1',
-      cost: 400,
-      gen: 1,
-      fuel: 450,
-      vision: 35,
-      speed: 0.8,
-      ammo: 1,
-      isFighter: true
+      isDogfighter: true,
+      hotkey: 'Z'
     },
     // gen 2
-    'reconbomber': {
-      name: 'reconbomber',
+    'ZB-2': {
+      name: 'ZB-2',
       cost: 1500,
       gen: 2,
-      fuel: 2000,
+      fuel: 1000,
       speed: 0.8,
       vision: 75,
       ammo: 1,
       isRecon: true,
       isBomber: true,
-      isNuclear: true
+      isNuclear: true,
+      isAfterburner: true,
+      hotkey: 'W'
     },
-    'heavyfighter': {
-      name: 'heavyfighter',
-      cost: 3000,
+    'ZF-2': {
+      name: 'ZF-2',
+      cost: 3500,
       gen: 2,
       fuel: 1000,
       speed: 1.6,
       vision: 40,
       ammo: 3,
-      isFighter: true
+      isFighter: true,
+      isAfterburner: true,
+      hotkey: 'S'
     },
     // gen 3
-    'tanker': {
-      name: 'tanker',
-      cost: 1500,
+    'ZB-3': {
+      name: 'ZB-3',
+      cost: 10000,
+      gen: 3,
+      fuel: 2000,
+      speed: 1.3,
+      vision: 50,
+      ammo: 8,
+      isGiant: true,
+      isShielded: true,
+      isBomber: true,
+      isNuclear: true,
+      hotkey: 'E'
+    },
+    'ZF-3': {
+      name: 'ZF-3',
+      cost: 10000,
+      gen: 3,
+      fuel: 2000,
+      speed: 1.8,
+      vision: 50,
+      ammo: 10,
+      isGiant: true,
+      isShielded: true,
+      isFighter: true,
+      hotkey: 'D'
+    },
+    'ZC-3': {
+      name: 'ZC-3',
+      cost: 160,
+      //TODO
       gen: 3,
       fuel: 2500,
-      speed: 0.9,
-      vision: 30,
-      ammo: 0,
-      isTanker: true // TODO
-    }
-
+      speed: 0.75,
+      vision: 65,
+      ammo: 4,
+      planeCapacity: 10,
+      planeTypes: ['ZF-1', 'ZR-1', 'ZB-2', 'ZF-2', 'ZF-4', 'ZB-4'],
+      isGiant: true,
+      isShielded: true,
+      // isFactory: true,
+      hotkey: 'C'
+    },
     // gen 4
+    'ZB-4': {
+      name: 'ZB-4',
+      cost: 1800,
+      gen: 4,
+      fuel: 700,
+      speed: 2.7,
+      vision: 40,
+      ammo: 1,
+      isBomber: true,
+      isNuclear: true,
+      hotkey: 'R'
+    },
+    'ZF-4': {
+      name: 'ZF-4',
+      cost: 4000,
+      gen: 4,
+      fuel: 1200,
+      speed: 2.7,
+      vision: 45,
+      ammo: 2,
+      isFighter: true,
+      isShielded: true,
+      isAfterburner: true,
+      hotkey: 'F'
+    }
   }]
 };
-
 module.exports = {
   config
 };
@@ -2029,6 +2077,7 @@ const rootReducer = (state, action) => {
     case 'UPDATE_SESSION':
     case 'END_SESSION':
     case 'EDIT_SESSION_PARAMS':
+    case 'SET_NATIONALITY_INDEX':
       return sessionReducer(state, action);
     case 'START':
       {
@@ -2037,7 +2086,7 @@ const rootReducer = (state, action) => {
           clientIDs
         } = action;
         const game = {
-          ...initGameState(state.config, state.clientID, clientIDs),
+          ...initGameState(state.config, state.clientID, clientIDs, state.dynamicConfig),
           clientID: state.clientID,
           entities
           // prevTickTime = new Date().getTime();
@@ -2131,15 +2180,16 @@ const initState = () => {
     game: null,
     modal: null,
     sessions: {},
-    config: deepCopy(config)
+    config: deepCopy(config),
+    dynamicConfig: {}
   };
 };
-const initGameState = (config, clientID, clientIDs) => {
+const initGameState = (config, clientID, clientIDs, dynamicConfig) => {
   const players = {};
   let nationalityIndex = 0;
   for (const id of clientIDs) {
     players[id] = {
-      nationalityIndex,
+      nationalityIndex: dynamicConfig[id].nationalityIndex,
       money: config.startingMoney,
       gen: 1,
       productionQueue: [],
@@ -2153,7 +2203,6 @@ const initGameState = (config, clientID, clientIDs) => {
     };
     nationalityIndex++;
   }
-  console.log(players, clientID, clientIDs);
   const game = {
     config: deepCopy(config),
     worldSize: {
@@ -2216,6 +2265,11 @@ const sessionReducer = (state, action) => {
           sessions: {
             ...state.sessions,
             [session.id]: session
+          },
+          dynamicConfig: {
+            [clientID]: {
+              nationalityIndex: 0
+            }
           }
         };
       }
@@ -2245,6 +2299,11 @@ const sessionReducer = (state, action) => {
             [sessionID]: {
               ...session
             }
+          },
+          dynamicConfig: {
+            [clientID]: {
+              nationalityIndex: 1
+            }
           }
         };
       }
@@ -2273,6 +2332,7 @@ const sessionReducer = (state, action) => {
           state.screen = 'LOBBY';
           state.game = null;
           state.modal = null;
+          state.dynamicConfig = {};
         }
         delete state.sessions[sessionID];
         return {
@@ -2284,6 +2344,23 @@ const sessionReducer = (state, action) => {
         delete action.type;
         for (const property in action) {
           state.config[property] = action[property];
+        }
+        return {
+          ...state
+        };
+      }
+    case 'SET_NATIONALITY_INDEX':
+      {
+        const {
+          nationalityIndex,
+          clientID
+        } = action;
+        if (state.dynamicConfig[clientID]) {
+          state.dynamicConfig[clientID].nationalityIndex = nationalityIndex;
+        } else {
+          state.dynamicConfig[clientID] = {
+            nationalityIndex
+          };
         }
         return {
           ...state
@@ -2347,6 +2424,9 @@ const render = state => {
       isBluePlayer = false;
       ctx.fillStyle = "red";
     }
+    if (entity.afterburn % 2 == 1) {
+      ctx.fillStyle = 'orange';
+    }
     let width = 4;
     let height = 4;
     let shape = 'circle'; // default shape is circle
@@ -2374,6 +2454,10 @@ const render = state => {
       shape = 'square';
     } else if (entity.isPlane) {
       width = 6;
+    }
+    if (entity.isGiant) {
+      height *= 3;
+      width *= 3;
     }
 
     // rotate
@@ -2669,6 +2753,16 @@ const getPlaneDesignsUnlocked = (game, clientID) => {
   const player = game.players[clientID];
   return getPlaneDesignsUpToGen(player.nationalityIndex, player.gen);
 };
+const getPlaneNameByHotkey = (game, key) => {
+  const planeDesigns = getPlaneDesignsUnlocked(game, game.clientID);
+  for (const planeName in planeDesigns) {
+    const design = planeDesigns[planeName];
+    if (design.hotkey == key) {
+      return planeName;
+    }
+  }
+  return null;
+};
 
 // --------------------------------------------------------------------
 // Production
@@ -2731,6 +2825,20 @@ const getTotalAirforceValue = (game, clientID) => {
 };
 const getIncome = (game, clientID) => {
   return getNumBuilding(game, clientID, 'CITY') + getNumBuilding(game, clientID, 'CITY', 'isMega');
+};
+const getTotalResearchSpending = (game, clientID) => {
+  let spending = 0;
+  for (let i = 0; i <= game.players[clientID].gen; i++) {
+    spending += game.config.genCost[i];
+  }
+  if (game.players[clientID].researchProgress != null) {
+    const {
+      gen,
+      cost
+    } = game.players[clientID].researchProgress;
+    spending += game.config.genCost[gen] - cost;
+  }
+  return spending;
 };
 
 // --------------------------------------------------------------------
@@ -2899,6 +3007,7 @@ module.exports = {
   getPlaneInProductionAtBase,
   getPlanesBeingWorkedOn,
   getPlaneDesignsUnlocked,
+  getPlaneNameByHotkey,
   getNumBuilding,
   getEntitiesByPlayer,
   getOtherClientID,
@@ -2909,7 +3018,8 @@ module.exports = {
   getInterceptPos,
   numTimesTargeted,
   getTotalAirforceValue,
-  getIncome
+  getIncome,
+  getTotalResearchSpending
 };
 },{"../config":12,"bens_utils":97}],21:[function(require,module,exports){
 const getSession = state => {
