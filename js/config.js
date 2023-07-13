@@ -221,19 +221,19 @@ const config = {
 
       // gen 3
       'ZB-3': {
-        name: 'ZB-3', cost: 10000,
+        name: 'ZB-3', cost: 8000,
         gen: 3, fuel: 2000, speed: 1.3, vision: 50, ammo: 8,
         isGiant: true, isShielded: true, isBomber: true, isNuclear: true,
         hotkey: 'E',
       },
       'ZF-3': {
-        name: 'ZF-3', cost: 10000,
+        name: 'ZF-3', cost: 8000,
         gen: 3, fuel: 2000, speed: 1.8, vision: 50, ammo: 10,
         isGiant: true, isShielded: true, isFighter: true,
         hotkey: 'D',
       },
       'ZC-3': {
-        name: 'ZC-3', cost: 10000,
+        name: 'ZC-3', cost: 6000,
         gen: 3, fuel: 2500, speed: 0.75, vision: 65, ammo: 4,
         planeCapacity: 10, planeTypes: ['ZF-1', 'ZR-1', 'ZB-2', 'ZF-2', 'ZF-4', 'ZB-4'],
         isGiant: true, isShielded: true, // isFactory: true,

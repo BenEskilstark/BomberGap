@@ -34,7 +34,7 @@ const LeftHandSideBar = (props) => {
         top: 0,
         left: 0,
         padding: 12,
-        width: 275,
+        width: 310,
         color: '#6ce989',
       }}
     >
