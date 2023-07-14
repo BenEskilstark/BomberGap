@@ -568,7 +568,7 @@ const LeftHandSideBar = props => {
       top: 0,
       left: 0,
       padding: 12,
-      width: 275,
+      width: 310,
       color: '#6ce989'
     }
   }, /*#__PURE__*/React.createElement(BuildingInfo, props), /*#__PURE__*/React.createElement(PlanesSelected, props), /*#__PURE__*/React.createElement(BuildingsSelected, props), /*#__PURE__*/React.createElement(Button, {
@@ -1425,15 +1425,12 @@ const config = {
   formationRadius: 50,
   factionNames: ['USA', 'USSR', 'Z'],
   // starting configuration
-  gen: 4,
-  //TODO
+  gen: 1,
   numAirbases: 1,
   numCities: 2,
   numFactories: 1,
   numLabs: 1,
-  startingMoney: 50000,
-  //TODO
-
+  startingMoney: 5000,
   cityCost: 1000,
   moneyRate: 50,
   // money made per second
@@ -1490,8 +1487,7 @@ const config = {
     'B-52': {
       name: 'B-52',
       nickname: 'Stratofortress',
-      cost: 240,
-      //TODO
+      cost: 2400,
       gen: 2,
       fuel: 2000,
       vision: 45,
@@ -1740,6 +1736,18 @@ const config = {
   // Z
   {
     // gen1
+    'ZC-1': {
+      name: 'ZC-1',
+      cost: 400,
+      gen: 1,
+      fuel: 1000,
+      vision: 40,
+      speed: 0.8,
+      ammo: 0,
+      planeCapacity: 1,
+      planeTypes: ['ZF-1'],
+      hotkey: 'Q'
+    },
     'ZF-1': {
       name: 'ZF-1',
       cost: 800,
@@ -1794,7 +1802,7 @@ const config = {
     // gen 3
     'ZB-3': {
       name: 'ZB-3',
-      cost: 10000,
+      cost: 8000,
       gen: 3,
       fuel: 2000,
       speed: 1.3,
@@ -1808,7 +1816,7 @@ const config = {
     },
     'ZF-3': {
       name: 'ZF-3',
-      cost: 10000,
+      cost: 8000,
       gen: 3,
       fuel: 2000,
       speed: 1.8,
@@ -1821,8 +1829,7 @@ const config = {
     },
     'ZC-3': {
       name: 'ZC-3',
-      cost: 160,
-      //TODO
+      cost: 6000,
       gen: 3,
       fuel: 2500,
       speed: 0.75,

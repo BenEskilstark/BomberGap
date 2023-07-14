@@ -191,6 +191,12 @@ const config = {
     // Z
     {
       // gen1
+      'ZC-1': {
+        name: 'ZC-1', cost: 400,
+        gen: 1, fuel: 1000, vision: 40, speed: 0.8, ammo: 0,
+        planeCapacity: 1, planeTypes: ['ZF-1'],
+        hotkey: 'Q',
+      },
       'ZF-1': {
         name: 'ZF-1', cost: 800,
         gen: 1, fuel: 600, vision: 35, speed: 1, ammo: 1,
